@@ -1,0 +1,104 @@
+#!/bin/bash
+MAX_DOM=1
+INTERVAL_SECONDS=10800
+PARENT_GRID_RATIO=3
+n_we_1=37
+n_sn_1=32
+E_WE=74
+E_SN=61
+E_VERT=33
+I_PARENT_START_2=19
+J_PARENT_START_2=16
+#I_PARENT_START_2=$(($E_WE_1/3))
+#J_PARENT_START_2=$(($E_SN_1/3))
+REF_LAT=63.414061 # Latitude of a known reference point inside the domain
+REF_LON=10.407602 # Longitude of the same point as used for REF_LAT
+STAND_LON=$REF_LON # A real value specifying the longitude that is parallel with the y-axis in conic and azimuthal projections.
+GEOG_DATA_PATH="/home/joveve/WPS_DATA/WPS_GEOG"
+START_YEAR=2020
+START_MONTH=07
+START_DAY=21
+START_HOUR=00
+END_YEAR=2020
+END_MONTH=07
+END_DAY=21
+END_HOUR=06
+GEOG_DATA_RES="default"
+START_DATE="$START_YEAR-$START_MONTH-${START_DAY}_$START_HOUR:00:00"
+END_DATE="$END_YEAR-$END_MONTH-${END_DAY}_$END_HOUR:00:00"
+VARIABLES="PARENT_ID PARENT_GRID_RATIO I_PARENT_START J_PARENT_START E_WE E_SN E_VERT START_YEAR START_MONTH START_DAY START_HOUR END_YEAR END_MONTH END_DAY END_HOUR START_DATE END_DATE GEOG_DATA_RES"
+for i in $(seq 1 $MAX_DOM)
+do
+	for sed_variable in $VARIABLES 
+	do
+		temp="${sed_variable}_$i"
+		if [[ ! -v $temp && -v $sed_variable ]];
+		then
+			eval "$temp=\$${sed_variable}"
+		fi
+		SED_VARIABLES="$SED_VARIABLES $temp"
+	done
+	if [[ $i == 1 ]]
+	then
+		PARENT_GRID_RATIO_1=1
+		PARENT_ID_1=1
+		PARENT_ID_2=1
+		I_PARENT_START_1=1
+		J_PARENT_START_1=1
+	else
+		temp="n_we_$i"
+		if [[ ! -v $temp ]];
+		then
+			im1=$(($i-1))
+			eval "$temp=\$((\$n_we_$im1))"
+		fi
+		temp="n_sn_$i"
+		if [[ ! -v $temp ]];
+		then
+			im1=$(($i-1))
+			eval "$temp=\$((\$n_sn_$im1))"
+		fi
+		eval "E_WE_$i=\$((\$n_we_$i * \$PARENT_GRID_RATIO_$i + 1))"
+		eval "E_SN_$i=\$((\$n_sn_$i * \$PARENT_GRID_RATIO_$i + 1))"
+		eval "PARENT_GRID_RATIO_$i=3"
+		temp="I_PARENT_START_$i"
+		if [[ ! -v $temp ]];
+		then
+			eval "$temp=\$((\$E_WE_$i / 3))"
+		fi
+		temp="J_PARENT_START_$i"
+		if [[ ! -v $temp ]];
+		then
+			eval "$temp=\$((\$E_SN_$i / 3))"
+		fi
+	fi
+	if [[ $i > 2 ]]
+	then
+		eval "PARENT_ID_$i=$(($i - 1))"
+	fi
+	for collector in $VARIABLES
+	do
+		temp="${collector}_$i"
+		eval "temp=\$${temp}"
+		re='^[0-9]+$'
+		if ! [[ $temp =~ $re ]];
+		then
+			if [[ ! -v D_${collector} ]]
+			then
+				eval "D_${collector}=\"'$temp',\""
+			else
+				eval "D_${collector}=\"\$D_${collector} '$temp',\""
+			fi
+		else
+			if [[ ! -v D_${collector} ]]
+			then
+				eval "D_${collector}=\"$temp,\""
+			else
+				eval "D_${collector}=\"\$D_${collector} $temp,\""
+			fi
+		fi
+	done
+done
+COLLECTORS=$(echo "$VARIABLES" | sed 's/[^ ]*/D_&/g')
+SED_VARIABLES="$SED_VARIABLES $COLLECTORS"
+

@@ -1,0 +1,99 @@
+ &time_control
+ run_days                            = 0,
+ run_hours                           = 6,
+ run_minutes                         = 0,
+ run_seconds                         = 0,
+ start_year                          = SED_D_START_YEAR
+ start_month                         = SED_D_START_MONTH
+ start_day                           = SED_D_START_DAY
+ start_hour                          = SED_D_START_HOUR
+ end_year                            = SED_D_END_YEAR
+ end_month                           = SED_D_END_MONTH
+ end_day                             = SED_D_END_DAY
+ end_hour                            = SED_D_END_HOUR
+ interval_seconds                    = SED_INTERVAL_SECONDS,
+ input_from_file                     = .true.,.true.,.true.,.true.,.true.,.true.,
+ history_interval                    = 180,  60,   60,   60,   60,   60,
+ frames_per_outfile                  = 1000, 1000, 1000, 1000, 1000, 1000,
+ restart                             = .false.,
+ restart_interval                    = 7200,
+ io_form_history                     = 2,
+ io_form_restart                     = 2,
+ io_form_input                       = 2,
+ io_form_boundary                    = 2,
+ /
+
+ &domains
+ time_step                           = 180,
+ time_step_fract_num                 = 0,
+ time_step_fract_den                 = 1,
+ max_dom                             = SED_MAX_DOM,
+ e_we                                = SED_D_E_WE
+ e_sn                                = SED_D_E_SN
+ e_vert                              = SED_D_E_VERT 
+ p_top_requested                     = 5000,
+ num_metgrid_levels                  = 34,
+ num_metgrid_soil_levels             = 4,
+ dx                                  = 30000,
+ dy                                  = 30000,
+ grid_id                             = 1,     2,     3,     4,     5,     6,
+ parent_id                           = SED_D_PARENT_ID
+ i_parent_start                      = SED_D_I_PARENT_START
+ j_parent_start                      = SED_D_J_PARENT_START
+ parent_grid_ratio                   = SED_D_PARENT_GRID_RATIO
+ parent_time_step_ratio              = 1,     3,     3,     3,     3,     3,
+ feedback                            = 1,
+ smooth_option                       = 0,
+ /
+
+ &physics
+ physics_suite                       = 'CONUS',
+ mp_physics                          = -1,    -1,    -1,    -1,    -1,    -1,
+ cu_physics                          = -1,    -1,     0,     0,     0,     0,
+ ra_lw_physics                       = -1,    -1,    -1,    -1,    -1,    -1,
+ ra_sw_physics                       = -1,    -1,    -1,    -1,    -1,    -1,
+ bl_pbl_physics                      = -1,    -1,    -1,    -1,    -1,    -1,
+ sf_sfclay_physics                   = -1,    -1,    -1,    -1,    -1,    -1,
+ sf_surface_physics                  = -1,    -1,    -1,    -1,    -1,    -1,
+ radt                                = 30,    30,    30,    30,    30,    30,
+ bldt                                = 0,     0,     0,     0,     0,     0,
+ cudt                                = 5,     5,     5,     5,     5,     5,
+ icloud                              = 1,
+ num_land_cat                        = 21,
+ sf_urban_physics                    = 0,     0,     0,     0,     0,     0,
+ /
+
+ &fdda
+ /
+
+ &dynamics
+ hybrid_opt                          = 2, 
+ w_damping                           = 0,
+ diff_opt                            = 1,      1,      1,      1,      1,      1,
+ km_opt                              = 4,      4,      4,      4,      4,      4,
+ diff_6th_opt                        = 0,      0,      0,      0,      0,      0,
+ diff_6th_factor                     = 0.12,   0.12,   0.12,   0.12,   0.12,   0.12,
+ base_temp                           = 290.,
+ damp_opt                            = 3,
+ zdamp                               = 5000.,  5000.,  5000.,  5000.,  5000.,  5000.,
+ dampcoef                            = 0.2,    0.2,    0.2,    0.2,    0.2,    0.2,
+ khdif                               = 0,      0,      0,      0,      0,      0,
+ kvdif                               = 0,      0,      0,      0,      0,      0,
+ non_hydrostatic                     = .true., .true., .true., .true., .true., .true.,
+ moist_adv_opt                       = 1,      1,      1,      1,      1,      1,
+ scalar_adv_opt                      = 1,      1,      1,      1,      1,      1,     
+ gwd_opt                             = 1,      1,      0,      0,      0,      0,
+ /
+
+ &bdy_control
+ spec_bdy_width                      = 5,
+ specified                           = .true.,.true.,.true.,.true.,.true.,.true.,
+ /
+
+ &grib2
+ /
+
+ &namelist_quilt
+ nio_tasks_per_group = 0,
+ nio_groups = 1,
+ /
