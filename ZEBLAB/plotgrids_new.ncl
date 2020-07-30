@@ -18,10 +18,7 @@ begin
   end if
 
 ; We generate plots, but what kind do we prefer?
-  type = "x11"
-; type = "pdf"
-; type = "ps"
-; type = "ncgm"
+  type = "SED_NCL_OUTPUT_TYPE"
   wks = gsn_open_wks(type,"wps_show_dom")
 
 ; read the following namelist file
@@ -42,14 +39,13 @@ begin
   mpres@mpLimbLineColor             = "Black"
   mpres@mpNationalLineColor         = "White"
   mpres@mpPerimLineColor            = "Black"
-  mpres@mpUSStateLineColor          = "Black"
-  mpres@mpOutlineBoundarySets       = "AllBoundaries"
+  mpres@mpOutlineBoundarySets       = "National"
   mpres@mpGridSpacingF              = 10
   mpres@tiMainString                = "WPS Domain Configuration for ZEB domain"
 
   lnres = True 
   lnres@gsLineThicknessF = 2.5
-  lnres@domLineColors    = (/ "white", "Red" , "Blue" /)
+  lnres@domLineColors    = (/ "white", "Red" , "Blue" , "black", "DeepSkyBlue"/)
 
   txres = True
   txres@txFont = "helvetica-bold"
@@ -171,16 +167,10 @@ begin
 
   if(mproj_int .eq. 1) then
     mpres@map_proj = "lambert"
-    mpres@pole_lat = 0.0
-    mpres@pole_lon = 0.0
   else if(mproj_int .eq. 2) then
     mpres@map_proj = "mercator"
-    mpres@pole_lat = 0.0
-    mpres@pole_lon = 0.0
   else if(mproj_int .eq. 3) then
     mpres@map_proj = "polar"
-    mpres@pole_lat = 0.0
-    mpres@pole_lon = 0.0
   else if(mproj_int .eq. 4) then
     mpres@map_proj = "lat-lon"
   end if
@@ -191,10 +181,10 @@ begin
 ; Deal with global wrf domains that don't have dx or dy
 
   if (mpres@dx.lt.1e-10 .and. mpres@dx.lt.1e-10) then
+		mpres@ref_lat = 90.0 - SED_POLE_LAT
+		mpres@ref_lon = -SED_STAND_LON
     mpres@dx = 360./(mpres@e_we(0) - 1)
     mpres@dy = 180./(mpres@e_sn(0) - 1)
-    mpres@ref_lat = 0.0
-    mpres@ref_lon = 180.0
   end if
 
   mp = wrf_wps_dom (wks,mpres,lnres,txres)
@@ -202,12 +192,16 @@ begin
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; Now you can add some information to the plot. 
-; Below is an example of adding a white dot over the DC location.
-  ;pmres = True
-  ;pmres@gsMarkerColor = "White"
-  ;pmres@gsMarkerIndex = 16
-  ;pmres@gsMarkerSizeF = 0.01
-  ;gsn_polymarker(wks,mp,-77.26,38.56,pmres)
+; Below is an example of adding a white dot at (ref_lat,ref_lon).
+  pmres = True
+  pmres@gsMarkerColor = "White"
+  pmres@gsMarkerIndex = 16
+  pmres@gsMarkerSizeF = 0.01
+  gsn_polymarker(wks,mp,mpres@ref_lat,mpres@ref_lon,pmres)
+
+  pmres@gsMarkerColor = "Red"
+  gsn_polymarker(wks,mp,mpres@pole_lat,mpres@pole_lon,pmres)
+  print("(ref_lat,ref_lon) = (" + mpres@ref_lat + ", " + mpres@ref_lon + ")" )
 
 
   frame(wks)           ; lets frame the plot - do not delete

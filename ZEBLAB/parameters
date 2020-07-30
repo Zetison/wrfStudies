@@ -1,32 +1,67 @@
 #!/bin/bash
-MAX_DOM=1
-INTERVAL_SECONDS=10800
+
+MAX_DOM=2
+GEOG_DATA_RES="5m" #10m (~19km), 5m (~9km), 2m (~4km), and 30s (~0.9km).
+INTERVAL_SECONDS=10800 # Must be >= 3600 as this is the interval the GFS data is available
+GFS_RES="1p00" # resolution (in degrees) in longitude and latitude direction (NOTE: if > 0.25 (0p25) then INTERVAL_SECONDS must be > 10800)
+RUN_HOURS=3
 PARENT_GRID_RATIO=3
-n_we_1=37
-n_sn_1=32
-E_WE=74
-E_SN=61
-E_VERT=33
-I_PARENT_START_2=19
-J_PARENT_START_2=16
-#I_PARENT_START_2=$(($E_WE_1/3))
-#J_PARENT_START_2=$(($E_SN_1/3))
+HISTORY_INTERVAL=60 # in minutes
+MAP_PROJ="lat-lon" # Accepted projections are 'lambert', 'polar', 'mercator', and 'lat-lon.'
+n_we_1=33
+n_sn_1=33
+E_WE=200 # number of velocity points in east west direction
+E_SN=100 # number of velocity points in south north direction
+E_VERT=100 #  This number must be the same for each domain.
+NCL_OUTPUT_TYPE="png" # 'x11', 'pdf', 'ps', 'ncgm', 'png' 
+D_I_PARENT_START="1, 84, 33, 33, 50, 33,"
+#D_J_PARENT_START="1, 31, 42, 33, 50, 33,"
+D_J_PARENT_START="1, 20, 42, 33, 50, 33,"
 REF_LAT=63.414061 # Latitude of a known reference point inside the domain
 REF_LON=10.407602 # Longitude of the same point as used for REF_LAT
-STAND_LON=$REF_LON # A real value specifying the longitude that is parallel with the y-axis in conic and azimuthal projections.
-GEOG_DATA_PATH="/home/joveve/WPS_DATA/WPS_GEOG"
-START_YEAR=2020
-START_MONTH=07
-START_DAY=21
-START_HOUR=00
-END_YEAR=2020
-END_MONTH=07
-END_DAY=21
-END_HOUR=06
-GEOG_DATA_RES="default"
+
+if [[ $MAP_PROJ == "lat-lon" ]]
+then
+	D_POLAR=".true.,.false.,"
+	DX=$((360 / ($E_WE - 1) ))
+	DY=$((180 / ($E_SN - 1) ))
+	# STAND_LON, POLE_LAT and POLE_LON assumes N.H.
+	POLE_LAT=$(echo "90.0 - $REF_LAT" | bc -l)   # Discretization time step
+	POLE_LON=180
+	STAND_LON=-$REF_LON # A real value specifying the longitude that is parallel with the y-axis in conic and azimuthal projections.
+else
+	STAND_LON=$REF_LON # A real value specifying the longitude that is parallel with the y-axis in conic and azimuthal projections.
+	DX=30000
+	DY=30000
+	D_POLAR=".false.,"
+fi
+#STAND_LON=0
+TIME_STEP=180 # in seconds (should be 6*dx (in km))
+GEOG_DATA_PATH="$HOME/WPS_DATA/WPS_GEOG"
+# Note that al times are UTC
+START_HOUR=00 # Must be either 00, 06, 12 or 18 (these are the times the NCEP run the GFS model) Also note that the date is available only some 4 hours after the initialization time
+if false
+then
+	START_DATE="$(date -u +'%Y-%m-%d')_$START_HOUR:00:00" # Get date in UTC
+	START_YEAR=${START_DATE:0:4}
+	START_MONTH=${START_DATE:5:2}
+	START_DAY=${START_DATE:8:2}
+else
+	START_YEAR=2020
+	START_MONTH=07
+	START_DAY=30
+	START_DATE="$START_YEAR-$START_MONTH-${START_DAY}_$START_HOUR:00:00"
+fi
+END_DATE=$(date -u +'%Y-%m-%d_%T' --date="${START_DATE:0:10} ${START_DATE:11} UTC + $RUN_HOURS hours")
+END_YEAR=${END_DATE:0:4}
+END_MONTH=${END_DATE:5:2}
+END_DAY=${END_DATE:8:2}
+END_HOUR=${END_DATE:11:2}
+
+COMP_START_DATE="${START_YEAR}${START_MONTH}${START_DAY}${START_HOUR}"
 START_DATE="$START_YEAR-$START_MONTH-${START_DAY}_$START_HOUR:00:00"
 END_DATE="$END_YEAR-$END_MONTH-${END_DAY}_$END_HOUR:00:00"
-VARIABLES="PARENT_ID PARENT_GRID_RATIO I_PARENT_START J_PARENT_START E_WE E_SN E_VERT START_YEAR START_MONTH START_DAY START_HOUR END_YEAR END_MONTH END_DAY END_HOUR START_DATE END_DATE GEOG_DATA_RES"
+VARIABLES="PARENT_ID PARENT_GRID_RATIO E_WE E_SN E_VERT START_YEAR START_MONTH START_DAY START_HOUR END_YEAR END_MONTH END_DAY END_HOUR START_DATE END_DATE GEOG_DATA_RES HISTORY_INTERVAL"
 for i in $(seq 1 $MAX_DOM)
 do
 	for sed_variable in $VARIABLES 

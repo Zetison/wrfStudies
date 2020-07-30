@@ -7,49 +7,107 @@ if [ -z "$DISPLAY" ]
 then
 	echo "Error: set the DISPLAY variable" #The display variable should be set for post processing purposes in paraview. This issue arises when using screen, and can be resolved by first getting the display variable outside the screen session (echo $DISPLAY) and then inside the screen session setting the variable to this value (i.e. export DISPLAY=localhost:10.0)"
 fi
+source $HOME/kode/bashScripts/sourceWRF
 
-DICTS="namelist.wps"
-
-SED_VARIABLES="INTERVAL_SECONDS REF_LAT REF_LON STAND_LON GEOG_DATA_PATH MAX_DOM"
+SED_VARIABLES="D_I_PARENT_START D_J_PARENT_START INTERVAL_SECONDS RUN_HOURS REF_LAT REF_LON STAND_LON GEOG_DATA_PATH MAX_DOM START_DATE TIME_STEP NCL_OUTPUT_TYPE MAP_PROJ DX DY POLE_LAT POLE_LON D_POLAR"
 MESH_ARR=$(seq 1 1)
 for MESH in $MESH_ARR
 do
 	source ./parameters
-	pathToFolder="$WRFDIRECTORY/Build_WRF/WPS"
-	cp namelist_$MODEL_NAME.wps $pathToFolder/namelist.wps
-	cp plotgrids_new.ncl wrf_wps_ter.ncl $pathToFolder/util
+	pathToWPS="$WRFDIRECTORY/Build_WRF/WPS"
+	pathToWRF="$WRFDIRECTORY/Build_WRF/WRF/run"
+	pathToResults="$HOME/results/WRF/$MODEL_NAME/$COMP_START_DATE"
+	mkdir -p $pathToResults
+	pathToFolder="$pathToWPS"
+	cp -f namelist_$MODEL_NAME.wps $pathToFolder/namelist.wps
+	cp -f plotgrids_new.ncl wrf_wps_ter.ncl $pathToFolder
 	
-#	#pushd $WRFDIRECTORY/Build_WRF/DATA > /dev/null
-#	#echo "Downloading NCEP data ... "
-#	#$HOME/kode/bashScripts/getNCEPdata "20200721" "00 03 06"
-#	#popd > /dev/null
-#
-	pushd $pathToFolder > /dev/null
-	source $HOME/kode/bashScripts/sedFiles
-	if [[ 1 ]]
+	if [[ ! -d "$GEOG_DATA_PATH" ]]
 	then
-		rm -f FILE* met_em*
-		./geogrid.exe | tee log.geogrid
-		ncl util/plotgrids_new.ncl # Plot domains
-		ncl util/wrf_wps_ter.ncl # Plot terrains
-		./link_grib.csh $WRFDIRECTORY/Build_WRF/DATA/GFS*
+		mkdir -p $GEOG_DATA_PATH
+		echo "Downloading geog data folder $GEOG_DATA_PATH"
+		pushd $WPSDATADIRECTORY > /dev/null
+		wget https://www2.mmm.ucar.edu/wrf/src/wps_files/geog_low_res_mandatory.tar.gz
+		gunzip geog_low_res_mandatory.tar.gz
+		tar -xf geog_low_res_mandatory.tar
+		wget https://www2.mmm.ucar.edu/wrf/src/wps_files/geog_high_res_mandatory.tar.gz
+		gunzip geog_high_res_mandatory.tar.gz
+		tar -xf geog_high_res_mandatory.tar
+		mv -n WPS_GEOG_LOW_RES/* WPS_GEOG
+		rm -rf WPS_GEOG_LOW_RES
+		popd > /dev/null
+	fi
+	pushd $WRFDIRECTORY/Build_WRF/DATA > /dev/null
+	$HOME/kode/bashScripts/getNCEPdata $START_DATE $END_DATE $INTERVAL_SECONDS $GFS_RES 
+	popd > /dev/null
+
+	pushd $pathToFolder > /dev/null
+	if [[ $MAP_PROJ == "lat-lon" ]]
+	then
+		sed -i '/SED_DX/d;/SED_DY/d;/truelat1/d;/truelat2/d;/SED_REF_LAT/d;/SED_REF_LON/d' namelist.wps
+	fi
+	DICTS="namelist.wps plotgrids_new.ncl wrf_wps_ter.ncl"
+	source $HOME/kode/bashScripts/sedFiles
+	rm -f FILE* met_em* *.pdf *.png
+	ncl plotgrids_new.ncl # Plot domains
+	if [[ $1 == 1 ]] 
+	then
+		$pathToWPS/geogrid.exe | tee log.geogrid
+		ncl wrf_wps_ter.ncl # Plot terrains
+		$pathToWPS/link_grib.csh $WRFDIRECTORY/Build_WRF/DATA/GFS*
 		ln -sf ungrib/Variable_Tables/Vtable.GFS Vtable
-		./ungrib.exe
-		./metgrid.exe | tee log.metgrid
+		$pathToWPS/ungrib.exe
+		$pathToWPS/metgrid.exe | tee log.metgrid
+		# ncview geo_em.d01.nc
+		cp -rf geo_em.* *.pdf *.png plotgrids_new.ncl wrf_wps_ter.ncl namelist.wps $pathToResults
 	fi
 	
+	if [[ $MAP_PROJ == "lat-lon" ]]
+	then
+		DX=$(ncdump -h geo_em.d01.nc | grep -oP '(?<=:DX = )[+-]?[0-9]+([.][0-9]+)?')
+		DY=$(ncdump -h geo_em.d01.nc | grep -oP '(?<=:DY = )[+-]?[0-9]+([.][0-9]+)?')
+	fi
 	popd > /dev/null
 	
 	pathToFolder="$WRFDIRECTORY/Build_WRF/WRF/run"
 	cp namelist_$MODEL_NAME.input $pathToFolder/namelist.input
+	cp wrf_Surface*.ncl $pathToFolder
 	pushd $pathToFolder > /dev/null
-	DICTS="namelist.input"
+	DICTS="namelist.input wrf_Surface1.ncl wrf_Surface2.ncl wrf_Surface3.ncl"
+	if [[ $MAP_PROJ == "lat-lon" ]]
+	then
+		sed -i "s/SED_DX/${DX}/g;s/SED_DY/${DY}/g" namelist.input
+	fi
 	source $HOME/kode/bashScripts/sedFiles
-	rm -f met_em* wrfout*
-	ln -sf ../../WPS/met_em* .	
-	mpirun -np 1 ./real.exe
-#	ncl ../var/graphics/ncl/wrf_Surface1.ncl
-	#ncl ../var/graphics/ncl/wrf_Surface2.ncl
-	#ncl ../var/graphics/ncl/wrf_Surface3.ncl
-	popd > /dev/null
+	if [[ $2 == 1 ]]
+	then
+		rm -f rsl.* met_em* wrfout* wrfbdy_* wrfinput_d0* *.png *.avi *.gif *.mpeg *.ogg
+
+		ln -sf ../../WPS/met_em* .	
+		mpirun -np 8 ./real.exe
+		# tail rsl.error.0000
+		mpirun -np 8 $pathToWRF/wrf.exe
+		# tail -F rsl.out.0000
+		# tail rsl.error.0000
+		cp -ruf wrfout_d* *.pdf *.png wrf_Surface*.ncl namelist.input $pathToResults
+		cd $pathToResults
+		rm *.vts *.pvd
+		for i_domain in $(seq -f "%02g" 1 ${MAX_DOM})
+		do
+			temp="wrf_Surface3_d${i_domain}.ncl"
+			cp "wrf_Surface3.ncl" "$temp" 
+			sed -i "s/SED_I_DOMAIN/$i_domain/g" $temp
+			#ncl "$temp"
+			#idt plt_Surface3.ncgm # Animate result in a GUI. Assumes NCL_OUTPUT_TYPE="ncgm"
+			#convert -delay 100 *.png "anim_d${i_domain}.mpeg"
+			python3 ~/kode/python/WRF2VTK.py -v T2 -w wind:U:V:W wrfout_d${i_domain}*
+			rename "s/(.*)\$/d${i_domain}_\$1/" surface*.vts
+			rename "s/(.*)\$/d${i_domain}_\$1/" atm*.vts
+			sed -i "s/surface/d${i_domain}_surface/g" surface.pvd
+			sed -i "s/atm/d${i_domain}_atm/g" atm.pvd
+			mv surface.pvd d${i_domain}_surface.pvd
+			mv atm.pvd d${i_domain}_atm.pvd
+		done
+		popd > /dev/null
+	fi
 done
