@@ -53,7 +53,7 @@ do
 	if [[ $1 == 1 ]] 
 	then
 		rm -f FILE* met_em*
-		$pathToWPS/geogrid.exe | tee log.geogrid
+		mpirun -np $NP $pathToWPS/geogrid.exe | tee log.geogrid
 		for i_domain in $(seq -f "%02g" 1 ${MAX_DOM})
 		do
 			ncl a="addfile(\"./geo_em.d${i_domain}.nc\",\"r\")" wrf_wps_ter.ncl
@@ -61,8 +61,8 @@ do
 		done
 		$pathToWPS/link_grib.csh $WRFDIRECTORY/Build_WRF/DATA/GFS*
 		ln -sf ungrib/Variable_Tables/Vtable.GFS Vtable
-		$pathToWPS/ungrib.exe
-		$pathToWPS/metgrid.exe | tee log.metgrid
+		mpirun -np $NP $pathToWPS/ungrib.exe
+		mpirun -np $NP $pathToWPS/metgrid.exe | tee log.metgrid
 		# ncview geo_em.d01.nc
 		cp -rf geo_em.* *.pdf *.png plotgrids_new.ncl wrf_wps_ter.ncl namelist.wps $pathToResults
 	fi
