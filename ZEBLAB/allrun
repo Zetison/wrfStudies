@@ -37,6 +37,7 @@ do
 		rm -rf WPS_GEOG_LOW_RES
 		popd > /dev/null
 	fi
+
 	pushd $WRFDIRECTORY/Build_WRF/DATA > /dev/null
 	$HOME/kode/bashScripts/getNCEPdata $START_DATE $END_DATE $INTERVAL_SECONDS $GFS_RES 
 	popd > /dev/null
@@ -48,10 +49,11 @@ do
 	fi
 	DICTS="namelist.wps plotgrids_new.ncl wrf_wps_ter.ncl"
 	source $HOME/kode/bashScripts/sedFiles
-	rm -f FILE* met_em* *.pdf *.png
+	rm -f *.pdf *.png
 	ncl plotgrids_new.ncl # Plot domains
 	if [[ $1 == 1 ]] 
 	then
+		rm -f FILE* met_em*
 		$pathToWPS/geogrid.exe | tee log.geogrid
 		ncl wrf_wps_ter.ncl # Plot terrains
 		$pathToWPS/link_grib.csh $WRFDIRECTORY/Build_WRF/DATA/GFS*
@@ -90,6 +92,11 @@ do
 		# tail -F rsl.out.0000
 		# tail rsl.error.0000
 		cp -ruf wrfout_d* *.pdf *.png wrf_Surface*.ncl namelist.input $pathToResults
+	fi
+	popd > /dev/null
+
+	if [[ $3 == 1 ]]
+	then
 		cd $pathToResults
 		rm *.vts *.pvd
 		for i_domain in $(seq -f "%02g" 1 ${MAX_DOM})
@@ -108,6 +115,5 @@ do
 			mv surface.pvd d${i_domain}_surface.pvd
 			mv atm.pvd d${i_domain}_atm.pvd
 		done
-		popd > /dev/null
 	fi
 done
