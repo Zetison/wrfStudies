@@ -89,6 +89,7 @@
  &bdy_control
  spec_bdy_width                      = 5,
  nested                              = .false.,.true.,
+ specified                           = SED_D_SPECIFIED
  periodic_x                          = SED_D_POLAR
  polar                               = SED_D_POLAR
 /

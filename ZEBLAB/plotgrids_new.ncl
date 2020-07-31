@@ -193,15 +193,15 @@ begin
 
 ; Now you can add some information to the plot. 
 ; Below is an example of adding a white dot at (ref_lat,ref_lon).
-  pmres = True
-  pmres@gsMarkerColor = "White"
-  pmres@gsMarkerIndex = 16
-  pmres@gsMarkerSizeF = 0.01
-  gsn_polymarker(wks,mp,mpres@ref_lat,mpres@ref_lon,pmres)
-
-  pmres@gsMarkerColor = "Red"
-  gsn_polymarker(wks,mp,mpres@pole_lat,mpres@pole_lon,pmres)
-  print("(ref_lat,ref_lon) = (" + mpres@ref_lat + ", " + mpres@ref_lon + ")" )
+;  pmres = True
+;  pmres@gsMarkerColor = "White"
+;  pmres@gsMarkerIndex = 16
+;  pmres@gsMarkerSizeF = 0.01
+;  gsn_polymarker(wks,mp,mpres@ref_lat,mpres@ref_lon,pmres)
+;
+;  pmres@gsMarkerColor = "Red"
+;  gsn_polymarker(wks,mp,mpres@pole_lat,mpres@pole_lon,pmres)
+;  print("(ref_lat,ref_lon) = (" + mpres@ref_lat + ", " + mpres@ref_lon + ")" )
 
 
   frame(wks)           ; lets frame the plot - do not delete

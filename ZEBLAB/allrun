@@ -1,7 +1,6 @@
 #!/bin/bash
 MODEL_NAME="ZEBLAB"
 #MODEL_NAME="tutorial"
-NP=4    	# Number of processors
 name=${1:-$MODEL_NAME}
 if [ -z "$DISPLAY" ]
 then
@@ -9,7 +8,7 @@ then
 fi
 source $HOME/kode/bashScripts/sourceWRF
 
-SED_VARIABLES="D_I_PARENT_START D_J_PARENT_START INTERVAL_SECONDS RUN_HOURS REF_LAT REF_LON STAND_LON GEOG_DATA_PATH MAX_DOM START_DATE TIME_STEP NCL_OUTPUT_TYPE MAP_PROJ DX DY POLE_LAT POLE_LON D_POLAR"
+SED_VARIABLES="D_I_PARENT_START D_J_PARENT_START INTERVAL_SECONDS RUN_HOURS REF_LAT REF_LON STAND_LON GEOG_DATA_PATH MAX_DOM START_DATE TIME_STEP NCL_OUTPUT_TYPE MAP_PROJ DX DY POLE_LAT POLE_LON D_POLAR D_SPECIFIED D_HISTORY_INTERVAL"
 MESH_ARR=$(seq 1 1)
 for MESH in $MESH_ARR
 do
@@ -55,7 +54,11 @@ do
 	then
 		rm -f FILE* met_em*
 		$pathToWPS/geogrid.exe | tee log.geogrid
-		ncl wrf_wps_ter.ncl # Plot terrains
+		for i_domain in $(seq -f "%02g" 1 ${MAX_DOM})
+		do
+			ncl a="addfile(\"./geo_em.d${i_domain}.nc\",\"r\")" wrf_wps_ter.ncl
+			mv plt_geo_6.png "plt_geo_d${i_domain}.png"
+		done
 		$pathToWPS/link_grib.csh $WRFDIRECTORY/Build_WRF/DATA/GFS*
 		ln -sf ungrib/Variable_Tables/Vtable.GFS Vtable
 		$pathToWPS/ungrib.exe
@@ -86,9 +89,9 @@ do
 		rm -f rsl.* met_em* wrfout* wrfbdy_* wrfinput_d0* *.png *.avi *.gif *.mpeg *.ogg
 
 		ln -sf ../../WPS/met_em* .	
-		mpirun -np 8 ./real.exe
+		mpirun -np $NP ./real.exe
 		# tail rsl.error.0000
-		mpirun -np 8 $pathToWRF/wrf.exe
+		mpirun -np $NP $pathToWRF/wrf.exe
 		# tail -F rsl.out.0000
 		# tail rsl.error.0000
 		cp -ruf wrfout_d* *.pdf *.png wrf_Surface*.ncl namelist.input $pathToResults

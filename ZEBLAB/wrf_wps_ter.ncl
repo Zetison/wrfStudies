@@ -7,7 +7,7 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/wrf/WRFUserARW.ncl"
 
 begin
 
-  a = addfile("./geo_em.d01.nc","r")           ; Open a file
+  ; a = addfile("./geo_em.d01.nc","r")           ; Open a file
 
 
 

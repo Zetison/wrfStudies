@@ -10,8 +10,6 @@ from numpy import pi
 paraview.simple._DisableFirstRenderCameraReset()
 
 # create a new 'XML Structured Grid Reader'
-surface_00001vts = XMLStructuredGridReader(FileName=['/home/zetison/results/WRF/ZEBLAB/2020073000/surface_00001.vts'])
-surface_00001vts.PointArrayStatus = ['T2']
 
 R = 6370e3 # WRF radius of earth (assumes earth is a sphere)
 # get active view
@@ -19,79 +17,43 @@ renderView1 = GetActiveViewOrCreate('RenderView')
 # uncomment following to set a specific view size
 # renderView1.ViewSize = [2180, 1084]
 
-# get layout
 layout1 = GetLayout()
 
-# show data in view
-surface_00001vtsDisplay = Show(surface_00001vts, renderView1, 'StructuredGridRepresentation')
-
-# trace defaults for the display properties.
-surface_00001vtsDisplay.Representation = 'Surface'
-surface_00001vtsDisplay.ColorArrayName = [None, '']
-surface_00001vtsDisplay.OSPRayScaleArray = 'T2'
-surface_00001vtsDisplay.OSPRayScaleFunction = 'PiecewiseFunction'
-surface_00001vtsDisplay.SelectOrientationVectors = 'None'
-surface_00001vtsDisplay.ScaleFactor = 3982276.9453125
-surface_00001vtsDisplay.SelectScaleArray = 'None'
-surface_00001vtsDisplay.GlyphType = 'Arrow'
-surface_00001vtsDisplay.GlyphTableIndexArray = 'None'
-surface_00001vtsDisplay.GaussianRadius = 199113.847265625
-surface_00001vtsDisplay.SetScaleArray = ['POINTS', 'T2']
-surface_00001vtsDisplay.ScaleTransferFunction = 'PiecewiseFunction'
-surface_00001vtsDisplay.OpacityArray = ['POINTS', 'T2']
-surface_00001vtsDisplay.OpacityTransferFunction = 'PiecewiseFunction'
-surface_00001vtsDisplay.DataAxesGrid = 'GridAxesRepresentation'
-surface_00001vtsDisplay.PolarAxes = 'PolarAxesRepresentation'
-surface_00001vtsDisplay.ScalarOpacityUnitDistance = 1655186.5998485514
-surface_00001vtsDisplay.InputVectors = [None, '']
-surface_00001vtsDisplay.SelectInputVectors = [None, '']
-surface_00001vtsDisplay.WriteLog = ''
-
-# init the 'PiecewiseFunction' selected for 'OSPRayScaleFunction'
-surface_00001vtsDisplay.OSPRayScaleFunction.Points = [0.00514701349531455, 0.0, 0.5, 0.0, 0.013980567542770658, 0.0, 0.5, 0.0, 0.0934825539698756, 1.0, 0.5, 0.0]
-
-# init the 'PiecewiseFunction' selected for 'ScaleTransferFunction'
-surface_00001vtsDisplay.ScaleTransferFunction.Points = [212.28143310546875, 0.0, 0.5, 0.0, 222.68084411621095, 0.0, 0.5, 0.0, 316.2755432128906, 1.0, 0.5, 0.0]
-
-# init the 'PiecewiseFunction' selected for 'OpacityTransferFunction'
-surface_00001vtsDisplay.OpacityTransferFunction.Points = [212.28143310546875, 0.0, 0.5, 0.0, 222.68084411621095, 0.0, 0.5, 0.0, 316.2755432128906, 1.0, 0.5, 0.0]
-
-# get the material library
-materialLibrary1 = GetMaterialLibrary()
-
-# update the view to ensure updated data information
-renderView1.Update()
-
-# set scalar coloring
-ColorBy(surface_00001vtsDisplay, ('POINTS', 'T2'))
-
-# rescale color and/or opacity maps used to include current data range
-surface_00001vtsDisplay.RescaleTransferFunctionToDataRange(True, False)
-
-# show color bar/color legend
-surface_00001vtsDisplay.SetScalarBarVisibility(renderView1, True)
-
-# get color transfer function/color map for 'T2'
-t2LUT = GetColorTransferFunction('T2')
-
-# get opacity transfer function/opacity map for 'T2'
-t2PWF = GetOpacityTransferFunction('T2')
 
 # create a new 'Calculator'
-max_dom = 1
+max_dom = 2
 i_parent_start = [1, 84, 33, 33, 50, 33]
 j_parent_start = [1, 31, 42, 33, 50, 33]
-e_we = [200,100,100,100,100,100]
+e_we = [100,100,100,100,100,100]
 e_sn = [100,100,100,100,100,100]
+#e_we = [26,26]
+#e_sn = [26,26]
+i_parent_start = [1, 31]
+j_parent_start = [1, 31]
+def getData(i):
+	surfacepvd = PVDReader(FileName='/home/zetison/results/WRF/ZEBLAB/2020073000/d0'+str(i+1)+'_surface.pvd')
+	surfacepvd.PointArrays = ['T2']
+	surfacepvdDisplay = Show(surfacepvd, renderView1, 'StructuredGridRepresentation')
+	surfacepvdDisplay.Representation = 'Surface'
+	surfacepvdDisplay.OSPRayScaleArray = 'T2'
+	ColorBy(surfacepvdDisplay, ('POINTS', 'T2'))
+	surfacepvdDisplay.RescaleTransferFunctionToDataRange(True, False)
+	surfacepvdDisplay.SetScalarBarVisibility(renderView1, True)
+	surfacepvdDisplay.SetRepresentationType('Surface With Edges')
+	pLUT = GetColorTransferFunction('T2')
+	# change scalar bar placement
+	pLUT.AutomaticRescaleRangeMode = "Never"
+	pLUT.RescaleOnVisibilityChange = 0
+	pLUT.RescaleTransferFunction(280,290)
 
-for i in range(0,max_dom):
-	calculator1 = Calculator(Input=surface_00001vts)
+	calculator1 = Calculator(Input=surfacepvd)
 	
 	# show data in view
 	calculator1Display = Show(calculator1, renderView1, 'StructuredGridRepresentation')
+	calculator1Display.SetRepresentationType('Surface With Edges')
 	
 	# hide data in view
-	Hide(surface_00001vts, renderView1)
+	Hide(surfacepvd, renderView1)
 	
 	# show color bar/color legend
 	# calculator1Display.SetScalarBarVisibility(renderView1, True)
@@ -105,20 +67,32 @@ for i in range(0,max_dom):
 	maxcoordsX = 39923332
 	mincoordsY = 101070.453125
 	maxcoordsY = 19910880
+	mincoordsX = 15000
+	maxcoordsX = 2955000
+	mincoordsY = 15000
+	maxcoordsY = 2955000
 	LX = maxcoordsX-mincoordsX
 	LY = maxcoordsY-mincoordsY
-	dx = (maxcoordsX-mincoordsX)/(e_we[i]-1)
-	dy = (maxcoordsY-mincoordsY)/(e_sn[i]-1)
-	cx = maxcoordsX + (i_parent_start[i]-1)*dx
-	cy = maxcoordsY + (j_parent_start[i]-1)*dy
+	dx = LX/(e_we[i]-2) # Note that LY is the full width minus 2*dy (the boundary is cut away)
+	dy = LY/(e_sn[i]-2) # similar to dx
+	cx = maxcoordsX - (i_parent_start[i]-1)*dx
+	cy = maxcoordsY - (j_parent_start[i]-1)*dy
+	cx = (i_parent_start[i]-1)*dx
+	cy = (j_parent_start[i]-1)*dy
 	WRFmapping = '('+str(R)+'+coordsZ)*cos('+str(pi)+'/2*(1+2*(coordsY-'+str(cy)+')/'+str(LY)+'))*cos('+str(pi)+'*(1+2*(coordsX-'+str(cx)+')/'+str(LX)+'))*iHat' \
 	            +'+('+str(R)+'+coordsZ)*cos('+str(pi)+'/2*(1+2*(coordsY-'+str(cy)+')/'+str(LY)+'))*sin('+str(pi)+'*(1+2*(coordsX-'+str(cx)+')/'+str(LX)+'))*jHat' \
 	            +'+('+str(R)+'+coordsZ)*sin('+str(pi)+'/2*(1+2*(coordsY-'+str(cy)+')/'+str(LY)+'))*kHat' 
+	WRFmapping = '(coordsX + '+str(cx)+')*iHat + (coordsY + '+str(cy)+')*jHat + coordsZ*kHat'
+	print([dx,dy,LX,LY])
+	print(WRFmapping)
 	calculator1.Function = WRFmapping
 	# update the view to ensure updated data information
 	renderView1.Update()
 
+
+for i in range(0,max_dom):
+	getData(i)
 #### saving camera placements for all active views
 # reset view to fit data
-renderView1.ResetCamera()
+#renderView1.ResetCamera()
 
