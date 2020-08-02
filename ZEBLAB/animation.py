@@ -21,7 +21,7 @@ layout1 = GetLayout()
 
 
 # create a new 'Calculator'
-max_dom = 2
+max_dom = 1
 i_parent_start = [1, 84, 33, 33, 50, 33]
 j_parent_start = [1, 31, 42, 33, 50, 33]
 e_we = [100,100,100,100,100,100]
@@ -31,7 +31,7 @@ e_sn = [100,100,100,100,100,100]
 i_parent_start = [1, 31]
 j_parent_start = [1, 31]
 def getData(i):
-	surfacepvd = PVDReader(FileName='/home/zetison/results/WRF/ZEBLAB/2020073000/d0'+str(i+1)+'_surface.pvd')
+	surfacepvd = PVDReader(FileName='/home/zetison/results/WRF/ZEBLAB/2020073112/d0'+str(i+1)+'_surface.pvd')
 	surfacepvd.PointArrays = ['T2']
 	surfacepvdDisplay = Show(surfacepvd, renderView1, 'StructuredGridRepresentation')
 	surfacepvdDisplay.Representation = 'Surface'
@@ -67,22 +67,22 @@ def getData(i):
 	maxcoordsX = 39923332
 	mincoordsY = 101070.453125
 	maxcoordsY = 19910880
-	mincoordsX = 15000
-	maxcoordsX = 2955000
-	mincoordsY = 15000
-	maxcoordsY = 2955000
+#	mincoordsX = 15000
+#	maxcoordsX = 2955000
+#	mincoordsY = 15000
+#	maxcoordsY = 2955000
 	LX = maxcoordsX-mincoordsX
 	LY = maxcoordsY-mincoordsY
 	dx = LX/(e_we[i]-2) # Note that LY is the full width minus 2*dy (the boundary is cut away)
 	dy = LY/(e_sn[i]-2) # similar to dx
 	cx = maxcoordsX - (i_parent_start[i]-1)*dx
 	cy = maxcoordsY - (j_parent_start[i]-1)*dy
-	cx = (i_parent_start[i]-1)*dx
-	cy = (j_parent_start[i]-1)*dy
+#	cx = (i_parent_start[i]-1)*dx
+#	cy = (j_parent_start[i]-1)*dy
 	WRFmapping = '('+str(R)+'+coordsZ)*cos('+str(pi)+'/2*(1+2*(coordsY-'+str(cy)+')/'+str(LY)+'))*cos('+str(pi)+'*(1+2*(coordsX-'+str(cx)+')/'+str(LX)+'))*iHat' \
 	            +'+('+str(R)+'+coordsZ)*cos('+str(pi)+'/2*(1+2*(coordsY-'+str(cy)+')/'+str(LY)+'))*sin('+str(pi)+'*(1+2*(coordsX-'+str(cx)+')/'+str(LX)+'))*jHat' \
 	            +'+('+str(R)+'+coordsZ)*sin('+str(pi)+'/2*(1+2*(coordsY-'+str(cy)+')/'+str(LY)+'))*kHat' 
-	WRFmapping = '(coordsX + '+str(cx)+')*iHat + (coordsY + '+str(cy)+')*jHat + coordsZ*kHat'
+#	WRFmapping = '(coordsX + '+str(cx)+')*iHat + (coordsY + '+str(cy)+')*jHat + coordsZ*kHat'
 	print([dx,dy,LX,LY])
 	print(WRFmapping)
 	calculator1.Function = WRFmapping

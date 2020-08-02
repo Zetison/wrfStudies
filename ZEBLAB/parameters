@@ -3,10 +3,10 @@ NP=32
 MAX_DOM=7
 GEOG_DATA_RES="30s" #10m (~19km), 5m (~9km), 2m (~4km), and 30s (~0.9km).
 INTERVAL_SECONDS=3600 # Must be >= 3600 as this is the interval the GFS data is available
-GFS_RES="0p25" # resolution (in degrees) in longitude and latitude direction (NOTE: if > 0.25 (0p25) then INTERVAL_SECONDS must be > 10800)
+GFS_RES="0p25" # resolution (in degrees) in longitude and latitude direction (NOTE: if > 0.25 (0p25) then INTERVAL_SECONDS must be > 10800) First 120 hours available hourly, after that every 3 hours
 RUN_HOURS=12
 PARENT_GRID_RATIO=3
-D_HISTORY_INTERVAL="1," # in minutes
+D_HISTORY_INTERVAL="1,1,1,1,1,1,1" # in minutes
 MAP_PROJ="lat-lon" # Accepted projections are 'lambert', 'polar', 'mercator', and 'lat-lon.'
 #MAP_PROJ="lambert" # Accepted projections are 'lambert', 'polar', 'mercator', and 'lat-lon.'
 E_WE=200 # number of velocity points in east west direction

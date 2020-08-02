@@ -89,7 +89,7 @@ do
 		rm -f rsl.* met_em* wrfout* wrfbdy_* wrfinput_d0* *.png *.avi *.gif *.mpeg *.ogg
 
 		ln -sf ../../WPS/met_em* .	
-		mpirun -np $NP ./real.exe
+		mpirun -np $NP $pathToWRF/real.exe
 		# tail rsl.error.0000
 		mpirun -np $NP $pathToWRF/wrf.exe
 		# tail -F rsl.out.0000
