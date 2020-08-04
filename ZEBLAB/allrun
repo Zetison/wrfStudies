@@ -113,7 +113,7 @@ do
 			#ncl "$temp"
 			#idt plt_Surface3.ncgm # Animate result in a GUI. Assumes NCL_OUTPUT_TYPE="ncgm"
 			#convert -delay 100 *.png "anim_d${i_domain}.mpeg"
-			python3 ~/kode/python/WRF2VTK.py -v T,T2 -w U:U:V:W,P wrfout_d${i_domain}*
+			python3 ~/kode/python/WRF2VTK.py -v T,T2,CLDFRA -w U:U:V:W,P wrfout_d${i_domain}*
 			rename "s/(.*)\$/d${i_domain}_\$1/" surface*.vts
 			rename "s/(.*)\$/d${i_domain}_\$1/" atm*.vts
 			sed -i "s/surface/d${i_domain}_surface/g" surface.pvd
