@@ -36,7 +36,7 @@ do
 		rm -rf WPS_GEOG_LOW_RES
 		popd > /dev/null
 	fi
-
+	mkdir -p $WRFDIRECTORY/Build_WRF/DATA
 	pushd $WRFDIRECTORY/Build_WRF/DATA > /dev/null
 	$HOME/kode/bashScripts/getNCEPdata $START_DATE $END_DATE $INTERVAL_SECONDS $GFS_RES 
 	popd > /dev/null
@@ -61,8 +61,10 @@ do
 		done
 		$pathToWPS/link_grib.csh $WRFDIRECTORY/Build_WRF/DATA/GFS*
 		ln -sf ungrib/Variable_Tables/Vtable.GFS Vtable
-		mpirun -np $NP $pathToWPS/ungrib.exe
-		mpirun -np $NP $pathToWPS/metgrid.exe | tee log.metgrid
+		#mpirun -np $NP $pathToWPS/ungrib.exe
+		$pathToWPS/ungrib.exe
+		#mpirun -np $NP $pathToWPS/metgrid.exe | tee log.metgrid
+		$pathToWPS/metgrid.exe | tee log.metgrid
 		# ncview geo_em.d01.nc
 		cp -rf geo_em.* *.pdf *.png plotgrids_new.ncl wrf_wps_ter.ncl namelist.wps $pathToResults
 	fi
@@ -94,6 +96,7 @@ do
 		mpirun -np $NP $pathToWRF/wrf.exe
 		# tail -F rsl.out.0000
 		# tail rsl.error.0000
+		rm -rf wrfout_d* *.pdf *.png wrf_Surface*.ncl namelist.input $pathToResults
 		cp -ruf wrfout_d* *.pdf *.png wrf_Surface*.ncl namelist.input $pathToResults
 	fi
 	popd > /dev/null
@@ -110,7 +113,7 @@ do
 			#ncl "$temp"
 			#idt plt_Surface3.ncgm # Animate result in a GUI. Assumes NCL_OUTPUT_TYPE="ncgm"
 			#convert -delay 100 *.png "anim_d${i_domain}.mpeg"
-			python3 ~/kode/python/WRF2VTK.py -v T2 -w wind:U:V:W wrfout_d${i_domain}*
+			python3 ~/kode/python/WRF2VTK.py -v T,T2 -w U:U:V:W,P wrfout_d${i_domain}*
 			rename "s/(.*)\$/d${i_domain}_\$1/" surface*.vts
 			rename "s/(.*)\$/d${i_domain}_\$1/" atm*.vts
 			sed -i "s/surface/d${i_domain}_surface/g" surface.pvd

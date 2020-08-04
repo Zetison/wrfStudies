@@ -48,13 +48,13 @@
 
  &physics
  physics_suite                       = 'CONUS',
- mp_physics                          = -1,
- cu_physics                          = -1,
- ra_lw_physics                       = -1,
- ra_sw_physics                       = -1,
- bl_pbl_physics                      = -1,
- sf_sfclay_physics                   = -1,
- sf_surface_physics                  = -1,
+ mp_physics                          = SED_D_MP_PHYSICS
+ cu_physics                          = SED_D_CU_PHYSICS
+ ra_lw_physics                       = SED_D_RA_LW_PHYSICS
+ ra_sw_physics                       = SED_D_RA_SW_PHYSICS
+ bl_pbl_physics                      = SED_D_BL_PBL_PHYSICS
+ sf_sfclay_physics                   = SED_D_SF_SFCLAY_PHYSICS
+ sf_surface_physics                  = SED_D_SF_SURFACE_PHYSICS
  radt                                = 30,
  bldt                                = 0, 
  cudt                                = 5,
