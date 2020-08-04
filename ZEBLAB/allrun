@@ -96,7 +96,7 @@ do
 		mpirun -np $NP $pathToWRF/wrf.exe
 		# tail -F rsl.out.0000
 		# tail rsl.error.0000
-		rm -rf wrfout_d* *.pdf *.png wrf_Surface*.ncl namelist.input $pathToResults
+		rm -rf $pathToResult/wrfout_d* $pathToResults/*.pdf $pathToResults/*.png $pathToResults/wrf_Surface*.ncl $pathToResults/namelist.input 
 		cp -ruf wrfout_d* *.pdf *.png wrf_Surface*.ncl namelist.input $pathToResults
 	fi
 	popd > /dev/null
