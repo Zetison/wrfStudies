@@ -5,7 +5,6 @@ GEOG_DATA_RES="30s" #10m (~19km), 5m (~9km), 2m (~4km), and 30s (~0.9km).
 GFS_RES="0p25" # resolution (in degrees) in longitude and latitude direction (NOTE: if > 0.25 (0p25) then INTERVAL_SECONDS must be > 10800) First 120 hours available hourly, after that every 3 hours
 RUN_HOURS=24
 PARENT_GRID_RATIO=3
-D_HISTORY_INTERVAL="1,1,1,1,1,1,1," # in minutes
 MAP_PROJ="lat-lon" # Accepted projections are 'lambert', 'polar', 'mercator', and 'lat-lon.'
 #MAP_PROJ="lambert" # Accepted projections are 'lambert', 'polar', 'mercator', and 'lat-lon.'
 NCL_OUTPUT_TYPE="png" # 'x11', 'pdf', 'ps', 'ncgm', 'png' 
@@ -17,6 +16,7 @@ then
 	TIME_STEP=300 # in seconds (should be 6*dx (in km))
 	D_I_PARENT_START="1, 84, 34, 34, 34, 34, 34,"
 	D_J_PARENT_START="1, 34, 34, 34, 34, 34, 34," # 29
+	D_HISTORY_INTERVAL="180,180,180,180,180,180,180," # in minutes
 else
 	E_WE=200 # number of velocity points in east west direction
 	E_SN=100 # number of velocity points in south north direction
@@ -24,6 +24,7 @@ else
 	TIME_STEP=1200 # in seconds (should be 6*dx (in km))
 	D_I_PARENT_START="1, 84, 34, 34, 34, 34, 34,"
 	D_J_PARENT_START="1, 34, 34, 34, 34, 34, 34," # 29
+	D_HISTORY_INTERVAL="1,1,1,1,1,1,1," # in minutes
 fi
 REF_LAT=63.414061 # Latitude of a known reference point inside the domain
 REF_LON=10.407602 # Longitude of the same point as used for REF_LAT
