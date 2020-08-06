@@ -180,6 +180,13 @@ begin
 
 ; Deal with global wrf domains that don't have dx or dy
 
+  if (mpres@dx.lt.1e-10 .and. mpres@dx.lt.1e-10) then
+		mpres@ref_lat = 90.0 - SED_POLE_LAT
+		mpres@ref_lon = -SED_STAND_LON
+    mpres@dx = 360./(mpres@e_we(0) - 1)
+    mpres@dy = 180./(mpres@e_sn(0) - 1)
+  end if
+
   mp = wrf_wps_dom (wks,mpres,lnres,txres)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

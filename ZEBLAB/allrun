@@ -19,7 +19,7 @@ do
 	mkdir -p $pathToResults
 	pathToFolder="$pathToWPS"
 	cp -f namelist_$MODEL_NAME.wps $pathToFolder/namelist.wps
-	cp -f plotgrids_new.ncl wrf_wps_ter.ncl $pathToFolder
+	cp -f plotgrids_new.ncl plotgrids_global.ncl wrf_wps_ter.ncl $pathToFolder
 	if [[ ! -d "$GEOG_DATA_PATH" ]]
 	then
 		mkdir -p $GEOG_DATA_PATH
@@ -45,10 +45,15 @@ do
 	then
 		sed -i '/SED_DX/d;/SED_DY/d;/truelat1/d;/truelat2/d;/SED_REF_LAT/d;/SED_REF_LON/d' namelist.wps
 	fi
-	DICTS="namelist.wps plotgrids_new.ncl wrf_wps_ter.ncl"
+	DICTS="namelist.wps plotgrids_new.ncl plotgrids_global.ncl wrf_wps_ter.ncl"
 	source $HOME/kode/bashScripts/sedFiles
 	rm -f *.pdf *.png
-	ncl plotgrids_new.ncl # Plot domains
+	if [[ $MAP_PROJ == "lat-lon" ]]
+	then
+		ncl plotgrids_global.ncl # Plot domains
+	else
+		ncl plotgrids_new.ncl # Plot domains
+	fi
 	if [[ $1 == 1 ]] 
 	then
 		rm -f FILE* met_em*
@@ -75,7 +80,6 @@ do
 	fi
 	NUM_METGRID_LEVELS=$(ncdump -h "met_em.d01.$START_DATE.nc" | grep -oP '(?<=num_metgrid_levels = )[0-9]+;?')
 	NUM_METGRID_SOIL_LEVELS=$(ncdump -h "met_em.d01.$START_DATE.nc" | grep -oP '(?<=num_st_layers = )[0-9]+;?')
-	echo "NUM_METGRID_SOIL_LEVELS = "$NUM_METGRID_SOIL_LEVELS
 	popd > /dev/null
 	
 	pathToFolder="$WRFDIRECTORY/Build_WRF/WRF/run"
