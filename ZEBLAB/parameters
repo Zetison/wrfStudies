@@ -1,27 +1,37 @@
 #!/bin/bash
-NP=46
+NP=10
 MAX_DOM=1
-GEOG_DATA_RES="30s" #10m (~19km), 5m (~9km), 2m (~4km), and 30s (~0.9km).
-GFS_RES="0p25" # resolution (in degrees) in longitude and latitude direction (NOTE: if > 0.25 (0p25) then INTERVAL_SECONDS must be > 10800) First 120 hours available hourly, after that every 3 hours
+GEOG_DATA_RES="10m" #10m (~19km), 5m (~9km), 2m (~4km), and 30s (~0.9km).
+GFS_RES="0p50" # resolution (in degrees) in longitude and latitude direction (NOTE: if > 0.25 (0p25) then INTERVAL_SECONDS must be > 10800) First 120 hours available hourly, after that every 3 hours
 RUN_HOURS=24
 PARENT_GRID_RATIO=3
 MAP_PROJ="lat-lon" # Accepted projections are 'lambert', 'polar', 'mercator', and 'lat-lon.'
 #MAP_PROJ="lambert" # Accepted projections are 'lambert', 'polar', 'mercator', and 'lat-lon.'
-NCL_OUTPUT_TYPE="png" # 'x11', 'pdf', 'ps', 'ncgm', 'png' 
-if true
+NCL_OUTPUT_TYPE="png" # 'x11', 'pdf', 'ps', 'ncgm', 'png'
+CASE="global"
+if [[ $CASE == "global" ]]
 then
-	E_WE=800 # number of velocity points in east west direction
-	E_SN=400 # number of velocity points in south north direction
+	E_WE=400 # number of velocity points in east west direction
+	E_SN=200 # number of velocity points in south north direction
 	E_VERT=50 #  This number must be the same for each domain.
-	TIME_STEP=300 # in seconds (should be 6*dx (in km))
+	TIME_STEP=600 # in seconds (should be 6*dx (in km))
 	D_I_PARENT_START="1, 84, 34, 34, 34, 34, 34,"
 	D_J_PARENT_START="1, 34, 34, 34, 34, 34, 34," # 29
 	D_HISTORY_INTERVAL="180,180,180,180,180,180,180," # in minutes
-else
+elif [[ $CASE == "local" ]]
+then
 	E_WE=200 # number of velocity points in east west direction
 	E_SN=100 # number of velocity points in south north direction
 	E_VERT=50 #  This number must be the same for each domain.
 	TIME_STEP=1200 # in seconds (should be 6*dx (in km))
+	D_I_PARENT_START="1, 84, 34, 34, 34, 34, 34,"
+	D_J_PARENT_START="1, 34, 34, 34, 34, 34, 34," # 29
+	D_HISTORY_INTERVAL="1,1,1,1,1,1,1," # in minutes
+else
+	E_WE=20 # number of velocity points in east west direction
+	E_SN=10 # number of velocity points in south north direction
+	E_VERT=40 #  This number must be the same for each domain.
+	TIME_STEP=3600 # in seconds (should be 6*dx (in km))
 	D_I_PARENT_START="1, 84, 34, 34, 34, 34, 34,"
 	D_J_PARENT_START="1, 34, 34, 34, 34, 34, 34," # 29
 	D_HISTORY_INTERVAL="1,1,1,1,1,1,1," # in minutes

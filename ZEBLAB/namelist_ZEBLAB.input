@@ -32,8 +32,8 @@
  e_sn                                = SED_D_E_SN
  e_vert                              = SED_D_E_VERT 
  p_top_requested                     = 5000,
- num_metgrid_levels                  = 34,
- num_metgrid_soil_levels             = 4,
+ num_metgrid_levels                  = SED_NUM_METGRID_LEVELS,
+ num_metgrid_soil_levels             = SED_NUM_METGRID_SOIL_LEVELS,
  dx                                  = SED_DX,
  dy                                  = SED_DY,
  grid_id                             = 1,     2,     3,     4,     5,     6,

@@ -8,7 +8,7 @@ then
 fi
 source $HOME/kode/bashScripts/sourceWRF
 
-SED_VARIABLES="D_I_PARENT_START D_J_PARENT_START INTERVAL_SECONDS RUN_HOURS REF_LAT REF_LON STAND_LON GEOG_DATA_PATH MAX_DOM START_DATE TIME_STEP NCL_OUTPUT_TYPE MAP_PROJ DX DY POLE_LAT POLE_LON D_POLAR D_SPECIFIED D_HISTORY_INTERVAL"
+SED_VARIABLES="D_I_PARENT_START D_J_PARENT_START INTERVAL_SECONDS RUN_HOURS REF_LAT REF_LON STAND_LON GEOG_DATA_PATH MAX_DOM START_DATE TIME_STEP NCL_OUTPUT_TYPE MAP_PROJ DX DY POLE_LAT POLE_LON D_POLAR D_SPECIFIED D_HISTORY_INTERVAL NUM_METGRID_LEVELS NUM_METGRID_SOIL_LEVELS"
 MESH_ARR=$(seq 1 1)
 for MESH in $MESH_ARR
 do
@@ -20,7 +20,6 @@ do
 	pathToFolder="$pathToWPS"
 	cp -f namelist_$MODEL_NAME.wps $pathToFolder/namelist.wps
 	cp -f plotgrids_new.ncl wrf_wps_ter.ncl $pathToFolder
-	
 	if [[ ! -d "$GEOG_DATA_PATH" ]]
 	then
 		mkdir -p $GEOG_DATA_PATH
@@ -62,7 +61,7 @@ do
 		$pathToWPS/link_grib.csh $WRFDIRECTORY/Build_WRF/DATA/GFS*
 		ln -sf ungrib/Variable_Tables/Vtable.GFS Vtable
 		#mpirun -np $NP $pathToWPS/ungrib.exe
-		$pathToWPS/ungrib.exe
+		$pathToWPS/ungrib.exe | tee log.ungrib
 		#mpirun -np $NP $pathToWPS/metgrid.exe | tee log.metgrid
 		$pathToWPS/metgrid.exe | tee log.metgrid
 		# ncview geo_em.d01.nc
@@ -74,6 +73,9 @@ do
 		DX=$(ncdump -h geo_em.d01.nc | grep -oP '(?<=:DX = )[+-]?[0-9]+([.][0-9]+)?')
 		DY=$(ncdump -h geo_em.d01.nc | grep -oP '(?<=:DY = )[+-]?[0-9]+([.][0-9]+)?')
 	fi
+	NUM_METGRID_LEVELS=$(ncdump -h "met_em.d01.$START_DATE.nc" | grep -oP '(?<=num_metgrid_levels = )[0-9]+;?')
+	NUM_METGRID_SOIL_LEVELS=$(ncdump -h "met_em.d01.$START_DATE.nc" | grep -oP '(?<=num_st_layers = )[0-9]+;?')
+	echo "NUM_METGRID_SOIL_LEVELS = "$NUM_METGRID_SOIL_LEVELS
 	popd > /dev/null
 	
 	pathToFolder="$WRFDIRECTORY/Build_WRF/WRF/run"

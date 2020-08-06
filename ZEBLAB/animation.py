@@ -31,7 +31,7 @@ e_sn = [100,100,100,100,100,100]
 i_parent_start = [1, 31]
 j_parent_start = [1, 31]
 def getData(i):
-	surfacepvd = PVDReader(FileName='/home/zetison/results/WRF/ZEBLAB/2020073112/d0'+str(i+1)+'_surface.pvd')
+	surfacepvd = PVDReader(FileName='/home/zetison/results/WRF/ZEBLAB/2020080400/d0'+str(i+1)+'_surface.pvd')
 	surfacepvd.PointArrays = ['T2']
 	surfacepvdDisplay = Show(surfacepvd, renderView1, 'StructuredGridRepresentation')
 	surfacepvdDisplay.Representation = 'Surface'
