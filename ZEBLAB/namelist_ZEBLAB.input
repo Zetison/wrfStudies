@@ -1,8 +1,8 @@
  &time_control
- run_days                            = 0,
+ run_days                            = SED_RUN_DAYS,
  run_hours                           = SED_RUN_HOURS,
- run_minutes                         = 0,
- run_seconds                         = 0,
+ run_minutes                         = SED_RUN_MINUTES,
+ run_seconds                         = SED_RUN_SECONDS,
  start_year                          = SED_D_START_YEAR
  start_month                         = SED_D_START_MONTH
  start_day                           = SED_D_START_DAY
