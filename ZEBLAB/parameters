@@ -1,5 +1,5 @@
 #!/bin/bash
-NP=1
+NP=4
 MAX_DOM=1
 GEOG_DATA_RES="30s" #10m (~19km), 5m (~9km), 2m (~4km), and 30s (~0.9km).
 GFS_RES="0p25" # resolution (in degrees) in longitude and latitude direction (NOTE: if > 0.25 (0p25) then INTERVAL_SECONDS must be > 10800) First 120 hours available hourly, after that every 3 hours
@@ -19,16 +19,19 @@ REF_LAT=63.414061 # Latitude of a known reference point inside the domain
 REF_LON=10.407602 # Longitude of the same point as used for REF_LAT
 if [[ $CASE == "global" ]]
 then
-	GEOG_DATA_RES="10m" #10m (~19km), 5m (~9km), 2m (~4km), and 30s (~0.9km).
+	GEOG_DATA_RES="30s" #10m (~19km), 5m (~9km), 2m (~4km), and 30s (~0.9km).
 	GFS_RES="0p25" # resolution (in degrees) in longitude and latitude direction (NOTE: if > 0.25 (0p25) then INTERVAL_SECONDS must be > 10800) First 120 hours available hourly, after that every 3 hours. Available resolutions: 1p00 (~111km), 0p50 (~55.7km), 0p25 (27.6km)
-	# For global runs E_WE should be 2^P*3^Q*5^R+1 for integers P,Q,R in {0,1,2,...}. I.e. 21,41,51,81,101,201,301,401,...
-	E_WE=801 # number of velocity points in east west direction
-	E_SN=401 # number of velocity points in south north direction
-	E_WE=201 # number of velocity points in east west direction
-	E_SN=101 # number of velocity points in south north direction
-	E_VERT=50 #  This number must be the same for each domain.
+	# For global runs E_WE should be 2^P*3^Q*5^R+1 for integers P,Q,R in {0,1,2,...}. E.g. (E_WE,E_SN) in {(21 11), (25 13), (31 16), (37 19), (41 21), (61 31), (73 37), (91 46), (121 61), (181 91), (361 181), (721 361), (1081 541), (1441 721), ...}
+	E_WE=721 # number of velocity points in east west direction
+	E_SN=361 # number of velocity points in south north direction
+	E_WE=361 # number of velocity points in east west direction
+	E_SN=181 # number of velocity points in south north direction
+	E_WE=21 # number of velocity points in east west direction
+	E_SN=10 # number of velocity points in south north direction
+	E_VERT=50 # number of points in the vertical directions. This number must be the same for each domain.
 	TIME_STEP=300 # in seconds (should be 6*dx (in km))
-	TIME_STEP=1200 # in seconds (should be 6*dx (in km))
+	TIME_STEP=600 # in seconds (should be 6*dx (in km))
+	TIME_STEP=3600 # in seconds (should be 6*dx (in km))
 	RUN_DAYS=5
 	RUN_HOURS=0
 	D_I_PARENT_START="1, 84, 34, 34, 34, 34, 34,"

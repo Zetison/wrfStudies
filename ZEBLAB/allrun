@@ -56,7 +56,7 @@ do
 	fi
 	if [[ $1 == 1 ]] 
 	then
-		rm -f FILE* met_em* *.log.*
+		rm -f PFILE* FILE* met_em* geo_em* *.log.* GRIBFILE*
 		mpirun -np $NP $pathToWPS/geogrid.exe | tee log.geogrid
 		#$pathToWPS/geogrid.exe | tee log.geogrid
 		for i_domain in $(seq -f "%02g" 1 ${MAX_DOM})
