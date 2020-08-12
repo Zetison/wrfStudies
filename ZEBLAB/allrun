@@ -56,7 +56,7 @@ do
 	fi
 	if [[ $1 == 1 ]] 
 	then
-		rm -f FILE* met_em*
+		rm -f FILE* met_em* *.log.*
 		mpirun -np $NP $pathToWPS/geogrid.exe | tee log.geogrid
 		#$pathToWPS/geogrid.exe | tee log.geogrid
 		for i_domain in $(seq -f "%02g" 1 ${MAX_DOM})
@@ -66,7 +66,7 @@ do
 		done
 		$pathToWPS/link_grib.csh $WRFDIRECTORY/Build_WRF/DATA/GFS*
 		ln -sf ungrib/Variable_Tables/Vtable.GFS Vtable
-		mpirun -np $NP $pathToWPS/ungrib.exe
+		mpirun -np $NP $pathToWPS/ungrib.exe | tee log.ungrib
 		#$pathToWPS/ungrib.exe | tee log.ungrib
 		mpirun -np $NP $pathToWPS/metgrid.exe | tee log.metgrid
 		#$pathToWPS/metgrid.exe | tee log.metgrid
@@ -120,13 +120,13 @@ do
 			#ncl "$temp"
 			#idt plt_Surface3.ncgm # Animate result in a GUI. Assumes NCL_OUTPUT_TYPE="ncgm"
 			#convert -delay 100 *.png "anim_d${i_domain}.mpeg"
-			python3 ~/kode/python/WRF2VTK.py -v T,T2,CLDFRA -w U:U:V:W,P wrfout_d${i_domain}*
-			rename "s/(.*)\$/d${i_domain}_\$1/" surface*.vts
-			rename "s/(.*)\$/d${i_domain}_\$1/" atm*.vts
-			sed -i "s/surface/d${i_domain}_surface/g" surface.pvd
-			sed -i "s/atm/d${i_domain}_atm/g" atm.pvd
-			mv surface.pvd d${i_domain}_surface.pvd
-			mv atm.pvd d${i_domain}_atm.pvd
+			#python3 ~/kode/python/WRF2VTK.py -v T,T2,CLDFRA -w U:U:V:W,P wrfout_d${i_domain}*
+			#rename "s/(.*)\$/d${i_domain}_\$1/" surface*.vts
+			#rename "s/(.*)\$/d${i_domain}_\$1/" atm*.vts
+			#sed -i "s/surface/d${i_domain}_surface/g" surface.pvd
+			#sed -i "s/atm/d${i_domain}_atm/g" atm.pvd
+			#mv surface.pvd d${i_domain}_surface.pvd
+			#mv atm.pvd d${i_domain}_atm.pvd
 		done
 	fi
 done
