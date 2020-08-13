@@ -64,7 +64,7 @@ do
 			ncl a="addfile(\"./geo_em.d${i_domain}.nc\",\"r\")" wrf_wps_ter.ncl
 			mv plt_geo_6.png "plt_geo_d${i_domain}.png"
 		done
-		$pathToWPS/link_grib.csh $WRFDIRECTORY/Build_WRF/DATA/GFS*
+		$pathToWPS/link_grib.csh $WRFDIRECTORY/Build_WRF/DATA/GFS_${GFS_RES}_${COMP_START_DATE}
 		ln -sf ungrib/Variable_Tables/Vtable.GFS Vtable
 		mpirun -np $NP $pathToWPS/ungrib.exe | tee log.ungrib
 		#$pathToWPS/ungrib.exe | tee log.ungrib
