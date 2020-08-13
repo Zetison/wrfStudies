@@ -127,6 +127,13 @@ do
 			#sed -i "s/atm/d${i_domain}_atm/g" atm.pvd
 			#mv surface.pvd d${i_domain}_surface.pvd
 			#mv atm.pvd d${i_domain}_atm.pvd
+			if [[ $MAP_PROJ == "lat-lon" ]]
+			then
+				ifem-to-vt -f pvd wrfout_d01.nc --periodic --global
+			else
+				ifem-to-vt -f pvd wrfout_d01.nc --global
+			fi
+
 		done
 	fi
 done
