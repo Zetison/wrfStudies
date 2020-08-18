@@ -10,17 +10,16 @@ RUN_SECONDS=0
 PARENT_GRID_RATIO=3
 MAP_PROJ="lat-lon" # Accepted projections are 'lambert', 'polar', 'mercator', and 'lat-lon.'
 #MAP_PROJ="lambert" # Accepted projections are 'lambert', 'polar', 'mercator', and 'lat-lon.'
-NCL_OUTPUT_TYPE="png" # 'x11', 'pdf', 'ps', 'ncgm', 'png'
-CASE="global"
-#CASE="nested"
-#CASE="YR"
-#CASE="debug"
+NCL_OUTPUT_TYPE="x11" # 'x11', 'pdf', 'ps', 'ncgm', 'png'
 REF_LAT=63.414061 # Latitude of a known reference point inside the domain
 REF_LON=10.407602 # Longitude of the same point as used for REF_LAT
+TRUELAT1=75
+TRUELAT2=45
+RUNGLOBAL=false
 if [[ $CASE == "global" ]]
 then
 	GEOG_DATA_RES="30s" #10m (~19km), 5m (~9km), 2m (~4km), and 30s (~0.9km).
-	GFS_RES="0p25" # resolution (in degrees) in longitude and latitude direction (NOTE: if > 0.25 (0p25) then INTERVAL_SECONDS must be > 10800) First 120 hours available hourly, after that every 3 hours. Available resolutions: 1p00 (~111km), 0p50 (~55.7km), 0p25 (27.6km)
+	GFS_RES="0p25" # resolution (in degrees) in longitude and latitude direction. First 120 hours available hourly, after that every 3 hours. Available resolutions: 1p00 (~111km), 0p50 (~55.7km), 0p25 (27.6km)
 	# For global runs E_WE should be 2^P*3^Q*5^R+1 for integers P,Q,R in {0,1,2,...}. E.g. (E_WE,E_SN) in {(21 11), (25 13), (31 16), (37 19), (41 21), (61 31), (73 37), (91 46), (121 61), (181 91), (361 181), (721 361), (1081 541), (1441 721), ...}
 	E_WE=721 # number of velocity points in east west direction
 	E_SN=361 # number of velocity points in south north direction
@@ -39,6 +38,27 @@ then
 	D_HISTORY_INTERVAL="180,180,180,180,180,180,180," # in minutes
 	#REF_LAT=0 # Latitude of a known reference point inside the domain
 	#REF_LON=0 # Longitude of the same point as used for REF_LAT
+	RUNGLOBAL=true
+elif [[ $CASE == "SN76914" ]]
+then
+	MAX_DOM=4
+	MAP_PROJ="lat-lon" # Accepted projections are 'lambert', 'polar', 'mercator', and 'lat-lon.'
+	DX=0.25
+	DY=0.25
+	GEOG_DATA_RES="30s" #10m (~19km), 5m (~9km), 2m (~4km), and 30s (~0.9km).
+	GFS_RES="0p25" # resolution (in degrees) in longitude and latitude direction (NOTE: if > 0.25 (0p25) then INTERVAL_SECONDS must be > 10800) First 120 hours available hourly, after that every 3 hours
+	E_WE=101 # number of velocity points in east west direction
+	E_SN=101 # number of velocity points in south north direction
+	E_VERT=50 #  This number must be the same for each domain.
+	TIME_STEP=6 # in seconds (should be 6*dx (in km))
+	RUN_DAYS=0
+	RUN_HOURS=24
+
+	D_I_PARENT_START="1, 34, 34, 34, 34, 34, 34,"
+	D_J_PARENT_START="1, 34, 34, 34, 34, 34, 34," # 29
+	D_HISTORY_INTERVAL="10,10,10,10,10,10,10," # in minutes
+	REF_LAT=59.9492 # Latitude of a known reference point inside the domain
+	REF_LON=10.715 # Longitude of the same point as used for REF_LAT
 elif [[ $CASE == "nested" ]]
 then
 	MAX_DOM=7
@@ -81,16 +101,16 @@ else [[ $CASE == "debug" ]]
 	D_HISTORY_INTERVAL="1,1,1,1,1,1,1," # in minutes
 fi
 
-if [[ $MAP_PROJ == "lat-lon" ]]
+POLE_LAT=$(echo "90.0 - $REF_LAT" | bc -l)   # Discretization time step
+POLE_LON=180
+STAND_LON=-$REF_LON # A real value specifying the longitude that is parallel with the y-axis in conic and azimuthal projections.
+if [[ "$RUNGLOBAL" = true ]]
 then
 	D_POLAR=".true.,.false.,"
 	D_SPECIFIED=".false.,.false.,"
 	DX=$((360 / ($E_WE - 1) ))
 	DY=$((180 / ($E_SN - 1) ))
 	# STAND_LON, POLE_LAT and POLE_LON assumes N.H.
-	POLE_LAT=$(echo "90.0 - $REF_LAT" | bc -l)   # Discretization time step
-	POLE_LON=180
-	STAND_LON=-$REF_LON # A real value specifying the longitude that is parallel with the y-axis in conic and azimuthal projections.
 else
 	STAND_LON=$REF_LON # A real value specifying the longitude that is parallel with the y-axis in conic and azimuthal projections.
 	D_SPECIFIED=".true.,.false.,"
@@ -119,10 +139,10 @@ then
 else
 	START_YEAR=2020
 	START_MONTH=08
-	START_DAY=11
+	START_DAY=18
 	START_DATE="$START_YEAR-$START_MONTH-${START_DAY}_$START_HOUR:00:00"
 fi
-if [[ $MAP_PROJ == "lat-lon" ]]
+if [[ "$RUNGLOBAL" = true ]]
 then
 	END_DATE=$START_DATE # only initial conditions are needed for a global run
 else

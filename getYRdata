@@ -1,0 +1,19 @@
+#!/bin/bash
+USER="24c65298-cf22-4c73-ad01-7c6b2c009626"
+
+
+curl -X GET --user 24c65298-cf22-4c73-ad01-7c6b2c009626: 'https://frost.met.no/observations/v0.jsonld?sources=sn18700&referencetime=2010-01-01T12&elements=air_temperaturei'
+
+curl -X GET --header 'Accept: application/json' 'https://frost.met.no/sources/v0.jsonld'
+
+# Get all observation locations: 
+curl -X GET --user $USER --header 'Accept: application/json' 'https://frost.met.no/sources/v0.jsonld' -o allSources.json
+
+# Get information on observation at Rikshospitalet (ITASMOBAWS1, SN76914):
+curl -X GET --user $USER --header 'Accept: application/json' 'https://frost.met.no/sources/v0.jsonld?name=Itasmobaws1'
+
+
+# OSLO - BLINDERN TESTFELT, SN18703, masl=96, (10.7194, 59.94256)
+# OSLO - BLINDERN, SN18700,          masl=94, (10.72, 59.9423)
+# OSLO - BLINDERN PLU, SN18701,      masl=94, (10.7202, 59.9423)
+# ITASMOBAWS1, SN76914               masl=121, (10.715, 59.9492)
