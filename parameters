@@ -1,5 +1,5 @@
 #!/bin/bash
-NP=4
+NP=46
 MAX_DOM=1
 GEOG_DATA_RES="30s" #10m (~19km), 5m (~9km), 2m (~4km), and 30s (~0.9km).
 GFS_RES="0p25" # resolution (in degrees) in longitude and latitude direction (NOTE: if > 0.25 (0p25) then INTERVAL_SECONDS must be > 10800) First 120 hours available hourly, after that every 3 hours
@@ -10,7 +10,7 @@ RUN_SECONDS=0
 PARENT_GRID_RATIO=3
 MAP_PROJ="lat-lon" # Accepted projections are 'lambert', 'polar', 'mercator', and 'lat-lon.'
 #MAP_PROJ="lambert" # Accepted projections are 'lambert', 'polar', 'mercator', and 'lat-lon.'
-NCL_OUTPUT_TYPE="x11" # 'x11', 'pdf', 'ps', 'ncgm', 'png'
+NCL_OUTPUT_TYPE="png" # 'x11', 'pdf', 'ps', 'ncgm', 'png'
 REF_LAT=63.414061 # Latitude of a known reference point inside the domain
 REF_LON=10.407602 # Longitude of the same point as used for REF_LAT
 TRUELAT1=75
@@ -52,7 +52,7 @@ then
 	E_VERT=50 #  This number must be the same for each domain.
 	TIME_STEP=6 # in seconds (should be 6*dx (in km))
 	RUN_DAYS=0
-	RUN_HOURS=24
+	RUN_HOURS=12
 
 	D_I_PARENT_START="1, 34, 34, 34, 34, 34, 34,"
 	D_J_PARENT_START="1, 34, 34, 34, 34, 34, 34," # 29

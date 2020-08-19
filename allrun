@@ -98,6 +98,9 @@ if [[ "$MAP_PROJ" == "lat-lon" ]]
 then
 	sed -i "s/SED_DX/${DX}/g;s/SED_DY/${DY}/g" namelist.input
 fi
+MAX_TIME_STEP=$(echo "8*$DX/1000" | bc -l) 
+MIN_TIME_STEP=$(echo "3*$DX/1000" | bc -l) 
+sed -i "s/SED_MAX_TIME_STEP/${MAX_TIME_STEP}/g;s/SED_MIN_TIME_STEP/${MIN_TIME_STEP}/g" namelist.input
 source $HOME/kode/bashScripts/sedFiles
 if [[ $2 == 1 ]]
 then
@@ -109,9 +112,9 @@ then
 	mpirun -np $NP $pathToWRF/wrf.exe
 	# tail -F rsl.out.0000
 	# tail rsl.error.0000
-	rm -rf $pathToResult/wrfout_d* $pathToResults/*.pdf $pathToResults/*.png $pathToResults/wrf_Surface*.ncl $pathToResults/namelist.input 
-	cp -ruf wrfout_d* *.pdf *.png wrf_Surface*.ncl namelist.input $pathToResults
 fi
+rm -rf $pathToResults/wrfout_d* $pathToResults/*.pdf $pathToResults/*.png $pathToResults/wrf_Surface*.ncl $pathToResults/namelist.input
+cp -ruf wrfout_d* *.pdf *.png wrf_Surface*.ncl namelist.input $pathToResults
 popd > /dev/null
 
 if [[ $3 == 1 ]]
@@ -138,9 +141,9 @@ then
 		wrfName="${wrfName}.nc"
 		if [[ "$RUNGLOBAL" = true ]]
 		then
-			ifem-to-vt -f pvd $wrfName --periodic --global
+			ifem-to-vt -f pvd $wrfName --periodic --global -l P,T,U,V,W,CLDFRA --planar
 		else
-			ifem-to-vt -f pvd $wrfName --global
+			ifem-to-vt -f pvd $wrfName --global --global -l P,T,U,V,W,CLDFRA --planar
 		fi
 	done
 fi
