@@ -2,14 +2,17 @@
 # Libraries needed (pandas is not standard and must be installed in Python)
 import requests
 import pandas as pd
-import matplotlib.pyplot as plt
+from netCDF4 import Dataset
+import numpy as np
+import wrf
 # Insert your own client ID here
 client_id = '24c65298-cf22-4c73-ad01-7c6b2c009626'
 #sourceID = "SN18703" # OSLO - BLINDERN TESTFELT
-#sourceID = "SN18700" # OSLO - BLINDERN
+sourceID = "SN18700" # OSLO - BLINDERN
 #sourceID = "SN18701" # OSLO - BLINDERN PLU
-sourceID = "SN76914" # ITASMOBAWS1
-startdate = "2020-08-17T16:00:00.000Z"
+#sourceID = "SN76914" # ITASMOBAWS1
+today = today.strftime("%Y-%m-%d")
+startdate = today+"T00:00:00.000Z"
 
 def getYRdata(endpoint, parameters, field):
 	# Issue an HTTP GET request
@@ -26,21 +29,28 @@ def getYRdata(endpoint, parameters, field):
 	    print('Message: %s' % json['error']['message'])
 	    print('Reason: %s' % json['error']['reason'])
 
+def writeData(prefix,df):
+	df.to_csv('df_'+prefix+'_'+sourceID+'_'+startdate+'.csv', index=False)
+
 endpoint = 'https://frost.met.no/sources/v0.jsonld'
 parameters = {
 		'ids': sourceID,
 		}
 
 data_source = getYRdata(endpoint, parameters, 'data')
-#print(df[0].masl)
+masl = data_source[0]['masl']
+lon = data_source[0]['geometry']['coordinates'][0]
+lat = data_source[0]['geometry']['coordinates'][1]
 
+########################################################################
+# Get observation data
 # Define endpoint and parameters
 endpoint = 'https://frost.met.no/observations/v0.jsonld'
 parameters = {
     'sources': sourceID,
 		'referencetime': startdate+'/2021-08-14T16:00:00.000Z',
     'elements': 'air_temperature,wind_speed',
-		'timeresolutions': 'PT1H',
+		'timeresolutions': 'PT10M',
 		'fields': 'value, referenceTime',
 		'qualities': 0, # 0 = original value found to be good, 1 = original value suspicious (likely correct), ...
 }
@@ -59,20 +69,19 @@ for i in range(len(data)):
 df = df.reset_index()
 
 # These additional columns will be kept
-df2 = df[fields].copy()
+df_obs = df[fields].copy()
 # Convert the time value to something Python understands
-df2['referenceTime'] = pd.to_datetime(df2['referenceTime'])
+df_obs['referenceTime'] = pd.to_datetime(df_obs['referenceTime']).dt.tz_convert(None)
 
-parameters['elements'] = 'air_temperature,wind_speed'
-data = getYRdata(endpoint, parameters, 'data')
-# This will return a Dataframe with all of the observations in a table format
+writeData('obs',df_obs)
 
-
+########################################################################
+# Get YR forecast
 endpoint = 'https://api.met.no/weatherapi/locationforecast/2.0/complete'
 parameters = {
-    'altitude': data_source[0]['masl'],
-		'lon': str(data_source[0]['geometry']['coordinates'][0]),
-    'lat': str(data_source[0]['geometry']['coordinates'][1]),
+    'altitude': masl,
+		'lon': str(lon),
+    'lat': str(lat),
 }
 fields = ['time','air_temperature','wind_speed']
 data_YR = getYRdata(endpoint, parameters, 'properties')
@@ -81,21 +90,46 @@ data_YR = data_YR['timeseries']
 
 df = pd.DataFrame()
 for i in range(len(data_YR)):
-	row = pd.DataFrame(data_YR[i])
+	row = pd.DataFrame({'time': [data_YR[i]['time']] })
 	for j in range(1,len(fields)):
 		row[fields[j]] = data_YR[i]['data']['instant']['details'][fields[j]]
 	df = df.append(row)
 
 df_YR = df[fields].copy()
 # Convert the time value to something Python understands
-df_YR['time'] = pd.to_datetime(df_YR['time'])
-fig, axs = plt.subplots(2)
-lines = axs[0].plot(df2.referenceTime,df2.air_temperature,'r',df_YR.time,df_YR.air_temperature,'b')
-lines2 = axs[1].plot(df2.referenceTime,df2.wind_speed,'r',df_YR.time,df_YR.wind_speed,'b')
-axs[0].legend(('Observated data', 'YR forecast'))
-axs[1].legend(('Observated data', 'YR forecast'))
-axs[0].set(xlabel='Time', ylabel='Temperature [°C]')
-axs[1].set(xlabel='Time', ylabel='Wind speed [m/s]')
-axs[0].set_xlim(pd.to_datetime(startdate),pd.to_datetime('2020-08-21 00:00:00+00:00'))
-axs[1].set_xlim(pd.to_datetime(startdate),pd.to_datetime('2020-08-21 00:00:00+00:00'))
-plt.show()
+df_YR['time'] = pd.to_datetime(df_YR['time']).dt.tz_convert(None)
+writeData('YR',df_YR)
+
+########################################################################
+# Get data from WRF file
+ncfile = Dataset("wrfout_d01.nc")
+xy = wrf.ll_to_xy(ncfile, lat, lon, as_int=False)
+if ncfile.MAP_PROJ_CHAR == 'Cylindrical Equidistant':
+	xy[0] += 360/0.25
+
+#HGT = getvar(ncfile, "HGT")
+#maslg = HGT.interp(west_east=xy[0], south_north=xy[1])
+#lat_lon = wrf.xy_to_ll(ncfile,xy[0],xy[1])
+fields = ['time','T','wind_speed']
+df_wrf = pd.DataFrame({'time': wrf.getvar(ncfile, fields[1], wrf.ALL_TIMES).Time})
+df_wrf['air_temperature'] = wrf.to_np(wrf.getvar(ncfile, 'tc', wrf.ALL_TIMES).interp(west_east=xy[0], south_north=xy[1], bottom_top=0))
+df_wrf['wind_speed'] = wrf.g_wind.get_destag_wspd(ncfile, wrf.ALL_TIMES).interp(west_east=xy[0], south_north=xy[1], bottom_top=0)
+
+df_wrf['time'] = pd.to_datetime(df_wrf['time'])
+writeData('wrf',df_wrf)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

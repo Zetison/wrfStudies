@@ -1,7 +1,8 @@
 #!/bin/bash
 #CASE="global"
 #CASE="global"
-CASE="SN76914" # Rikshospitalet in Oslo
+#CASE="SN76914" # Rikshospitalet in Oslo
+CASE="SN18700" # OSLO - BLINDERN
 #CASE="nested"
 #CASE="YR"
 #CASE="debug"
@@ -98,8 +99,6 @@ if [[ "$MAP_PROJ" == "lat-lon" ]]
 then
 	sed -i "s/SED_DX/${DX}/g;s/SED_DY/${DY}/g" namelist.input
 fi
-MAX_TIME_STEP=$(echo "8*$DX/1000" | bc -l) 
-MIN_TIME_STEP=$(echo "3*$DX/1000" | bc -l) 
 sed -i "s/SED_MAX_TIME_STEP/${MAX_TIME_STEP}/g;s/SED_MIN_TIME_STEP/${MIN_TIME_STEP}/g" namelist.input
 source $HOME/kode/bashScripts/sedFiles
 if [[ $2 == 1 ]]
@@ -119,6 +118,7 @@ popd > /dev/null
 
 if [[ $3 == 1 ]]
 then
+	cp extractData.py plotComparison.py $pathToResults
 	cd $pathToResults
 	rm *.vts *.pvd
 	for i_domain in $(seq -f "%02g" 1 ${MAX_DOM})
@@ -141,9 +141,10 @@ then
 		wrfName="${wrfName}.nc"
 		if [[ "$RUNGLOBAL" = true ]]
 		then
-			ifem-to-vt -f pvd $wrfName --periodic --global -l P,T,U,V,W,CLDFRA --planar
+			ifem-to-vt -f pvd $wrfName --global -l P,T,U,V,W,CLDFRA --planar --periodic
 		else
-			ifem-to-vt -f pvd $wrfName --global --global -l P,T,U,V,W,CLDFRA --planar
+			ifem-to-vt -f pvd $wrfName --global -l P,T,U,V,W,CLDFRA --planar
 		fi
 	done
+	python3 extractData.py
 fi

@@ -48,8 +48,8 @@
  step_to_output_time                 = .true.,
  max_step_increase_pct               = 5, 51,
  starting_time_step                  = -1,
- max_time_step                       = SED_MAX_TIME_STEP,
- min_time_step                       = SED_MIN_TIME_STEP,
+ max_time_step                       = -1, 
+ min_time_step                       = -1,
  adaptation_domain                   = SED_MAX_DOM,
  /
 
