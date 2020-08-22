@@ -47,7 +47,7 @@ startdate = df_YR['time'][0]
 endpoint = 'https://frost.met.no/observations/v0.jsonld'
 parameters = {
 		'sources': sourceID,
-		'referencetime': startdate+'/2020-12-14T16:00:00.000Z',
+		'referencetime': startdate.strftime("%Y-%m-%dT%H:%M:%S.000Z")+'/2020-12-14T16:00:00.000Z',
 		'elements': 'air_temperature,wind_speed',
 		'timeresolutions': 'PT10M',
 		'fields': 'value, referenceTime',

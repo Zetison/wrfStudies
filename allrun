@@ -159,7 +159,6 @@ do
 			fi
 		done
 		python3 extractData.py
-		cp df_* $HOME/results/forecastData
 		popd > /dev/null
 	fi
 	if [[ $loopForecast -ne true ]]
