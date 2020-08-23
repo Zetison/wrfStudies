@@ -23,8 +23,10 @@ do
 		TODAY="$(date -u +'%Y-%m-%d')" # Get date in UTC
 		target_epoch=$(date -u +'%s' --date="$TODAY + 1 days + 1 hour") # Get date in UTC
 		sleep_seconds=$(( $target_epoch - $current_epoch ))
-		echo "Pausing for $sleep_seconds seconds."
-		sleep $sleep_seconds
+		date1=$((`date +%s` + $sleep_seconds));
+		while [ "$date1" -ge `date +%s` ]; do
+			echo -ne "Time until start of simulation: $(date -u --date @$(($date1 - `date +%s` )) +%H:%M:%S)\r";
+		done
 	fi
 	source ./parameters
 	pathToWPS="$WRFDIRECTORY/Build_WRF/WPS"
