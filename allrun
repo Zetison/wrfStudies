@@ -25,7 +25,7 @@ do
 		sleep_seconds=$(( $target_epoch - $current_epoch ))
 		date1=$((`date +%s` + $sleep_seconds));
 		while [ "$date1" -ge `date +%s` ]; do
-			echo -ne "Time until start of simulation: $(date -u --date @$(($date1 - `date +%s` )) +%H:%M:%S)\r";
+			echo -ne "Time until start of program: $(date -u --date @$(($date1 - `date +%s` )) +%H:%M:%S)\r";
 		done
 	fi
 	source ./parameters
@@ -160,6 +160,7 @@ do
 				siso -f pvd $wrfName --global -l P,T,U,V,W,CLDFRA --planar
 			fi
 		done
+		conda activate ncl_stable
 		python3 extractData.py
 		popd > /dev/null
 	fi

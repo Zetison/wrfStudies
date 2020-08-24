@@ -6,6 +6,7 @@ from netCDF4 import Dataset
 import numpy as np
 import wrf
 from datetime import date
+from os import path
 # Insert your own client ID here
 client_id = '24c65298-cf22-4c73-ad01-7c6b2c009626'
 today = date.today()
