@@ -28,8 +28,8 @@ def getYRdata(endpoint, parameters, field):
 
 @click.command()
 @click.option('--sourceid', default='SN18700')
-@click.option('--folder', default='/home/joveve/results/forecastData/')
-def test(sourceid,folder):
+@click.option('--folder', default='/home/zetison/results/forecastData/')
+def main(sourceid,folder):
 	
 
 	########################################################################
@@ -43,7 +43,7 @@ def test(sourceid,folder):
 	## Get observation data
 	# Define endpoint and parameters
 	if sourceid == 'SN76914':
-		timeresolution = 'PT1D'
+		timeresolution = 'PT1H'
 	else:
 		timeresolution = 'PT10M'
 	
@@ -86,13 +86,12 @@ def test(sourceid,folder):
 	axs[1].legend(('Observated data', 'YR forecast', 'WRF forecast'))
 	axs[0].set(xlabel='Time', ylabel='Temperature [°C]')
 	axs[1].set(xlabel='Time', ylabel='Wind speed [m/s]')
-	oneday = timedelta(hours=24*2)
-	axs[0].set_xlim(enddate-oneday,enddate)
-	axs[1].set_xlim(enddate-oneday,enddate)
+	axs[0].set_xlim(startdate,enddate)
+	axs[1].set_xlim(startdate,enddate)
 	plt.show()
 	
 if __name__ == '__main__':
-    test()
+    main()
 	
 	
 	

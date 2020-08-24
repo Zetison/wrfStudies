@@ -160,8 +160,9 @@ do
 				siso -f pvd $wrfName --global -l P,T,U,V,W,CLDFRA --planar
 			fi
 		done
-		conda activate ncl_stable
+		conda activate
 		python3 extractData.py
+		conda deactivate
 		popd > /dev/null
 	fi
 	if [[ $loopForecast -ne true ]]
