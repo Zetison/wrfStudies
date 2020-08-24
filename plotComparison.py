@@ -7,8 +7,8 @@ from datetime import datetime, timedelta
 import click
 
 client_id = '24c65298-cf22-4c73-ad01-7c6b2c009626'
-#sourceID = "SN18700" # OSLO - BLINDERN
-#sourceID = "SN76914" # ITASMOBAWS1 - Rikshospitalet in Oslo
+#sourceid = "SN18700" # OSLO - BLINDERN
+#sourceid = "SN76914" # ITASMOBAWS1 - Rikshospitalet in Oslo
 
 def getYRdata(endpoint, parameters, field):
 	# Issue an HTTP GET request
@@ -26,31 +26,32 @@ def getYRdata(endpoint, parameters, field):
 	    print('Reason: %s' % json['error']['reason'])
 
 
-@main.command()
-@click.option('--sourceID', default='SN18700')
+@click.command()
+@click.option('--sourceid', default='SN18700')
 @click.option('--folder', default='/home/joveve/results/forecastData/')
-@util.common_args
-def main(sourceID,folder):
+def test(sourceid,folder):
+	
+
 	########################################################################
 	# Get YR/wrf data
-	df_YR = pd.read_csv(folder+'df_YR_'+sourceID+'.csv')
-	df_wrf = pd.read_csv(folder+'df_wrf_'+sourceID+'.csv')
+	df_YR = pd.read_csv(folder+'df_YR_'+sourceid+'.csv')
+	df_wrf = pd.read_csv(folder+'df_wrf_'+sourceid+'.csv')
 	df_YR['time'] = pd.to_datetime(df_YR['time'])
 	df_wrf['time'] = pd.to_datetime(df_wrf['time'])
 	
 	########################################################################
 	## Get observation data
 	# Define endpoint and parameters
-	if sourceID == 'SN76914':
-		timeresolutions = 'PT1D'
+	if sourceid == 'SN76914':
+		timeresolution = 'PT1D'
 	else:
-		timeresolutions = 'PT10M'
+		timeresolution = 'PT10M'
 	
 	startdate = df_wrf['time'][0]
-	enddate = df_wrf['time'][-1]
+	enddate = df_wrf['time'].iloc[-1]
 	endpoint = 'https://frost.met.no/observations/v0.jsonld'
 	parameters = {
-			'sources': sourceID,
+			'sources': sourceid,
 			'referencetime': startdate.strftime("%Y-%m-%dT%H:%M:%S.000Z")+'/'+enddate.strftime("%Y-%m-%dT%H:%M:%S.000Z"),
 			'elements': 'air_temperature,wind_speed',
 			'timeresolutions': timeresolution,
@@ -86,12 +87,12 @@ def main(sourceID,folder):
 	axs[0].set(xlabel='Time', ylabel='Temperature [°C]')
 	axs[1].set(xlabel='Time', ylabel='Wind speed [m/s]')
 	oneday = timedelta(hours=24*2)
-	axs[0].set_xlim(endtime-oneday,endtime)
-	axs[1].set_xlim(endtime-oneday,endtime)
+	axs[0].set_xlim(enddate-oneday,enddate)
+	axs[1].set_xlim(enddate-oneday,enddate)
 	plt.show()
 	
 if __name__ == '__main__':
-    main()
+    test()
 	
 	
 	
