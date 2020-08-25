@@ -2,7 +2,8 @@
 #CASE="global"
 #CASE="global"
 #CASE="SN76914" # Rikshospitalet in Oslo
-CASE="SN18700" # OSLO - BLINDERN
+#CASE="SN18700" # OSLO - BLINDERN
+CASE="ATBcase1" # OSLO - BLINDERN
 #CASE="nested"
 #CASE="YR"
 #CASE="debug"
@@ -12,16 +13,15 @@ then
 	echo "Error: set the DISPLAY variable" #The display variable should be set for post processing purposes in paraview. This issue arises when using screen, and can be resolved by first getting the display variable outside the screen session (echo $DISPLAY) and then inside the screen session setting the variable to this value (i.e. export DISPLAY=localhost:10.0)"
 fi
 source $HOME/kode/bashScripts/sourceWRF
-loopForecast=true
+loopForecast=false
 
-SED_VARIABLES="D_I_PARENT_START D_J_PARENT_START INTERVAL_SECONDS RUN_DAYS RUN_HOURS RUN_MINUTES RUN_SECONDS TRUELAT1 TRUELAT2 REF_LAT REF_LON STAND_LON GEOG_DATA_PATH MAX_DOM START_DATE TIME_STEP NCL_OUTPUT_TYPE MAP_PROJ DX DY POLE_LAT POLE_LON D_POLAR D_SPECIFIED D_HISTORY_INTERVAL NUM_METGRID_LEVELS NUM_METGRID_SOIL_LEVELS"
 while true
 do
 	if [[ "$loopForecast" = true ]]
 	then
 		current_epoch=$(date +%s)
 		TODAY="$(date -u +'%Y-%m-%d')" # Get date in UTC
-		target_epoch=$(date -u +'%s' --date="$TODAY + 1 days + 1 hour") # Get date in UTC
+		target_epoch=$(date -u +'%s' --date="$TODAY + 1 days + 5 hour") # Get date in UTC
 		sleep_seconds=$(( $target_epoch - $current_epoch ))
 		date1=$((`date +%s` + $sleep_seconds));
 		while [ "$date1" -ge `date +%s` ]; do
@@ -52,7 +52,13 @@ do
 	fi
 	mkdir -p $WRFDIRECTORY/Build_WRF/DATA
 	pushd $WRFDIRECTORY/Build_WRF/DATA > /dev/null
-	$HOME/kode/bashScripts/getNCEPdata $START_DATE $END_DATE $INTERVAL_SECONDS $GFS_RES 
+	TODAY="$(date -u +'%Y-%m-%d')" # Get date in UTC
+	if [[ $NCEPstorageDate -ge $(date -d ${START_DATE:0:10} +%s) ]]
+	then
+		$HOME/kode/bashScripts/getHistoricNCEPdata $START_DATE $END_DATE $INTERVAL_SECONDS $GFS_RES 
+	else
+		$HOME/kode/bashScripts/getNCEPdata $START_DATE $END_DATE $INTERVAL_SECONDS $GFS_RES 
+	fi
 	popd > /dev/null
 	
 	pushd $pathToFolder > /dev/null
@@ -160,12 +166,10 @@ do
 				siso -f pvd $wrfName --global -l P,T,U,V,W,CLDFRA --planar
 			fi
 		done
-		conda activate
 		python3 extractData.py
-		conda deactivate
 		popd > /dev/null
 	fi
-	if [[ $loopForecast -ne true ]]
+	if [ "$loopForecast" = false ]
 	then
 		exit 1
 	fi
