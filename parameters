@@ -89,12 +89,12 @@ then
 		START_MONTH=02
 		START_DAY=09
 		START_HOUR=06
-		RUN_HOURS=5
+		RUN_HOURS=6
 	else
 		START_MONTH=04
 		START_DAY=13
 		START_HOUR=12
-		RUN_HOURS=4
+		RUN_HOURS=6
 	fi
 elif [[ $CASE == "SN76914" ]] || [[ $CASE == "SN18700" ]]
 then

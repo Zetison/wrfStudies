@@ -47,12 +47,14 @@ def main(sourceid,folder):
 	else:
 		timeresolution = 'PT10M'
 	
+	timeresolution = 'PT1H'
+	
 	startdate = df_wrf['time'][0]
 	enddate = df_wrf['time'].iloc[-1]
 	endpoint = 'https://frost.met.no/observations/v0.jsonld'
 	parameters = {
 			'sources': sourceid,
-			'referencetime': startdate.strftime("%Y-%m-%dT%H:%M:%S.000Z")+'/'+enddate.strftime("%Y-%m-%dT%H:%M:%S.000Z"),
+			'referencetime': startdate.strftime("%Y-%m-%dT%H:%M:%S.000Z")+'/'+enddate.strftime("%Y-%m-%dT%H:%M:01.000Z"),
 			'elements': 'air_temperature,wind_speed',
 			'timeresolutions': timeresolution,
 			'fields': 'value, referenceTime',
@@ -61,12 +63,13 @@ def main(sourceid,folder):
 	
 	data = getYRdata(endpoint, parameters, 'data')
 	
-	fields = ['referenceTime','air_temperature','wind_speed']
+	fields = ['time','air_temperature','wind_speed']
 	# This will return a Dataframe with all of the observations in a table format
 	df = pd.DataFrame()
 	for i in range(len(data)):
-		row = pd.DataFrame(data[i])
-		for j in range(1,len(fields)):
+		row = pd.DataFrame({'time': [data[i]['referenceTime']] })
+		noFields = min(len(fields),len(data[i]['observations'])+1)
+		for j in range(1,noFields):
 			row[fields[j]] = data[i]['observations'][j-1]['value']
 		df = df.append(row)
 	
@@ -75,15 +78,19 @@ def main(sourceid,folder):
 	# These additional columns will be kept
 	df_obs = df[fields].copy()
 	# Convert the time value to something Python understands
-	df_obs['referenceTime'] = pd.to_datetime(df_obs['referenceTime']).dt.tz_convert(None)
+	df_obs['time'] = pd.to_datetime(df_obs['time']).dt.tz_convert(None)
 	
 	########################################################################
 	# Plot data
 	fig, axs = plt.subplots(2)
-	lines = axs[0].plot(df_obs.referenceTime,df_obs.air_temperature,'r',df_YR.time,df_YR.air_temperature,'g',df_wrf.time,df_wrf.air_temperature,'b')
-	lines2 = axs[1].plot(df_obs.referenceTime,df_obs.wind_speed,'r',df_YR.time,df_YR.wind_speed,'g',df_wrf.time,df_wrf.wind_speed,'b')
-	axs[0].legend(('Observated data', 'YR forecast', 'WRF forecast'))
-	axs[1].legend(('Observated data', 'YR forecast', 'WRF forecast'))
+	lines = axs[0].plot(df_YR.time,df_YR.air_temperature,'g', label = 'YR forecast')
+	lines = axs[0].plot(df_wrf.time,df_wrf.air_temperature,'b', label = 'WRF forecast')
+	lines = axs[0].plot(df_obs.time,df_obs.air_temperature,'r', label = 'Observation data')
+	lines2 = axs[1].plot(df_YR.time,df_YR.wind_speed,'g', label = 'YR forecast')
+	lines2 = axs[1].plot(df_wrf.time,df_wrf.wind_speed,'b', label = 'WRF forecast')
+	lines2 = axs[1].plot(df_obs.time,df_obs.wind_speed,'r', label = 'Observation data')
+	axs[0].legend()
+	axs[1].legend()
 	axs[0].set(xlabel='Time', ylabel='Temperature [°C]')
 	axs[1].set(xlabel='Time', ylabel='Wind speed [m/s]')
 	axs[0].set_xlim(startdate,enddate)
