@@ -47,8 +47,6 @@ def main(sourceid,folder):
 	else:
 		timeresolution = 'PT10M'
 	
-	timeresolution = 'PT1H'
-	
 	startdate = df_wrf['time'][0]
 	enddate = df_wrf['time'].iloc[-1]
 	endpoint = 'https://frost.met.no/observations/v0.jsonld'
@@ -82,7 +80,7 @@ def main(sourceid,folder):
 	
 	########################################################################
 	# Plot data
-	fig, axs = plt.subplots(2)
+	fig, axs = plt.subplots(2, sharex=True)
 	lines = axs[0].plot(df_YR.time,df_YR.air_temperature,'g', label = 'YR forecast')
 	lines = axs[0].plot(df_wrf.time,df_wrf.air_temperature,'b', label = 'WRF forecast')
 	lines = axs[0].plot(df_obs.time,df_obs.air_temperature,'r', label = 'Observation data')
