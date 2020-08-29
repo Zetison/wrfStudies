@@ -30,7 +30,7 @@ do
 	fi
 	if [ "$loopForecast" = true ]
 	then
-		python3 extractData.py --yr
+		python3 extractData.py --extract_yr
 	fi
 	source ./parameters
 	pathToWPS="$WRFDIRECTORY/Build_WRF/WPS"
@@ -176,7 +176,7 @@ do
 		done
 		if [ "$loopForecast" = true ]
 		then
-			python3 extractData.py --wrf
+			python3 extractData.py --extract_wrf
 		fi
 		popd > /dev/null
 	fi
