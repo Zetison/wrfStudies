@@ -169,9 +169,9 @@ do
 			wrfName="${wrfName}.nc"
 			if [[ "$RUNGLOBAL" = true ]]
 			then
-				siso -f pvd $wrfName --global -l P,T,U,V,W,CLDFRA --planar --periodic
+				siso -f pvd $wrfName --global -l P,T,U,V,W --planar --periodic
 			else
-				siso -f pvd $wrfName --global -l P,T,U,V,W,CLDFRA --planar
+				siso -f pvd $wrfName --global -l P,T,U,V,W --planar
 			fi
 		done
 		if [ "$loopForecast" = true ]

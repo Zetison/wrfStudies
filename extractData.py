@@ -30,9 +30,9 @@ def getYRdata(endpoint, parameters, field):
 @click.command()
 @click.option('--folder', default='/home/joveve/results/forecastData/')
 @click.option('--append/--no-append', default=True)
-@click.option('--yr/--no-yr', default=False)
-@click.option('--wrf/--no-wrf', default=False)
-def main(folder,append,yr,wrf):	
+@click.option('--extract_yr/--no-extract_yr', default=False)
+@click.option('--extract_wrf/--no-extract_wrf', default=False)
+def main(folder,append,extract_yr,extract_wrf):	
 	sourceIDlist = ["SN18700", # OSLO - BLINDERN          
 							    "SN76914"] # ITASMOBAWS1
 	for sourceID in sourceIDlist:
@@ -50,7 +50,7 @@ def main(folder,append,yr,wrf):
 		
 		########################################################################
 		# Get data from WRF file
-		if wrf:
+		if extract_wrf:
 			i_domain = 4
 			ncfile = Dataset('wrfout_d0'+str(i_domain)+'.nc')
 			xy = wrf.ll_to_xy(ncfile, lat, lon, as_int=False)
@@ -77,7 +77,7 @@ def main(folder,append,yr,wrf):
 		
 		########################################################################
 		# Get YR forecast
-		if yr:
+		if extract_yr:
 			endpoint = 'https://api.met.no/weatherapi/locationforecast/2.0/complete'
 			parameters = {
 			    'altitude': masl,
