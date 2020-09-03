@@ -51,29 +51,45 @@ def main(folder,append,extract_yr,extract_wrf):
 		########################################################################
 		# Get data from WRF file
 		if extract_wrf:
-			i_domain = 4
-			ncfile = Dataset('wrfout_d0'+str(i_domain)+'.nc')
-			xy = wrf.ll_to_xy(ncfile, lat, lon, as_int=False)
-			if ncfile.MAP_PROJ_CHAR == 'Cylindrical Equidistant' and i_domain == 1:
-				xy[0] += 360/0.25
-			
-			#HGT = getvar(ncfile, "HGT")
-			#maslg = HGT.interp(west_east=xy[0], south_north=xy[1])
-			#lat_lon = wrf.xy_to_ll(ncfile,xy[0],xy[1])
-			fields = ['time','T','wind_speed']
-			df_wrf = pd.DataFrame({'time': wrf.getvar(ncfile, fields[1], wrf.ALL_TIMES).Time})
-			df_wrf['air_temperature'] = wrf.to_np(wrf.getvar(ncfile, 'tc', wrf.ALL_TIMES).interp(west_east=xy[0], south_north=xy[1], bottom_top=0))
-			df_wrf['wind_speed'] = wrf.g_wind.get_destag_wspd(ncfile, wrf.ALL_TIMES).interp(west_east=xy[0], south_north=xy[1], bottom_top=0)
-			
-			df_wrf['time'] = pd.to_datetime(df_wrf['time'])
-			
-			if path.exists(folder+'df_wrf_'+sourceID+'.csv') and append:
-				df_wrf_hist = pd.read_csv(folder+'df_wrf_'+sourceID+'.csv')
-				df_wrf_hist = df_wrf_hist[df_wrf_hist['time'] <= str(df_YR['time'][0])]
-				df_wrf_hist = df_wrf_hist.append(df_wrf)
-				df_wrf_hist.to_csv(folder+'df_wrf_'+sourceID+'.csv', index=False)
-			else:
-				df_wrf.to_csv(folder+'df_wrf_'+sourceID+'.csv', index=False)
+			i_domain = 10
+			isOutside = True
+			while isOutside:
+				if i_domain < 0:
+					print('The observation station '+str(sourceID)+' is not inside the solution domain')
+					break
+
+				i_domain -= 1
+				try:
+					ncfile = Dataset('wrfout_d0'+str(i_domain)+'.nc')
+				except:
+					continue
+
+				xy = wrf.ll_to_xy(ncfile, lat, lon, as_int=False)
+
+				if ncfile.MAP_PROJ_CHAR == 'Cylindrical Equidistant' and i_domain == 1:
+					xy[0] += 360/0.25
+				
+				#HGT = getvar(ncfile, "HGT")
+				#maslg = HGT.interp(west_east=xy[0], south_north=xy[1])
+				#lat_lon = wrf.xy_to_ll(ncfile,xy[0],xy[1])
+				fields = ['time','T','wind_speed']
+				df_wrf = pd.DataFrame({'time': wrf.getvar(ncfile, fields[1], wrf.ALL_TIMES).Time})
+				df_wrf['air_temperature'] = wrf.to_np(wrf.getvar(ncfile, 'tc', wrf.ALL_TIMES).interp(west_east=xy[0], south_north=xy[1], bottom_top=0))
+				if df_wrf.isnull().values.any():
+					continue
+
+				df_wrf['wind_speed'] = wrf.g_wind.get_destag_wspd(ncfile, wrf.ALL_TIMES).interp(west_east=xy[0], south_north=xy[1], bottom_top=0)
+				
+				df_wrf['time'] = pd.to_datetime(df_wrf['time'])
+				df_wrf = df_wrf.reset_index()
+				
+				if path.exists(folder+'df_wrf_'+sourceID+'.csv') and append:
+					df_wrf_hist = pd.read_csv(folder+'df_wrf_'+sourceID+'.csv')
+					df_wrf_hist = df_wrf_hist[df_wrf_hist['time'] <= str(df_wrf['time'][0])]
+					df_wrf_hist = df_wrf_hist.append(df_wrf)
+					df_wrf_hist.to_csv(folder+'df_wrf_'+sourceID+'.csv', index=False)
+				else:
+					df_wrf.to_csv(folder+'df_wrf_'+sourceID+'.csv', index=False)
 		
 		########################################################################
 		# Get YR forecast
@@ -99,14 +115,17 @@ def main(folder,append,extract_yr,extract_wrf):
 			df_YR = df[fields].copy()
 			# Convert the time value to something Python understands
 			df_YR['time'] = pd.to_datetime(df_YR['time']).dt.tz_convert(None)
+			df_YR = df_YR.reset_index()
 			
 			if path.exists(folder+'df_YR_'+sourceID+'.csv') and append:
 				df_YR_hist = pd.read_csv(folder+'df_YR_'+sourceID+'.csv')
-				df_YR_hist = df_YR_hist[df_YR_hist['time'] <= str(df_wrf['time'][0])]
+				df_YR_hist = df_YR_hist[df_YR_hist['time'] <= str(df_YR['time'][0])]
 				df_YR_hist = df_YR_hist.append(df_YR)
 				df_YR_hist.to_csv(folder+'df_YR_'+sourceID+'.csv', index=False)
 			else:
 				df_YR.to_csv(folder+'df_YR_'+sourceID+'.csv', index=False)
+
+		print('Sucessfully extracted data')
 			
 		
 		
