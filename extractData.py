@@ -34,7 +34,9 @@ def getYRdata(endpoint, parameters, field):
 @click.option('--extract_wrf/--no-extract_wrf', default=False)
 def main(folder,append,extract_yr,extract_wrf):	
 	sourceIDlist = ["SN18700", # OSLO - BLINDERN          
-							    "SN76914"] # ITASMOBAWS1
+							    "SN6700",  # RV3 Svingen - Elverum
+							    "SN6690",  # RV3 Ebru - Elverum
+								  "SN76914"] # ITASMOBAWS1 - Rikshospitalet i Oslo
 	for sourceID in sourceIDlist:
 		########################################################################
 		# Get coordinates for observation point (lon,lat,masl)

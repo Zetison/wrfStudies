@@ -96,7 +96,7 @@ then
 		START_HOUR=12
 		RUN_HOURS=6
 	fi
-elif [[ $CASE == "SN76914" ]] || [[ $CASE == "SN18700" ]]
+elif [[ $CASE == "SN76914" ]] || [[ $CASE == "SN18700" ]] || [[ $CASE == "Elverum" ]]
 then
 	MAX_DOM=4
 	MAP_PROJ="lat-lon" # Accepted projections are 'lambert', 'polar', 'mercator', and 'lat-lon.'
