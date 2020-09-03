@@ -28,8 +28,9 @@ def getYRdata(endpoint, parameters, field):
 
 @click.command()
 @click.option('--sourceid', default='SN18700')
+@click.option('--timeresolution', default='PT1H')
 @click.option('--folder', default='/home/zetison/results/forecastData/')
-def main(sourceid,folder):
+def main(sourceid,folder,timeresolution):
 	
 
 	########################################################################
@@ -42,10 +43,6 @@ def main(sourceid,folder):
 	########################################################################
 	## Get observation data
 	# Define endpoint and parameters
-	if sourceid == 'SN76914':
-		timeresolution = 'PT1H'
-	else:
-		timeresolution = 'PT10M'
 	
 	startdate = df_wrf['time'][0]
 	enddate = df_wrf['time'].iloc[-1]

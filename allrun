@@ -14,7 +14,7 @@ then
 	echo "Error: set the DISPLAY variable" #The display variable should be set for post processing purposes in paraview. This issue arises when using screen, and can be resolved by first getting the display variable outside the screen session (echo $DISPLAY) and then inside the screen session setting the variable to this value (i.e. export DISPLAY=localhost:10.0)"
 fi
 source $HOME/kode/bashScripts/sourceWRF
-loopForecast=false
+loopForecast=true
 
 while true
 do
@@ -37,10 +37,7 @@ do
 			echo -ne "Time until start of program: $(date -u --date @$(($date1 - `date +%s` )) +%H:%M:%S)\r";
 		done
 	fi
-	if [ "$loopForecast" = true ]
-	then
-		python3 extractData.py --extract_yr
-	fi
+	python3 extractData.py --extract_yr
 	source ./parameters
 	pathToWPS="$WRFDIRECTORY/Build_WRF/WPS"
 	pathToWRF="$WRFDIRECTORY/Build_WRF/WRF/run"
@@ -180,10 +177,7 @@ do
 				siso -f pvd $wrfName --global -l P,T,U,V,W --planar
 			fi
 		done
-		if [ "$loopForecast" = true ]
-		then
-			python3 extractData.py --extract_wrf
-		fi
+		python3 extractData.py --extract_wrf
 		popd > /dev/null
 	fi
 	if [ "$loopForecast" = false ]

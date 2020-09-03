@@ -35,7 +35,6 @@ def getYRdata(endpoint, parameters, field):
 def main(folder,append,extract_yr,extract_wrf):	
 	sourceIDlist = ["SN18700", # OSLO - BLINDERN          
 							    "SN6700",  # RV3 Svingen - Elverum
-							    "SN6690",  # RV3 Ebru - Elverum
 								  "SN76914"] # ITASMOBAWS1 - Rikshospitalet i Oslo
 	for sourceID in sourceIDlist:
 		########################################################################
@@ -79,6 +78,8 @@ def main(folder,append,extract_yr,extract_wrf):
 				df_wrf['air_temperature'] = wrf.to_np(wrf.getvar(ncfile, 'tc', wrf.ALL_TIMES).interp(west_east=xy[0], south_north=xy[1], bottom_top=0))
 				if df_wrf.isnull().values.any():
 					continue
+				else:
+					isOutside = False
 
 				df_wrf['wind_speed'] = wrf.g_wind.get_destag_wspd(ncfile, wrf.ALL_TIMES).interp(west_east=xy[0], south_north=xy[1], bottom_top=0)
 				
@@ -92,7 +93,10 @@ def main(folder,append,extract_yr,extract_wrf):
 					df_wrf_hist.to_csv(folder+'df_wrf_'+sourceID+'.csv', index=False)
 				else:
 					df_wrf.to_csv(folder+'df_wrf_'+sourceID+'.csv', index=False)
-		
+
+			print('Sucessfully extracted wrf data')
+
+						
 		########################################################################
 		# Get YR forecast
 		if extract_yr:
@@ -127,7 +131,7 @@ def main(folder,append,extract_yr,extract_wrf):
 			else:
 				df_YR.to_csv(folder+'df_YR_'+sourceID+'.csv', index=False)
 
-		print('Sucessfully extracted data')
+			print('Sucessfully extracted YR data')
 			
 		
 		
