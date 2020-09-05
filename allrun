@@ -8,43 +8,46 @@ CASE="Elverum" # Sykehuset innlandet Elverum
 #CASE="nested"
 #CASE="YR"
 #CASE="debug"
-name=${1:-$CASE}
 if [ -z "$DISPLAY" ]
 then
 	echo "Error: set the DISPLAY variable" #The display variable should be set for post processing purposes in paraview. This issue arises when using screen, and can be resolved by first getting the display variable outside the screen session (echo $DISPLAY) and then inside the screen session setting the variable to this value (i.e. export DISPLAY=localhost:10.0)"
 fi
 source $HOME/kode/bashScripts/sourceWRF
+pathToWPS="$WRFDIRECTORY/Build_WRF/WPS"
+pathToWRF="$WRFDIRECTORY/Build_WRF/WRF/run"
 loopForecast=true
 
 while true
 do
 	if [[ "$loopForecast" = true ]]
 	then
-		current_epoch=$(date +%s)
+		current_epoch=$(date -u +%s)
 		TODAY="$(date -u +'%Y-%m-%d')" # Get date in UTC
 		target_epoch=$(date -u +'%s' --date="$TODAY + 1 days") # Get date in UTC
 		sleep_seconds=$(( $target_epoch - $current_epoch ))
-		date1=$((`date +%s` + $sleep_seconds));
-		while [ "$date1" -ge `date +%s` ]; do
+		date1=$((`date -u +%s` + $sleep_seconds))
+		while [ "$date1" -ge `date -u +%s` ]
+		do
 			echo -ne "Time until midnight (extraction time for YR): $(date -u --date @$(($date1 - `date +%s` )) +%H:%M:%S)\r";
 		done
-		current_epoch=$(date +%s)
+		python3 extractData.py --extract_yr
+
+		current_epoch=$(date -u +%s)
 		TODAY="$(date -u +'%Y-%m-%d')" # Get date in UTC
 		target_epoch=$(date -u +'%s' --date="$TODAY + 6 hour") # Get date in UTC
 		sleep_seconds=$(( $target_epoch - $current_epoch ))
-		date1=$((`date +%s` + $sleep_seconds));
-		while [ "$date1" -ge `date +%s` ]; do
+		date1=$((`date -u +%s` + $sleep_seconds))
+		while [ "$date1" -ge `date -u +%s` ]
+		do
 			echo -ne "Time until start of program: $(date -u --date @$(($date1 - `date +%s` )) +%H:%M:%S)\r";
 		done
 	fi
-	python3 extractData.py --extract_yr
 	source ./parameters
-	pathToWPS="$WRFDIRECTORY/Build_WRF/WPS"
-	pathToWRF="$WRFDIRECTORY/Build_WRF/WRF/run"
+
+	##############################################################################################
+	## Get geog data
 	pathToResults="$HOME/results/WRF/$CASE/$COMP_START_DATE"
 	mkdir -p $pathToResults
-	pathToFolder="$pathToWPS"
-	cp -f namelist.wps plotgrids_new.ncl plotgrids_global.ncl wrf_wps_ter.ncl $pathToFolder
 	if [[ ! -d "$GEOG_DATA_PATH" ]]
 	then
 		mkdir -p $GEOG_DATA_PATH
@@ -60,10 +63,12 @@ do
 		rm -rf WPS_GEOG_LOW_RES
 		popd > /dev/null
 	fi
+
+	##############################################################################################
+	## Get NCEP data
 	mkdir -p $WRFDIRECTORY/Build_WRF/DATA
-	rm $WRFDIRECTORY/Build_WRF/DATA/*
+	rm -f $WRFDIRECTORY/Build_WRF/DATA/*
 	pushd $WRFDIRECTORY/Build_WRF/DATA > /dev/null
-	TODAY="$(date -u +'%Y-%m-%d')" # Get date in UTC
 	if [[ $NCEPstorageDate -ge $(date -d ${START_DATE:0:10} +%s) ]]
 	then
 		$HOME/kode/bashScripts/getHistoricNCEPdata $START_DATE $END_DATE $INTERVAL_SECONDS $GFS_RES 
@@ -72,7 +77,10 @@ do
 	fi
 	popd > /dev/null
 	
-	pushd $pathToFolder > /dev/null
+	##############################################################################################
+	## WPS
+	cp -f namelist.wps plotgrids_new.ncl plotgrids_global.ncl wrf_wps_ter.ncl $pathToWPS
+	pushd $pathToWPS > /dev/null
 	if [[ "$RUNGLOBAL" = true ]]
 	then
 		sed -i '/SED_DX/d;/SED_DY/d;/SED_REF_LAT/d;/SED_REF_LON/d' namelist.wps
@@ -122,9 +130,10 @@ do
 	NUM_METGRID_SOIL_LEVELS=$(ncdump -h "met_em.d01.$START_DATE.nc" | grep -oP '(?<=num_st_layers = )[0-9]+;?')
 	popd > /dev/null
 	
-	pathToFolder="$WRFDIRECTORY/Build_WRF/WRF/run"
-	cp namelist.input wrf_Surface*.ncl $pathToFolder
-	pushd $pathToFolder > /dev/null
+	##############################################################################################
+	## WRF
+	cp namelist.input wrf_Surface*.ncl $pathToWRF
+	pushd $pathToWRF > /dev/null
 	DICTS="namelist.input wrf_Surface1.ncl wrf_Surface2.ncl wrf_Surface3.ncl"
 	if [[ "$MAP_PROJ" == "lat-lon" ]]
 	then
@@ -147,6 +156,8 @@ do
 	cp -ruf wrfout_d* *.pdf *.png wrf_Surface*.ncl namelist.input $pathToResults
 	popd > /dev/null
 	
+	##############################################################################################
+	## Post processing
 	if [[ $3 == 1 ]]
 	then
 		cp extractData.py $pathToResults
@@ -180,8 +191,13 @@ do
 		python3 extractData.py --extract_wrf
 		popd > /dev/null
 	fi
-	if [ "$loopForecast" = false ]
+	if [ "$loopForecast" = true ]
 	then
+		for collector in $VARIABLES 
+		do
+			eval "D_${collector}=\"\""
+		done
+	else
 		exit 1
 	fi
 done
