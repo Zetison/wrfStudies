@@ -118,7 +118,7 @@ then
 	then
 		REF_LAT=59.9492 # Latitude of a known reference point inside the domain
 		REF_LON=10.715 # Longitude of the same point as used for REF_LAT
-	elif [[ $CASE == "Elverum" ]]
+	elif [[ $CASE == "Bessaker" ]]
 	then
 		REF_LAT=64.2233001 # Latitude of a known reference point inside the domain (Bessakerfjellet)
 		REF_LON=10.3727204 # Longitude of the same point as used for REF_LAT

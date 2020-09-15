@@ -99,7 +99,6 @@ do
 	
 	DICTS="namelist.wps plotgrids_new.ncl plotgrids_global.ncl wrf_wps_ter.ncl"
 	source $HOME/kode/bashScripts/sedFiles
-	rm -f *.pdf *.png
 	if [[ "$RUNGLOBAL" = true ]]
 	then
 		ncl plotgrids_global.ncl # Plot domains
@@ -123,7 +122,7 @@ do
 		mpirun -np $NP $pathToWPS/metgrid.exe | tee log.metgrid
 		#$pathToWPS/metgrid.exe | tee log.metgrid
 		# ncview geo_em.d01.nc
-		cp -rf geo_em.* *.pdf *.png plotgrids_new.ncl wrf_wps_ter.ncl namelist.wps $pathToResults
+		cp -rf geo_em.* *.png plotgrids_new.ncl wrf_wps_ter.ncl namelist.wps $pathToResults
 	fi
 	
 	if [[ "$MAP_PROJ" == "lat-lon" ]]
