@@ -38,7 +38,7 @@ then
 else
 	START_YEAR=2020
 	START_MONTH=09
-	START_DAY=03
+	START_DAY=15
 fi
 if [[ $CASE == "global" ]]
 then
@@ -96,7 +96,7 @@ then
 		START_HOUR=12
 		RUN_HOURS=6
 	fi
-elif [[ $CASE == "SN76914" ]] || [[ $CASE == "SN18700" ]] || [[ $CASE == "Elverum" ]]
+elif [[ $CASE == "SN76914" ]] || [[ $CASE == "SN18700" ]] || [[ $CASE == "Elverum" ]] || [[ $CASE == "Bessaker" ]]
 then
 	MAX_DOM=4
 	MAP_PROJ="lat-lon" # Accepted projections are 'lambert', 'polar', 'mercator', and 'lat-lon.'
@@ -118,6 +118,10 @@ then
 	then
 		REF_LAT=59.9492 # Latitude of a known reference point inside the domain
 		REF_LON=10.715 # Longitude of the same point as used for REF_LAT
+	elif [[ $CASE == "Elverum" ]]
+	then
+		REF_LAT=64.2233001 # Latitude of a known reference point inside the domain (Bessakerfjellet)
+		REF_LON=10.3727204 # Longitude of the same point as used for REF_LAT
 	elif [[ $CASE == "Elverum" ]]
 	then
 		REF_LAT=60.8771324 # Latitude of a known reference point inside the domain

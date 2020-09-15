@@ -25,7 +25,7 @@
  pole_lon          =  SED_POLE_LON,
  ref_lat           =  SED_REF_LAT,
  ref_lon           =  SED_REF_LON,
- geog_data_path    = 'SED_GEOG_DATA_PATH'
+ geog_data_path    = 'SED_GEOG_DATA_PATH',
 /
 
 &ungrib
@@ -34,7 +34,7 @@
 /
 
 &metgrid
- fg_name = 'FILE'
+ fg_name = 'FILE',
  io_form_metgrid = 2, 
 /
 

@@ -1,8 +1,9 @@
 #!/bin/bash
 #CASE="global"
 #CASE="global"
+CASE="Bessaker"
 #CASE="SN76914" # Rikshospitalet in Oslo
-CASE="Elverum" # Sykehuset innlandet Elverum 
+#CASE="Elverum" # Sykehuset innlandet Elverum 
 #CASE="SN18700" # OSLO - BLINDERN
 #CASE="ATBcase1" # OSLO - BLINDERN
 #CASE="nested"
@@ -15,7 +16,8 @@ fi
 source $HOME/kode/bashScripts/sourceWRF
 pathToWPS="$WRFDIRECTORY/Build_WRF/WPS"
 pathToWRF="$WRFDIRECTORY/Build_WRF/WRF/run"
-loopForecast=true
+loopForecast=false
+clearNCEPdata=false
 
 while true
 do
@@ -67,7 +69,10 @@ do
 	##############################################################################################
 	## Get NCEP data
 	mkdir -p $WRFDIRECTORY/Build_WRF/DATA
-	rm -f $WRFDIRECTORY/Build_WRF/DATA/*
+	if [[ "$clearNCEPdata" = true ]]
+	then
+		rm -f $WRFDIRECTORY/Build_WRF/DATA/*
+	fi
 	pushd $WRFDIRECTORY/Build_WRF/DATA > /dev/null
 	if [[ $NCEPstorageDate -ge $(date -d ${START_DATE:0:10} +%s) ]]
 	then
@@ -183,9 +188,9 @@ do
 			wrfName="${wrfName}.nc"
 			if [[ "$RUNGLOBAL" = true ]]
 			then
-				siso -f pvd $wrfName --global -l P,T,U,V,W --planar --periodic
+				siso -f pvd $wrfName --coords geocentric -l P,T,U,V,W --planar --periodic
 			else
-				siso -f pvd $wrfName --global -l P,T,U,V,W --planar
+				siso -f pvd $wrfName --coords geocentric -l P,T,U,V,W --planar
 			fi
 		done
 		python3 extractData.py --extract_wrf
