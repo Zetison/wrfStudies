@@ -38,7 +38,7 @@ then
 else
 	START_YEAR=2020
 	START_MONTH=09
-	START_DAY=15
+	START_DAY=16
 fi
 if [[ $CASE == "global" ]]
 then
@@ -110,6 +110,7 @@ then
 	TIME_STEP=6 # in seconds (should be 6*dx (in km))
 	RUN_DAYS=0
 	RUN_HOURS=24
+	START_HOUR=12 # Must be either 00, 06, 12 or 18 (these are the times the NCEP run the GFS model) Also note that the date is available only some 4 hours after the initialization time
 
 	D_I_PARENT_START="1, 34, 34, 34, 34, 34, 34,"
 	D_J_PARENT_START="1, 34, 34, 34, 34, 34, 34," # 29

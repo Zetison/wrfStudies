@@ -156,8 +156,8 @@ do
 		# tail -F rsl.out.0000
 		# tail rsl.error.0000
 	fi
-	rm -rf $pathToResults/wrfout_d* $pathToResults/*.pdf $pathToResults/*.png $pathToResults/wrf_Surface*.ncl $pathToResults/namelist.input
-	cp -ruf wrfout_d* *.pdf *.png wrf_Surface*.ncl namelist.input $pathToResults
+	rm -rf $pathToResults/wrfout_d* $pathToResults/wrf_Surface*.ncl $pathToResults/namelist.input
+	cp -ruf wrfout_d* *.png wrf_Surface*.ncl namelist.input $pathToResults
 	popd > /dev/null
 	
 	##############################################################################################
@@ -187,9 +187,9 @@ do
 			wrfName="${wrfName}.nc"
 			if [[ "$RUNGLOBAL" = true ]]
 			then
-				siso -f pvd $wrfName --coords geocentric -l P,T,U,V,W --planar --periodic
+				siso -f pvd $wrfName --coords geocentric -l P,T,U,V,W,T2,U10,V10 --planar --periodic
 			else
-				siso -f pvd $wrfName --coords geocentric -l P,T,U,V,W --planar
+				siso -f pvd $wrfName --coords geocentric -l P,T,U,V,W,T2,U10,V10 --planar
 			fi
 		done
 		python3 extractData.py --extract_wrf
