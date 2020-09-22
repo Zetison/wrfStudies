@@ -21,6 +21,8 @@
  io_form_restart                     = 2,
  io_form_input                       = 2,
  io_form_boundary                    = 2,
+ io_form_auxinput4                   = 2,
+ auxinput4_interval_s                = SED_INTERVAL_SECONDS,
  /
 
  &domains
@@ -59,15 +61,25 @@
  cu_physics                          = SED_D_CU_PHYSICS
  ra_lw_physics                       = SED_D_RA_LW_PHYSICS
  ra_sw_physics                       = SED_D_RA_SW_PHYSICS
+ swint_opt                           = SED_SWINT_OPT,
+ bl_mynn_mixlength                   = SED_BL_MYNN_MIXLENGTH,
+ bl_mynn_tkebudget                   = SED_D_BL_MYNN_TKEBUDGET
  bl_pbl_physics                      = SED_D_BL_PBL_PHYSICS
  sf_sfclay_physics                   = SED_D_SF_SFCLAY_PHYSICS
  sf_surface_physics                  = SED_D_SF_SURFACE_PHYSICS
- radt                                = 30,
+ radt                                = SED_D_RADT
  bldt                                = 0, 
- cudt                                = 5,
+ cudt                                = SED_D_CUDT
+ fractional_seaice                   = SED_FRACTIONAL_SEAICE,
+ num_soil_layers                     = SED_NUM_SOIL_LAYERS,
+ seaice_threshold                    = 0.,
  icloud                              = 1,
- num_land_cat                        = 21,
+ num_land_cat                        = SED_NUM_LAND_CAT,
  sf_urban_physics                    = 0,
+ surface_input_source                = 1,
+ sst_update                          = 0,
+ usemonalb                           = .true.,
+ prec_acc_dt                         = SED_D_HISTORY_INTERVAL
  /
 
  &fdda

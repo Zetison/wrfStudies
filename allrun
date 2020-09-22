@@ -1,7 +1,7 @@
 #!/bin/bash
 #CASE="global"
-#CASE="global"
-CASE="Bessaker"
+CASE="global"
+#CASE="Bessaker"
 #CASE="SN76914" # Rikshospitalet in Oslo
 #CASE="Elverum" # Sykehuset innlandet Elverum 
 #CASE="SN18700" # OSLO - BLINDERN
@@ -99,6 +99,7 @@ do
 	
 	DICTS="namelist.wps plotgrids_new.ncl plotgrids_global.ncl wrf_wps_ter.ncl"
 	source $HOME/kode/bashScripts/sedFiles
+	rm *.png
 	if [[ "$RUNGLOBAL" = true ]]
 	then
 		ncl plotgrids_global.ncl # Plot domains
