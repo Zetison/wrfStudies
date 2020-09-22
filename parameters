@@ -1,7 +1,7 @@
 #!/bin/bash
 NP=32
 MAX_DOM=1
-GEOG_DATA_RES="30s" #10m (~19km), 5m (~9km), 2m (~4km), and 30s (~0.9km).
+GEOG_DATA_RES="usgs_lakes+30s" #10m (~19km), 5m (~9km), 2m (~4km), and 30s (~0.9km).
 GFS_RES="0p25" # resolution (in degrees) in longitude and latitude direction (NOTE: if > 0.25 (0p25) then INTERVAL_SECONDS must be > 10800) First 120 hours available hourly, after that every 3 hours
 RUN_DAYS=0
 RUN_HOURS=3
@@ -98,7 +98,13 @@ FRAMES_PER_OUTFILE=1000000
 GEOG_DATA_PATH="$HOME/WPS_DATA/WPS_GEOG"
 # Note that al times are UTC
 START_HOUR=00 # Must be either 00, 06, 12 or 18 (these are the times the NCEP run the GFS model) Also note that the date is available only some 4 hours after the initialization time
-NUM_LAND_CAT=21 # Depends on GEOG_DATA_RES
+
+if [[ "${GEOG_DATA_RES:0:10}" == "usgs_lakes" ]]
+then
+	NUM_LAND_CAT=28 # Depends on GEOG_DATA_RES
+else
+	NUM_LAND_CAT=21 # Depends on GEOG_DATA_RES
+fi
 if [[ "$loopForecast" = true ]]
 then
 	START_DATE="$(date -u +'%Y-%m-%d')_$START_HOUR:00:00" # Get date in UTC

@@ -8,7 +8,7 @@ CASE="global"
 #CASE="ATBcase1" # OSLO - BLINDERN
 #CASE="nested"
 #CASE="YR"
-#CASE="debug"
+CASE="debug"
 if [ -z "$DISPLAY" ]
 then
 	echo "Error: set the DISPLAY variable" #The display variable should be set for post processing purposes in paraview. This issue arises when using screen, and can be resolved by first getting the display variable outside the screen session (echo $DISPLAY) and then inside the screen session setting the variable to this value (i.e. export DISPLAY=localhost:10.0)"
@@ -158,7 +158,8 @@ do
 		# tail rsl.error.0000
 	fi
 	rm -rf $pathToResults/wrfout_d* $pathToResults/wrf_Surface*.ncl $pathToResults/namelist.input
-	cp -ruf wrfout_d* *.png wrf_Surface*.ncl namelist.input $pathToResults
+	mv wrfout_d* $pathToResults
+	cp -ruf *.png wrf_Surface*.ncl namelist.input $pathToResults
 	popd > /dev/null
 	
 	##############################################################################################
