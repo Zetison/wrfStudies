@@ -48,11 +48,12 @@
  smooth_option                       = 0,
  use_adaptive_time_step              = SED_USE_ADAPTIVE_TIME_STEP,
  step_to_output_time                 = .true.,
- max_step_increase_pct               = 5, 51,
+ max_step_increase_pct               = 51,
  starting_time_step                  = -1,
  max_time_step                       = -1, 
  min_time_step                       = SED_MIN_TIME_STEP,
- target_cfl                          = 1.2,
+ target_cfl                          = 1.0,
+ target_hcfl                         = 0.84,
  adaptation_domain                   = SED_MAX_DOM,
  /
 
