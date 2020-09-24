@@ -282,11 +282,11 @@ if [[ "$MAP_PROJ" = lat-lon ]]
 then
 	RADT=$(round "40075*$DX/360")
 	TIME_STEP=$(round "6*40075*$DX/360")
-	MIN_TIME_STEP=$(round "0.1*40075*$DX/360")
+	MIN_TIME_STEP=$(round "0.001*40075*$DX/360")
 else
 	RADT=$(round "$DX/1000")
 	TIME_STEP=$(round "6*$DX/1000")
-	MIN_TIME_STEP=$(round "0.1*$DX/1000")
+	MIN_TIME_STEP=$(round "0.001*$DX/1000")
 fi
 if [[ "$RUNGLOBAL" = true ]]
 then
