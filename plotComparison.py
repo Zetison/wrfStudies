@@ -53,7 +53,6 @@ def main(sourceid,folder,timeresolution):
 			'elements': 'air_temperature,wind_speed',
 			'timeresolutions': timeresolution,
 			'fields': 'value, referenceTime',
-			'qualities': 0, # 0 = original value found to be good, 1 = original value suspicious (likely correct), ...
 	}
 	
 	data = getYRdata(endpoint, parameters, 'data')

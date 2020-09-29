@@ -1,7 +1,7 @@
 #!/bin/bash
 #CASE="global"
-CASE="global"
-#CASE="Bessaker"
+#CASE="global"
+CASE="Bessaker"
 #CASE="SN76914" # Rikshospitalet in Oslo
 #CASE="Elverum" # Sykehuset innlandet Elverum 
 #CASE="SN18700" # OSLO - BLINDERN

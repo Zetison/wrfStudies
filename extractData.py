@@ -114,7 +114,7 @@ def main(folder,append,extract_met,extract_yr,extract_wrf):
 				#maslg = HGT.interp(west_east=xy[0], south_north=xy[1])
 				#lat_lon = wrf.xy_to_ll(ncfile,xy[0],xy[1])
 				fields = ['time','T','wind_speed']
-				df_wrf = pd.DataFrame({'time': wrf.getvar(ncfile, fields[1], wrf.ALL_TIMES).Time})
+				df_wrf = pd.DataFrame({'time': wrf.getvar(ncfile, 'Times', wrf.ALL_TIMES)})
 				df_wrf['air_temperature'] = wrf.to_np(wrf.getvar(ncfile, 'tc', wrf.ALL_TIMES).interp(west_east=xy[0], south_north=xy[1], bottom_top=0))
 				if df_wrf.isnull().values.any():
 					continue
