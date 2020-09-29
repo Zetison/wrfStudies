@@ -1,7 +1,9 @@
 #!/bin/bash
 #CASE="global"
 #CASE="global"
-CASE="Bessaker"
+#CASE="Bessaker"
+#CASE="SN71990"
+CASE="Frankfurt"
 #CASE="SN76914" # Rikshospitalet in Oslo
 #CASE="Elverum" # Sykehuset innlandet Elverum 
 #CASE="SN18700" # OSLO - BLINDERN
@@ -25,18 +27,18 @@ do
 	then
 		current_epoch=$(date -u +%s)
 		TODAY="$(date -u +'%Y-%m-%d')" # Get date in UTC
-		target_epoch=$(date -u +'%s' --date="$TODAY + 1 days") # Get date in UTC
+		target_epoch=$(date -u +'%s' --date="$TODAY + 12 hour") # Get date in UTC
 		sleep_seconds=$(( $target_epoch - $current_epoch ))
 		date1=$((`date -u +%s` + $sleep_seconds))
 		while [ "$date1" -ge `date -u +%s` ]
 		do
-			echo -ne "Time until midnight (extraction time for YR): $(date -u --date @$(($date1 - `date +%s` )) +%H:%M:%S)\r";
+			echo -ne "Time until extraction of MetCoOp data: $(date -u --date @$(($date1 - `date +%s` )) +%H:%M:%S)\r";
 		done
 		python3 extractData.py --extract_yr
 
 		current_epoch=$(date -u +%s)
 		TODAY="$(date -u +'%Y-%m-%d')" # Get date in UTC
-		target_epoch=$(date -u +'%s' --date="$TODAY + 6 hour") # Get date in UTC
+		target_epoch=$(date -u +'%s' --date="$TODAY + 18 hour") # Get date in UTC
 		sleep_seconds=$(( $target_epoch - $current_epoch ))
 		date1=$((`date -u +%s` + $sleep_seconds))
 		while [ "$date1" -ge `date -u +%s` ]

@@ -26,7 +26,6 @@ def getYRdata(endpoint, parameters, field):
 	    print('Message: %s' % json['error']['message'])
 	    print('Reason: %s' % json['error']['reason'])
 
-
 @click.command()
 @click.option('--folder', default='/home/joveve/results/forecastData/')
 @click.option('--append/--no-append', default=True)
@@ -38,19 +37,27 @@ def main(folder,append,extract_met,extract_yr,extract_wrf):
 							    "SN6700",  # RV3 Svingen - Elverum
 									"SN71900", # Bessaker
 									"SN71990", # Buholmråsa fyr
-								  "SN76914"] # ITASMOBAWS1 - Rikshospitalet i Oslo
+								  "SN76914", # ITASMOBAWS1 - Rikshospitalet i Oslo
+									"Frankfurt"] # Frankfurt airport
 	for sourceID in sourceIDlist:
 		########################################################################
 		# Get coordinates for observation point (lon,lat,masl)
-		endpoint = 'https://frost.met.no/sources/v0.jsonld'
-		parameters = {
-				'ids': sourceID,
-				}
-		
-		data_source = getYRdata(endpoint, parameters, 'data')
-		masl = data_source[0]['masl']
-		lon = data_source[0]['geometry']['coordinates'][0]
-		lat = data_source[0]['geometry']['coordinates'][1]
+		if sourceID[0:2] == 'SN': # Assume Norwegian station number format
+			endpoint = 'https://frost.met.no/sources/v0.jsonld'
+			parameters = {
+					'ids': sourceID,
+					}
+			
+			data_source = getYRdata(endpoint, parameters, 'data')
+			masl = data_source[0]['masl']
+			lon = data_source[0]['geometry']['coordinates'][0]
+			lat = data_source[0]['geometry']['coordinates'][1]
+		elif sourceID == 'Frankfurt':
+			masl = 98
+			lon = 8.51962
+			lat = 50.02528
+		else:
+			print('Error, sourceID = '+sourceID+' not listed')
 		
 		########################################################################
 		# Get data from met file
@@ -113,7 +120,6 @@ def main(folder,append,extract_met,extract_yr,extract_wrf):
 				#HGT = getvar(ncfile, "HGT")
 				#maslg = HGT.interp(west_east=xy[0], south_north=xy[1])
 				#lat_lon = wrf.xy_to_ll(ncfile,xy[0],xy[1])
-				fields = ['time','T','wind_speed']
 				df_wrf = pd.DataFrame({'time': wrf.getvar(ncfile, 'Times', wrf.ALL_TIMES)})
 				df_wrf['air_temperature'] = wrf.to_np(wrf.getvar(ncfile, 'tc', wrf.ALL_TIMES).interp(west_east=xy[0], south_north=xy[1], bottom_top=0))
 				if df_wrf.isnull().values.any():
@@ -122,6 +128,7 @@ def main(folder,append,extract_met,extract_yr,extract_wrf):
 					isOutside = False
 
 				df_wrf['wind_speed'] = wrf.g_wind.get_destag_wspd(ncfile, wrf.ALL_TIMES).interp(west_east=xy[0], south_north=xy[1], bottom_top=0)
+				df_wrf['wind_from_direction'] = wrf.g_wind.get_destag_wspd_wdir(ncfile, wrf.ALL_TIMES).interp(west_east=xy[0], south_north=xy[1], bottom_top=0)
 				
 				df_wrf['time'] = pd.to_datetime(df_wrf['time'])
 				df_wrf = df_wrf.reset_index()
@@ -146,7 +153,7 @@ def main(folder,append,extract_met,extract_yr,extract_wrf):
 					'lon': str(lon),
 			    'lat': str(lat),
 			}
-			fields = ['time','air_temperature','wind_speed']
+			fields = ['time','air_temperature','wind_speed', 'wind_from_direction']
 			data_YR = getYRdata(endpoint, parameters, 'properties')
 			
 			data_YR = data_YR['timeseries']
@@ -173,13 +180,5 @@ def main(folder,append,extract_met,extract_yr,extract_wrf):
 
 			print('Sucessfully extracted YR data')
 			
-		
-		
-		
-		
 if __name__ == '__main__':
     main()
-		
-		
-		
-	
