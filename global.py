@@ -37,24 +37,6 @@ calculator1Display = Show(calculator1, renderView1, 'UnstructuredGridRepresentat
 # trace defaults for the display properties.
 calculator1Display.Representation = 'Surface'
 calculator1Display.ColorArrayName = [None, '']
-calculator1Display.OSPRayScaleArray = 'P'
-calculator1Display.OSPRayScaleFunction = 'PiecewiseFunction'
-calculator1Display.SelectOrientationVectors = 'None'
-calculator1Display.ScaleFactor = 307267.29676407116
-calculator1Display.SelectScaleArray = 'None'
-calculator1Display.GlyphType = 'Arrow'
-calculator1Display.GlyphTableIndexArray = 'None'
-calculator1Display.GaussianRadius = 15363.364838203557
-calculator1Display.SetScaleArray = ['POINTS', 'P']
-calculator1Display.ScaleTransferFunction = 'PiecewiseFunction'
-calculator1Display.OpacityArray = ['POINTS', 'P']
-calculator1Display.OpacityTransferFunction = 'PiecewiseFunction'
-calculator1Display.DataAxesGrid = 'GridAxesRepresentation'
-calculator1Display.PolarAxes = 'PolarAxesRepresentation'
-calculator1Display.ScalarOpacityUnitDistance = 205300.10534295466
-calculator1Display.InputVectors = [None, '']
-calculator1Display.SelectInputVectors = [None, '']
-calculator1Display.WriteLog = ''
 
 # init the 'PiecewiseFunction' selected for 'OSPRayScaleFunction'
 calculator1Display.OSPRayScaleFunction.Points = [-1.60970643249866e-06, 0.0, 0.5, 0.0, -1.220962564368047e-06, 0.0, 0.5, 0.0, 2.27773224880747e-06, 1.0, 0.5, 0.0]
@@ -226,24 +208,6 @@ calculator2Display = Show(calculator2, renderView1, 'UnstructuredGridRepresentat
 # trace defaults for the display properties.
 calculator2Display.Representation = 'Surface'
 calculator2Display.ColorArrayName = [None, '']
-calculator2Display.OSPRayScaleArray = 'P'
-calculator2Display.OSPRayScaleFunction = 'PiecewiseFunction'
-calculator2Display.SelectOrientationVectors = 'None'
-calculator2Display.ScaleFactor = 307267.29676407116
-calculator2Display.SelectScaleArray = 'None'
-calculator2Display.GlyphType = 'Arrow'
-calculator2Display.GlyphTableIndexArray = 'None'
-calculator2Display.GaussianRadius = 15363.364838203557
-calculator2Display.SetScaleArray = ['POINTS', 'P']
-calculator2Display.ScaleTransferFunction = 'PiecewiseFunction'
-calculator2Display.OpacityArray = ['POINTS', 'P']
-calculator2Display.OpacityTransferFunction = 'PiecewiseFunction'
-calculator2Display.DataAxesGrid = 'GridAxesRepresentation'
-calculator2Display.PolarAxes = 'PolarAxesRepresentation'
-calculator2Display.ScalarOpacityUnitDistance = 205300.10534295466
-calculator2Display.InputVectors = [None, '']
-calculator2Display.SelectInputVectors = [None, '']
-calculator2Display.WriteLog = ''
 
 # init the 'PiecewiseFunction' selected for 'OSPRayScaleFunction'
 calculator2Display.OSPRayScaleFunction.Points = [-1.60970643249866e-06, 0.0, 0.5, 0.0, -1.220962564368047e-06, 0.0, 0.5, 0.0, 2.27773224880747e-06, 1.0, 0.5, 0.0]
