@@ -1,7 +1,8 @@
-# some_file.py
+from os.path import expanduser
 import sys
 # insert at 1, 0 is the script path (or '' in REPL)
-sys.path.insert(1, '/home/zetison/kode/paraUtils')
+home = expanduser("~")
+sys.path.insert(1, home+'/kode/paraUtils')
 
 import earthInSpace
 import SINTEFlogo
@@ -10,7 +11,7 @@ from paraview.simple import *
 # get active view
 renderView1 = GetActiveViewOrCreate('RenderView')
 # create a new 'PVD Reader'
-wrfout_d01pvd = PVDReader(FileName='/home/zetison/results/WRF/Bessaker/2020091500/wrfout_d01.pvd')
+wrfout_d01pvd = PVDReader(FileName=home+'/results/WRF/Bessaker/2020091500/wrfout_d01.pvd')
 wrfout_d01pvd.PointArrays = ['P', 'T', 'T2', 'U', 'U10', 'V', 'V10', 'W']
 
 # get animation scene
@@ -159,15 +160,15 @@ cameraAnimationCue1.KeyFrames = [keyFrame15980, keyFrame15981]
 SetActiveSource(calculator1)
 
 # create a new 'PVD Reader'
-wrfout_d02pvd = PVDReader(FileName='/home/zetison/results/WRF/Bessaker/2020091500/wrfout_d02.pvd')
+wrfout_d02pvd = PVDReader(FileName=home+'/results/WRF/Bessaker/2020091500/wrfout_d02.pvd')
 wrfout_d02pvd.PointArrays = ['P', 'T', 'T2', 'U', 'U10', 'V', 'V10', 'W']
 
 # create a new 'PVD Reader'
-wrfout_d03pvd = PVDReader(FileName='/home/zetison/results/WRF/Bessaker/2020091500/wrfout_d03.pvd')
+wrfout_d03pvd = PVDReader(FileName=home+'/results/WRF/Bessaker/2020091500/wrfout_d03.pvd')
 wrfout_d03pvd.PointArrays = ['P', 'T', 'T2', 'U', 'U10', 'V', 'V10', 'W']
 
 # create a new 'PVD Reader'
-wrfout_d04pvd = PVDReader(FileName='/home/zetison/results/WRF/Bessaker/2020091500/wrfout_d04.pvd')
+wrfout_d04pvd = PVDReader(FileName=home+'/results/WRF/Bessaker/2020091500/wrfout_d04.pvd')
 wrfout_d04pvd.PointArrays = ['P', 'T', 'T2', 'U', 'U10', 'V', 'V10', 'W']
 
 # show data in view
@@ -520,7 +521,7 @@ renderView1.CameraParallelScale = 11009700.0
 
 # save animation
 if False:
-	SaveAnimation('/home/zetison/Videos/Bessaker.ogv', renderView1, ImageResolution=[1920, 1080],
+	SaveAnimation(home+'/Videos/Bessaker.ogv', renderView1, ImageResolution=[1920, 1080],
 	    FrameRate=15,
 	    FrameWindow=[0, 144])
 

@@ -107,6 +107,7 @@ def main(sourceid,folder,timeresolution):
 	if wrfDataFound:	
 		lines = axs[0].plot(df_wrf.time,df_wrf.air_temperature,'b', label = 'WRF forecast')
 		lines2 = axs[1].plot(df_wrf.time,df_wrf.wind_speed,'b', label = 'WRF forecast')
+		lines3 = axs[2].plot(df_wrf.time,df_wrf.wind_from_direction,'b', label = 'WRF forecast')
 
 	lines = axs[0].plot(df_obs.time,df_obs.air_temperature,'r', label = 'Observation data')
 	lines2 = axs[1].plot(df_obs.time,df_obs.wind_speed,'r', label = 'Observation data')

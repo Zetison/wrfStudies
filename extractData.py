@@ -121,14 +121,14 @@ def main(folder,append,extract_met,extract_yr,extract_wrf):
 				#maslg = HGT.interp(west_east=xy[0], south_north=xy[1])
 				#lat_lon = wrf.xy_to_ll(ncfile,xy[0],xy[1])
 				df_wrf = pd.DataFrame({'time': wrf.getvar(ncfile, 'Times', wrf.ALL_TIMES)})
-				df_wrf['air_temperature'] = wrf.to_np(wrf.getvar(ncfile, 'tc', wrf.ALL_TIMES).interp(west_east=xy[0], south_north=xy[1], bottom_top=0))
+				df_wrf['air_temperature'] = wrf.to_np(wrf.getvar(ncfile, 'T2', wrf.ALL_TIMES).interp(west_east=xy[0], south_north=xy[1]))-273.15
 				if df_wrf.isnull().values.any():
 					continue
 				else:
 					isOutside = False
 
-				df_wrf['wind_speed'] = wrf.g_wind.get_destag_wspd(ncfile, wrf.ALL_TIMES).interp(west_east=xy[0], south_north=xy[1], bottom_top=0)
-				df_wrf['wind_from_direction'] = wrf.g_wind.get_destag_wspd_wdir(ncfile, wrf.ALL_TIMES).interp(west_east=xy[0], south_north=xy[1], bottom_top=0)
+				df_wrf['wind_speed'] = wrf.g_uvmet.get_uvmet10_wspd_wdir(ncfile, wrf.ALL_TIMES).interp(west_east=xy[0], south_north=xy[1])[0]
+				df_wrf['wind_from_direction'] = wrf.g_uvmet.get_uvmet10_wspd_wdir(ncfile, wrf.ALL_TIMES).interp(west_east=xy[0], south_north=xy[1])[1]
 				
 				df_wrf['time'] = pd.to_datetime(df_wrf['time'])
 				df_wrf = df_wrf.reset_index()

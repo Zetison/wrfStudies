@@ -1,8 +1,9 @@
-# some_file.py
+from os.path import expanduser
 import sys
 import numpy as np
 # insert at 1, 0 is the script path (or '' in REPL)
-sys.path.insert(1, '/home/zetison/kode/paraUtils')
+sys.path.insert(1, home+'/kode/paraUtils')
+home = expanduser("~")
 
 import earthInSpace
 import SINTEFlogo
@@ -11,7 +12,7 @@ from paraview.simple import *
 # get active view
 renderView1 = GetActiveViewOrCreate('RenderView')
 # create a new 'PVD Reader'
-wrfout_d01pvd = PVDReader(FileName='/home/zetison/results/WRF/global/2020092700/wrfout_d01.pvd')
+wrfout_d01pvd = PVDReader(FileName=home+'/results/WRF/global/2020092700/wrfout_d01.pvd')
 wrfout_d01pvd.PointArrays = ['P', 'T', 'T2', 'U', 'U10', 'V', 'V10', 'W']
 
 # get animation scene
@@ -309,7 +310,7 @@ renderView1.Update()
 
 # save animation
 if True:
-	SaveAnimation('/home/zetison/Videos/global.ogv', renderView1, ImageResolution=[1920, 1080],
+	SaveAnimation(home+'/Videos/global.ogv', renderView1, ImageResolution=[1920, 1080],
 	    FrameRate=15)
 
 #### uncomment the following to render all views
