@@ -8,10 +8,17 @@ import earthInSpace
 import SINTEFlogo
 
 from paraview.simple import *
+
+
+case = 'Frankfurt'
+#case = 'Bessaker'
+date='2020093012'
+folder=home+'/results/WRF/'+case+'/'+date
+
 # get active view
 renderView1 = GetActiveViewOrCreate('RenderView')
 # create a new 'PVD Reader'
-wrfout_d01pvd = PVDReader(FileName=home+'/results/WRF/Bessaker/2020091500/wrfout_d01.pvd')
+wrfout_d01pvd = PVDReader(FileName=folder+'/wrfout_d01.pvd')
 wrfout_d01pvd.PointArrays = ['P', 'T', 'T2', 'U', 'U10', 'V', 'V10', 'W']
 
 # get animation scene
@@ -100,7 +107,7 @@ windat10mLUT.RescaleTransferFunction(0.011410207580437114, 17.14499218072963)
 windat10mPWF.RescaleTransferFunction(0.011410207580437114, 17.14499218072963)
 
 # Properties modified on annotateTimeFilter1
-annotateTimeFilter1.Format = 'Bessaker: %2.0f:00 UTC, 15. sep. 2020'
+annotateTimeFilter1.Format = case+': %2.0f:00 UTC, 15. sep. 2020'
 
 # update the view to ensure updated data information
 renderView1.Update()
@@ -111,46 +118,19 @@ annotateTimeFilter1.Scale = 0.0002777777777777778
 # update the view to ensure updated data information
 renderView1.Update()
 
-# get camera animation track for the view
-cameraAnimationCue1 = GetCameraTrack(view=renderView1)
-
-# create keyframes for this animation track
-
-# create a key frame
-keyFrame15980 = CameraKeyFrame()
-keyFrame15980.Position = [6490203.814580697, 335645.9177908342, 11839358.935738495]
-keyFrame15980.FocalPoint = [-1140808.7231353712, 2367074.5126317227, 823358.8605524981]
-keyFrame15980.ViewUp = [-0.8250813257113501, -0.15854170710145818, 0.5423147914926869]
-keyFrame15980.ParallelScale = 11009723.242661461
-keyFrame15980.PositionPathPoints = [0.0, -4.799127132977675, -1.4029892235927837, 1.6605344456757887, -4.562983983682464, 1.1923936092505267, 2.6868011725933916, -2.583936042741949, 3.332322611328297, 2.686801172593391, 0.38208764177008936, 4.199417637358462, 1.660534445675788, 3.2021668338072473, 3.4624778588734757, -2.220446049250313e-16, 4.799127132977672, 1.4029892235927834, -1.660534445675788, 4.562983983682463, -1.1923936092505256, -2.6868011725933907, 2.583936042741948, -3.332322611328295, -2.6868011725933902, -0.3820876417700889, -4.199417637358461, -1.6605344456757873, -3.2021668338072455, -3.4624778588734744]
-keyFrame15980.FocalPathPoints = [0.0, 0.0, 0.0]
-keyFrame15980.ClosedPositionPath = 1
-
-# create a key frame
-keyFrame15981 = CameraKeyFrame()
-keyFrame15981.KeyTime = 1.0
-keyFrame15981.Position = [6490203.814580697, 335645.9177908342, 11839358.935738495]
-keyFrame15981.FocalPoint = [-1140808.7231353712, 2367074.5126317227, 823358.8605524981]
-keyFrame15981.ViewUp = [-0.8250813257113501, -0.15854170710145818, 0.5423147914926869]
-keyFrame15981.ParallelScale = 11009723.242661461
-
-# initialize the animation track
-cameraAnimationCue1.Mode = 'Path-based'
-cameraAnimationCue1.KeyFrames = [keyFrame15980, keyFrame15981]
-
 # set active source
 SetActiveSource(calculator1)
 
 # create a new 'PVD Reader'
-wrfout_d02pvd = PVDReader(FileName=home+'/results/WRF/Bessaker/2020091500/wrfout_d02.pvd')
+wrfout_d02pvd = PVDReader(FileName=folder+'/wrfout_d02.pvd')
 wrfout_d02pvd.PointArrays = ['P', 'T', 'T2', 'U', 'U10', 'V', 'V10', 'W']
 
 # create a new 'PVD Reader'
-wrfout_d03pvd = PVDReader(FileName=home+'/results/WRF/Bessaker/2020091500/wrfout_d03.pvd')
+wrfout_d03pvd = PVDReader(FileName=folder+'/wrfout_d03.pvd')
 wrfout_d03pvd.PointArrays = ['P', 'T', 'T2', 'U', 'U10', 'V', 'V10', 'W']
 
 # create a new 'PVD Reader'
-wrfout_d04pvd = PVDReader(FileName=home+'/results/WRF/Bessaker/2020091500/wrfout_d04.pvd')
+wrfout_d04pvd = PVDReader(FileName=folder+'/wrfout_d04.pvd')
 wrfout_d04pvd.PointArrays = ['P', 'T', 'T2', 'U', 'U10', 'V', 'V10', 'W']
 
 # show data in view
@@ -257,34 +237,35 @@ wrfout_d01pvdDisplay = Show(wrfout_d01pvd, renderView1, 'UnstructuredGridReprese
 wrfout_d01pvdDisplay.SetRepresentationType('Feature Edges')
 
 # get camera animation track for the view
-cameraAnimationCue1_2 = GetCameraTrack(view=renderView1)
+cameraAnimationCue1 = GetCameraTrack(view=renderView1)
 
 # create keyframes for this animation track
 
 # create a key frame
-keyFrame16856 = CameraKeyFrame()
-keyFrame16856.Position = [13167443.913250923, -6142582.365477984, 31770024.277042862]
-keyFrame16856.FocalPoint = [0,0,0]
-keyFrame16856.ViewUp = [0,0,1]
-keyFrame16856.ParallelScale = 11009723.242661461
-keyFrame16856.PositionPathPoints = [14810874.01757741, -7268992.661536203, 13631380.526461517, 12825703.015560722, -3025086.830466129, 16177647.659417953, 7033799.63242234,697025.3582761172, 12527111.38757966, 3582577.382017896, 632713.4233301905, 7248154.893394888]
-keyFrame16856.FocalPathPoints = [2606383.1177147585, 471439.00487497053, 5463132.285989471]
-keyFrame16856.ClosedPositionPath = 0
+keyFrame = CameraKeyFrame()
+keyFrame.Position = [13167443.913250923, -6142582.365477984, 31770024.277042862]
+keyFrame.FocalPoint = [0,0,0]
+keyFrame.ViewUp = [0,0,1]
+keyFrame.ParallelScale = 11009723.242661461
+if case == 'Frankfurt':
+	keyFrame.PositionPathPoints = [14811530.60603528, -7269862.549400556, 13631730.556501828, 13838079.65527507, -2329375.6717371917, 15094400.640107533, 8879091.440577025, 1284076.780895559, 10785237.269407991, 4903449.064884835,753731.8394898069, 5952040.955273723]
+elif case == 'Bessaker':
+	keyFrame.PositionPathPoints = [14810874.01757741, -7268992.661536203, 13631380.526461517, 12825703.015560722, -3025086.830466129, 16177647.659417953, 7033799.63242234,697025.3582761172, 12527111.38757966, 3582577.382017896, 632713.4233301905, 7248154.893394888]
+
+keyFrame.FocalPathPoints = [0.0, 0.0, 0.0]
+keyFrame.ClosedPositionPath = 0
 
 # create a key frame
-keyFrame16857 = CameraKeyFrame()
-keyFrame16857.KeyTime = 1.0
-keyFrame16857.Position = [13167443.913250923, -6142582.365477984, 31770024.277042862]
-keyFrame16857.FocalPoint = [0,0,0]
-keyFrame16857.ViewUp = [0,0,1]
-keyFrame16857.ParallelScale = 11009723.242661461
+dummy_keyFrame = CameraKeyFrame()
+dummy_keyFrame.KeyTime = 1.0
+dummy_keyFrame.Position = [13167443.913250923, -6142582.365477984, 31770024.277042862]
+dummy_keyFrame.FocalPoint = [0,0,0]
+dummy_keyFrame.ViewUp = [0,0,1]
+dummy_keyFrame.ParallelScale = 11009723.242661461
 
 # initialize the animation track
-cameraAnimationCue1_2.Mode = 'Path-based'
-cameraAnimationCue1_2.KeyFrames = [keyFrame16856, keyFrame16857]
-
-# set active source
-SetActiveSource(calculator1)
+cameraAnimationCue1.Mode = 'Path-based'
+cameraAnimationCue1.KeyFrames = [keyFrame, dummy_keyFrame]
 
 # set active source
 SetActiveSource(wrfout_d01pvd)
@@ -431,7 +412,7 @@ renderView1.CameraParallelScale = 11009700.0
 
 # save animation
 if False:
-	SaveAnimation(home+'/Videos/Bessaker.ogv', renderView1, ImageResolution=[1920, 1080],
+	SaveAnimation(home+'/Videos/'+case+'.ogv', renderView1, ImageResolution=[1920, 1080],
 	    FrameRate=15,
 	    FrameWindow=[0, 144])
 

@@ -172,22 +172,24 @@ then
 	RUN_HOURS=66
 elif [[ $CASE == "debug" ]]
 then
-	PARM_CONF=6
+	PARM_CONF=0
 	MAX_DOM=2
-	NP=2
+	GFS_RES="1p00" # resolution (in degrees) in longitude and latitude direction (NOTE: if > 0.25 (0p25) then INTERVAL_SECONDS must be > 10800) First 120 hours available hourly, after that every 3 hours
+	GEOG_DATA_RES="10m" #10m (~19km), 5m (~9km), 2m (~4km), and 30s (~0.9km).
+	NP=1
 	DX=0.25
 	DY=0.25
 	START_YEAR=2020
-	START_MONTH=09
-	START_DAY=15
-	E_WE=40 # number of velocity points in east west direction
-	E_SN=40 # number of velocity points in south north direction
-	E_VERT=40 #  This number must be the same for each domain.
+	START_MONTH=10
+	START_DAY=01
+	E_WE=17 # number of velocity points in east west direction
+	E_SN=17 # number of velocity points in south north direction
+	E_VERT=33 #  This number must be the same for each domain.
 	TIME_STEP=3600 # in seconds (should be 6*dx (in km))
-	REF_LAT=59.9423 # Latitude of a known reference point inside the domain
-	REF_LON=10.72 # Longitude of the same point as used for REF_LAT
-	D_I_PARENT_START="1, 10, 34, 34, 34, 34, 34,"
-	D_J_PARENT_START="1, 10, 34, 34, 34, 34, 34," # 29
+	REF_LAT=59.94234 # Latitude of a known reference point inside the domain
+	REF_LON=10.72005 # Longitude of the same point as used for REF_LAT
+	D_I_PARENT_START="1, 5, 34, 34, 34, 34, 34,"
+	D_J_PARENT_START="1, 5, 34, 34, 34, 34, 34," # 29
 	D_HISTORY_INTERVAL="1,1,1,1,1,1,1," # in minutes
 fi
 

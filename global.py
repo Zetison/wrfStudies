@@ -2,8 +2,8 @@ from os.path import expanduser
 import sys
 import numpy as np
 # insert at 1, 0 is the script path (or '' in REPL)
-sys.path.insert(1, home+'/kode/paraUtils')
 home = expanduser("~")
+sys.path.insert(1, home+'/kode/paraUtils')
 
 import earthInSpace
 import SINTEFlogo
@@ -168,7 +168,7 @@ for i in range(0,3):
 positionPathPoints = np.reshape(positionPathPoints,3*N)
 positionPathPoints = [-1690414.2495330623, -31553988.481395524, 3343847.5804185355, 6702868.940717658,-8233878.7211645115, 14236046.679383121, 5329758.91244422, 67637.01959551555, 13008794.500356803, 11914519.530324157, -531541.9319099111, 12114741.09150445, 5600809.803112263, 9625778.000199161, -17918073.040220123, -2615303.514955571, 7567726.647222995, -18633238.311893556, -18949646.72433445, 25532812.726450253, -2111617.097631029, -21762221.580803443, 7109349.401801563, 11434566.391817434, -22488229.53160724, -12403647.318957299, 10196487.205719497, -18949646.724334415, -26058236.22842707, -1213078.0503668599]
 #positionPathPoints = [-1690414.2495330623, -31553988.481395524, 3343847.5804185355, 6702868.940717658,-8233878.7211645115, 14236046.679383121, 5329758.91244422, 67637.01959551555, 13008794.500356803]
-keyFrame.FocalPathPoints = axisCenter[:2]
+keyFrame.FocalPathPoints = [0.0,0.0,0.0]
 keyFrame.PositionPathPoints = positionPathPoints
 
 dummy_keyFrame = CameraKeyFrame()
@@ -273,7 +273,7 @@ windspeedLUTColorBar.WindowLocation = 'UpperRightCorner'
 renderView1.Update()
 
 # save animation
-if True:
+if False:
 	SaveAnimation(home+'/Videos/global.ogv', renderView1, ImageResolution=[1920, 1080],
 	    FrameRate=15)
 
