@@ -1,9 +1,9 @@
 #!/bin/bash
 #CASE="global"
 #CASE="global"
-#CASE="Bessaker"
+CASE="Bessaker"
 #CASE="SN71990"
-CASE="Frankfurt"
+#CASE="Frankfurt"
 #CASE="SN76914" # Rikshospitalet in Oslo
 #CASE="Elverum" # Sykehuset innlandet Elverum 
 #CASE="SN18700" # OSLO - BLINDERN
@@ -18,8 +18,14 @@ fi
 source $HOME/kode/bashScripts/sourceWRF
 pathToWPS="$WRFDIRECTORY/Build_WRF/WPS"
 pathToWRF="$WRFDIRECTORY/Build_WRF/WRF/run"
-loopForecast=false
+loopForecast=true
 clearNCEPdata=false
+RUN_DAYS=1
+RUN_HOURS=0
+RUN_MINUTES=0
+RUN_SECONDS=0
+START_SIM_DATE="2020-09-24 12:00:00"
+#START_SIM_DATE="$(date -u +'%Y-%m-%d')_$START_HOUR:00:00" # Get date in UTC
 
 while true
 do
@@ -27,18 +33,18 @@ do
 	then
 		current_epoch=$(date -u +%s)
 		TODAY="$(date -u +'%Y-%m-%d')" # Get date in UTC
-		target_epoch=$(date -u +'%s' --date="$TODAY + 12 hour") # Get date in UTC
+		target_epoch=$(date -u +'%s' --date="$START_SIM_DATE UTC")
 		sleep_seconds=$(( $target_epoch - $current_epoch ))
 		date1=$((`date -u +%s` + $sleep_seconds))
 		while [ "$date1" -ge `date -u +%s` ]
 		do
 			echo -ne "Time until extraction of MetCoOp data: $(date -u --date @$(($date1 - `date +%s` )) +%H:%M:%S)\r";
 		done
-		python3 extractData.py --extract_yr
+		python3 extractData.py --extract_yr --folder="$HOME/results/forecastData/"
 
 		current_epoch=$(date -u +%s)
 		TODAY="$(date -u +'%Y-%m-%d')" # Get date in UTC
-		target_epoch=$(date -u +'%s' --date="$TODAY + 18 hour") # Get date in UTC
+		target_epoch=$(date -u +'%s' --date="$START_SIM_DATE UTC + 6 hour")
 		sleep_seconds=$(( $target_epoch - $current_epoch ))
 		date1=$((`date -u +%s` + $sleep_seconds))
 		while [ "$date1" -ge `date -u +%s` ]
@@ -46,6 +52,9 @@ do
 			echo -ne "Time until start of program: $(date -u --date @$(($date1 - `date +%s` )) +%H:%M:%S)\r";
 		done
 	fi
+	START_YEAR=${START_SIM_DATE:0:4}
+	START_MONTH=${START_SIM_DATE:5:2}
+	START_DAY=${START_SIM_DATE:8:2}
 	source ./parameters
 
 	##############################################################################################
@@ -201,6 +210,7 @@ do
 	fi
 	if [ "$loopForecast" = true ]
 	then
+		START_SIM_DATE=$(date -u +'%Y-%m-%d %H:%M:%S' --date="$START_SIM_DATE UTC + $RUN_DAYS days + $RUN_HOURS hours + $RUN_MINUTES minutes + $RUN_SECONDS seconds")
 		for collector in $VARIABLES 
 		do
 			eval "D_${collector}=\"\""
