@@ -329,7 +329,6 @@ else
 fi
 n_we_1=$((E_WE/3))
 n_sn_1=$((E_SN/3))
-START_DATE="$START_YEAR-$START_MONTH-${START_DAY}_$START_HOUR:00:00"
 POLE_LAT=$(echo "90.0 - $REF_LAT" | bc -l)   # Discretization time step
 POLE_LON=180
 STAND_LON=-$REF_LON # A real value specifying the longitude that is parallel with the y-axis in conic and azimuthal projections.
@@ -356,6 +355,7 @@ else
 	TIME_STEP=$(round "6*$DX/1000")
 	MIN_TIME_STEP=$(round "0.001*$DX/1000")
 fi
+START_DATE="$START_YEAR-$START_MONTH-${START_DAY}_$START_HOUR:00:00"
 if [[ "$RUNGLOBAL" = true ]]
 then
 	END_DATE=$START_DATE # only initial conditions are needed for a global run
@@ -366,7 +366,9 @@ END_YEAR=${END_DATE:0:4}
 END_MONTH=${END_DATE:5:2}
 END_DAY=${END_DATE:8:2}
 END_HOUR=${END_DATE:11:2}
-NCEPstorageDate=$(date -u +'%s' --date="$TODAY - 11 days")
+
+TODAY="$(date -u +'%Y-%m-%d')" # Get date in UTC
+NCEPstorageDate=$(date -u +'%s' --date="$TODAY - 10 days")
 if [[ $GFS_RES == "0p25" ]] && [[ $NCEPstorageDate -lt $(date -d ${START_DATE:0:10} +%s) ]]
 then
 	INTERVAL_SECONDS=3600

@@ -29,8 +29,10 @@ def getYRdata(endpoint, parameters, field):
 @click.command()
 @click.option('--sourceid', default='SN18700')
 @click.option('--timeresolution', default='PT1H')
+@click.option('--plotdata/--no-plotdata', default=True)
+@click.option('--ploterror/--no-ploterror', default=False)
 @click.option('--folder', default='/home/zetison/results/forecastData/')
-def main(sourceid,folder,timeresolution):
+def main(sourceid,folder,timeresolution,plotdata,ploterror):
 	
 
 	########################################################################
@@ -98,30 +100,65 @@ def main(sourceid,folder,timeresolution):
 
 	########################################################################
 	# Plot data
-	fig, axs = plt.subplots(3, sharex=True)
-	if yrDataFound:
-		lines = axs[0].plot(df_YR.time,df_YR.air_temperature,'g', label = 'MetCoOp forecast')
-		lines2 = axs[1].plot(df_YR.time,df_YR.wind_speed,'g', label = 'MetCoOp forecast')
-		lines3 = axs[2].plot(df_YR.time,df_YR.wind_from_direction,'g', label = 'MetCoOp forecast')
-
-	if wrfDataFound:	
-		lines = axs[0].plot(df_wrf.time,df_wrf.air_temperature,'b', label = 'WRF forecast')
-		lines2 = axs[1].plot(df_wrf.time,df_wrf.wind_speed,'b', label = 'WRF forecast')
-		lines3 = axs[2].plot(df_wrf.time,df_wrf.wind_from_direction,'b', label = 'WRF forecast')
-
-	lines = axs[0].plot(df_obs.time,df_obs.air_temperature,'r', label = 'Observation data')
-	lines2 = axs[1].plot(df_obs.time,df_obs.wind_speed,'r', label = 'Observation data')
-	lines3 = axs[2].plot(df_obs.time,df_obs.wind_from_direction,'r', label = 'Observation data')
-	axs[0].legend()
-	axs[1].legend()
-	axs[2].legend()
-	axs[0].set(xlabel='Time', ylabel='Temperature [°C]')
-	axs[1].set(xlabel='Time', ylabel='Wind speed [m/s]')
-	axs[2].set(xlabel='Time', ylabel='Wind from direction [degrees]')
-	axs[0].set_xlim(startdate,enddate)
-	axs[1].set_xlim(startdate,enddate)
-	axs[2].set_xlim(startdate,enddate)
-	plt.show()
+	if plotdata:
+		fig, axs = plt.subplots(3, sharex=True)
+		fig.suptitle('Weather forecast comparison between MetCoOp and WRF simulations at '+sourceid)
+		if yrDataFound:
+			lines = axs[0].plot(df_YR.time,df_YR.air_temperature,'g', label = 'MetCoOp forecast')
+			lines2 = axs[1].plot(df_YR.time,df_YR.wind_speed,'g', label = 'MetCoOp forecast')
+			lines3 = axs[2].plot(df_YR.time,df_YR.wind_from_direction,'g', label = 'MetCoOp forecast')
+	
+		if wrfDataFound:	
+			lines = axs[0].plot(df_wrf.time,df_wrf.air_temperature,'b', label = 'WRF forecast')
+			lines2 = axs[1].plot(df_wrf.time,df_wrf.wind_speed,'b', label = 'WRF forecast')
+			lines3 = axs[2].plot(df_wrf.time,df_wrf.wind_from_direction,'b', label = 'WRF forecast')
+	
+		lines = axs[0].plot(df_obs.time,df_obs.air_temperature,'r', label = 'Observation data')
+		lines2 = axs[1].plot(df_obs.time,df_obs.wind_speed,'r', label = 'Observation data')
+		lines3 = axs[2].plot(df_obs.time,df_obs.wind_from_direction,'r', label = 'Observation data')
+		axs[0].legend()
+		axs[1].legend()
+		axs[2].legend()
+		axs[0].set(xlabel='Time', ylabel='Temperature [°C]')
+		axs[1].set(xlabel='Time', ylabel='Wind speed [m/s]')
+		axs[2].set(xlabel='Time', ylabel='Wind from direction [degrees]')
+		axs[0].set_xlim(startdate,enddate)
+		axs[1].set_xlim(startdate,enddate)
+		axs[2].set_xlim(startdate,enddate)
+		plt.show()
+	
+	########################################################################
+	# Plot error
+	if ploterror:
+		fig, axs = plt.subplots(3, sharex=True)
+		fig.suptitle('Weather forecast comparison between MetCoOp and WRF simulations at '+sourceid)
+		fields = ['air_temperature','wind_speed', 'wind_from_direction']
+		noFields = len(fields)
+		df_YR_i = df_obs[fields].copy() 
+		df_wrf_i = df_obs[fields].copy() 
+		for j in range(0,noFields):
+			df_YR_i[fields[j]] = np.interp(np.array(df_obs.time).astype(float),np.array(df_YR.time).astype(float),df_YR[fields[j]])
+			df_wrf_i[fields[j]] = np.interp(np.array(df_obs.time).astype(float),np.array(df_wrf.time).astype(float),df_wrf[fields[j]])
+			df_obs[fields[j]] = np.array(df_obs[fields[j]])
+		
+		order = 2 # order of global norm
+		for j in range(0,noFields):
+			yr_error = 100*np.linalg.norm(df_YR_i[fields[j]]-df_obs[fields[j]], ord=order)/np.linalg.norm(df_obs[fields[j]], ord=order)
+			wrf_error = 100*np.linalg.norm(df_wrf_i[fields[j]]-df_obs[fields[j]], ord=order)/np.linalg.norm(df_obs[fields[j]], ord=order)
+			axs[j].set_title(r'Relative $l_'+str(order)+'$-errors: MetCoOp: '+'{0:.1f}'.format(yr_error)+'%, WRF: '+'{0:.1f}'.format(wrf_error)+'%')
+			axs[j].semilogy(df_obs.time,100*np.abs(df_YR_i[fields[j]]-df_obs[fields[j]])/max(np.abs(df_obs[fields[j]])),'g', label = 'MetCoOp')
+			axs[j].semilogy(df_obs.time,100*np.abs(df_wrf_i[fields[j]]-df_obs[fields[j]])/max(np.abs(df_obs[fields[j]])),'b', label = 'WRF')
+	
+		axs[0].legend()
+		axs[1].legend()
+		axs[2].legend()
+		axs[0].set(xlabel='Time', ylabel='Relative temperature error [%]')
+		axs[1].set(xlabel='Time', ylabel='Relative wind speed error [%]')
+		axs[2].set(xlabel='Time', ylabel='Relative wind from direction error [%]')
+		axs[0].set_xlim(startdate,enddate)
+		axs[1].set_xlim(startdate,enddate)
+		axs[2].set_xlim(startdate,enddate)
+		plt.show()
 	
 if __name__ == '__main__':
     main()
