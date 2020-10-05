@@ -2,9 +2,15 @@
 NP=16
 MAX_DOM=1
 GEOG_DATA_RES="usgs_lakes+30s" #10m (~19km), 5m (~9km), 2m (~4km), and 30s (~0.9km).
+GEOG_DATA_RES="30s" #10m (~19km), 5m (~9km), 2m (~4km), and 30s (~0.9km).
 GFS_RES="0p25" # resolution (in degrees) in longitude and latitude direction (NOTE: if > 0.25 (0p25) then INTERVAL_SECONDS must be > 10800) First 120 hours available hourly, after that every 3 hours
-if [[ "$loopForecast" != true ]]
+if [[ "$loopForecast" = true ]]
 then
+	START_YEAR=${START_SIM_DATE:0:4}
+	START_MONTH=${START_SIM_DATE:5:2}
+	START_DAY=${START_SIM_DATE:8:2}
+	START_HOUR=${START_SIM_DATE:11:2}
+else
 	RUN_DAYS=0
 	RUN_HOURS=3
 	RUN_MINUTES=0
