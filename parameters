@@ -1,5 +1,5 @@
 #!/bin/bash
-NP=16
+NP=32
 MAX_DOM=1
 GEOG_DATA_RES="usgs_lakes+30s" #10m (~19km), 5m (~9km), 2m (~4km), and 30s (~0.9km).
 GEOG_DATA_RES="30s" #10m (~19km), 5m (~9km), 2m (~4km), and 30s (~0.9km).
@@ -96,7 +96,7 @@ then
 	fi
 elif [[ $CASE == "SN76914" ]] || [[ $CASE == "SN18700" ]] || [[ $CASE == "Elverum" ]] || [[ $CASE == "Bessaker" ]] || [[ $CASE == "SN71990" ]] || [[ $CASE == "Frankfurt" ]]
 then
-	NP=1
+	#NP=1
 	PARM_CONF=0
 	MAX_DOM=4
 	MAP_PROJ="lat-lon" # Accepted projections are 'lambert', 'polar', 'mercator', and 'lat-lon.'
@@ -106,12 +106,12 @@ then
 	#DX=9000
 	#DY=9000
 	GFS_RES="0p25" # resolution (in degrees) in longitude and latitude direction (NOTE: if > 0.25 (0p25) then INTERVAL_SECONDS must be > 10800) First 120 hours available hourly, after that every 3 hours
-	GFS_RES="1p00" # resolution (in degrees) in longitude and latitude direction (NOTE: if > 0.25 (0p25) then INTERVAL_SECONDS must be > 10800) First 120 hours available hourly, after that every 3 hours
+	#GFS_RES="1p00" # resolution (in degrees) in longitude and latitude direction (NOTE: if > 0.25 (0p25) then INTERVAL_SECONDS must be > 10800) First 120 hours available hourly, after that every 3 hours
 	E_WE=100 # number of velocity points in east west direction
 	E_SN=100 # number of velocity points in south north direction
 	E_VERT=50 #  This number must be the same for each domain.
-	E_WE=16 # number of velocity points in east west direction
-	E_SN=16 # number of velocity points in south north direction
+	#E_WE=16 # number of velocity points in east west direction
+	#E_SN=16 # number of velocity points in south north direction
 	E_VERT=33 #  This number must be the same for each domain.
 	TIME_STEP=6 # in seconds (should be 6*dx (in km))
 
@@ -389,8 +389,6 @@ START_DATE="$START_YEAR-$START_MONTH-${START_DAY}_$START_HOUR:00:00"
 END_DATE="${END_YEAR}-${END_MONTH}-${END_DAY}_${END_HOUR}:00:00"
 SED_VARIABLES="DIFF_6TH_OPT SST_UPDATE W_DAMPING CHEM_ADV_OPT TKE_ADV_OPT MOIST_ADV_OPT SCALAR_ADV_OPT DIFF_OPT MIN_TIME_STEP NUM_LAND_CAT ISFFLX FRACTIONAL_SEAICE SEAICE_THRESHOLD NUM_SOIL_LAYERS BL_MYNN_MIXLENGTH SWINT_OPT INTERVAL_SECONDS RUN_DAYS RUN_HOURS RUN_MINUTES RUN_SECONDS TRUELAT1 TRUELAT2 REF_LAT REF_LON STAND_LON GEOG_DATA_PATH MAX_DOM START_DATE TIME_STEP NCL_OUTPUT_TYPE MAP_PROJ DX DY POLE_LAT POLE_LON D_POLAR D_SPECIFIED D_HISTORY_INTERVAL NUM_METGRID_LEVELS NUM_METGRID_SOIL_LEVELS USE_ADAPTIVE_TIME_STEP"
 VARIABLES="START_DATE I_PARENT_START J_PARENT_START SF_URBAN_PHYSICS CUDT BL_MYNN_TKEBUDGET RADT PARENT_GRID_RATIO E_WE E_SN E_VERT START_YEAR START_MONTH START_DAY START_HOUR END_DATE END_YEAR END_MONTH END_DAY END_HOUR GEOG_DATA_RES MP_PHYSICS CU_PHYSICS RA_LW_PHYSICS RA_SW_PHYSICS BL_PBL_PHYSICS SF_SFCLAY_PHYSICS SF_SURFACE_PHYSICS FRAMES_PER_OUTFILE"
-echo "START_DATE="$START_DATE
-echo "D_START_DATE="$D_START_DATE
 for i in $(seq 1 $MAX_DOM)
 do
 	D_GRID_ID="${D_GRID_ID}$i, "
@@ -462,7 +460,6 @@ do
 		fi
 	done
 done
-echo "D_START_DATE="$D_START_DATE 
 VARIABLES="$VARIABLES GRID_ID PARENT_ID"
 COLLECTORS=$(echo "$VARIABLES" | sed 's/[^ ]*/D_&/g')
 SED_VARIABLES="$SED_VARIABLES $COLLECTORS"
