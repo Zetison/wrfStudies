@@ -10,7 +10,7 @@ CASE="Bessaker"
 #CASE="ATBcase1" # OSLO - BLINDERN
 #CASE="nested"
 #CASE="YR"
-#CASE="debug"
+CASE="debug"
 if [ -z "$DISPLAY" ]
 then
 	echo "Error: set the DISPLAY variable" #The display variable should be set for post processing purposes in paraview. This issue arises when using screen, and can be resolved by first getting the display variable outside the screen session (echo $DISPLAY) and then inside the screen session setting the variable to this value (i.e. export DISPLAY=localhost:10.0)"
@@ -24,7 +24,7 @@ RUN_DAYS=1
 RUN_HOURS=0
 RUN_MINUTES=0
 RUN_SECONDS=0
-START_SIM_DATE="2020-09-24 12:00:00"
+START_SIM_DATE="2020-09-29 12:00:00"
 #START_SIM_DATE="$(date -u +'%Y-%m-%d')_$START_HOUR:00:00" # Get date in UTC
 
 while true
@@ -40,7 +40,7 @@ do
 		do
 			echo -ne "Time until extraction of MetCoOp data: $(date -u --date @$(($date1 - `date +%s` )) +%H:%M:%S)\r";
 		done
-		python3 extractData.py --extract_yr --folder="$HOME/results/forecastData/"
+	#	python3 extractData.py --extract_yr --folder="$HOME/results/forecastData/"
 
 		current_epoch=$(date -u +%s)
 		TODAY="$(date -u +'%Y-%m-%d')" # Get date in UTC
@@ -52,9 +52,6 @@ do
 			echo -ne "Time until start of program: $(date -u --date @$(($date1 - `date +%s` )) +%H:%M:%S)\r";
 		done
 	fi
-	START_YEAR=${START_SIM_DATE:0:4}
-	START_MONTH=${START_SIM_DATE:5:2}
-	START_DAY=${START_SIM_DATE:8:2}
 	source ./parameters
 
 	##############################################################################################
@@ -82,6 +79,7 @@ do
 	then
 		rm -f $WRFDIRECTORY/Build_WRF/DATA/*
 	fi
+
 	pushd $WRFDIRECTORY/Build_WRF/DATA > /dev/null
 	if [[ $NCEPstorageDate -ge $(date -d ${START_DATE:0:10} +%s) ]]
 	then
@@ -96,6 +94,7 @@ do
 	pathToResults="$HOME/results/WRF/$CASE/$COMP_START_DATE"
 	mkdir -p $pathToResults
 	cp -f namelist.wps plotgrids_new.ncl plotgrids_global.ncl wrf_wps_ter.ncl $pathToWPS
+
 	pushd $pathToWPS > /dev/null
 	if [[ "$RUNGLOBAL" = true ]]
 	then

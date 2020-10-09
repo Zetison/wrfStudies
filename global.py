@@ -1,7 +1,6 @@
 from os.path import expanduser
 import sys
 import numpy as np
-# insert at 1, 0 is the script path (or '' in REPL)
 home = expanduser("~")
 sys.path.insert(1, home+'/kode/paraUtils')
 
@@ -265,8 +264,7 @@ windspeedLUT.EnableOpacityMapping = 1
 windspeedLUTColorBar = GetScalarBar(windspeedLUT, renderView1)
 
 # change scalar bar placement
-windspeedLUTColorBar.WindowLocation = 'AnyLocation'
-windspeedLUTColorBar.ScalarBarLength = 0.32999999999999985
+windspeedLUTColorBar.ScalarBarLength = 0.33
 windspeedLUTColorBar.WindowLocation = 'UpperRightCorner'
 
 # update the view to ensure updated data information

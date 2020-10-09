@@ -1,5 +1,6 @@
 # Script based on https://frost.met.no/python_example.html
 # Libraries needed (pandas is not standard and must be installed in Python)
+from os.path import expanduser
 import requests
 import pandas as pd
 from netCDF4 import Dataset
@@ -8,6 +9,8 @@ import wrf
 from datetime import date
 from os import path
 import click
+home = expanduser("~")
+
 # Insert your own client ID here
 client_id = '24c65298-cf22-4c73-ad01-7c6b2c009626'
 
@@ -27,7 +30,7 @@ def getYRdata(endpoint, parameters, field):
 	    print('Reason: %s' % json['error']['reason'])
 
 @click.command()
-@click.option('--folder', default='/home/joveve/results/forecastData/')
+@click.option('--folder', default=home+'/results/forecastData/')
 @click.option('--append/--no-append', default=True)
 @click.option('--extract_yr/--no-extract_yr', default=False)
 @click.option('--extract_wrf/--no-extract_wrf', default=False)
