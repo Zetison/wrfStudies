@@ -24,8 +24,9 @@ RUN_DAYS=1
 RUN_HOURS=0
 RUN_MINUTES=0
 RUN_SECONDS=0
+START_HOUR=12
 START_SIM_DATE="2020-09-30 12:00:00"
-#START_SIM_DATE="$(date -u +'%Y-%m-%d')_$START_HOUR:00:00" # Get date in UTC
+START_SIM_DATE="$(date -u +'%Y-%m-%d') $START_HOUR:00:00" # Get date in UTC
 
 while true
 do
