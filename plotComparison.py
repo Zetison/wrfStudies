@@ -143,8 +143,9 @@ def main(sourceid,folder,timeresolution,plotdata,ploterror):
 		
 		order = 2 # order of global norm
 		for j in range(0,noFields):
-			yr_error = 100*np.linalg.norm(df_YR_i[fields[j]]-df_obs[fields[j]], ord=order)/np.linalg.norm(df_obs[fields[j]], ord=order)
-			wrf_error = 100*np.linalg.norm(df_wrf_i[fields[j]]-df_obs[fields[j]], ord=order)/np.linalg.norm(df_obs[fields[j]], ord=order)
+			idx = np.argwhere(np.isnan(np.array(df_obs[fields[j]]).astype(float)) == False)[0]
+			yr_error = 100*np.linalg.norm(df_YR_i[fields[j]][idx]-df_obs[fields[j]][idx], ord=order)/np.linalg.norm(df_obs[fields[j]][idx], ord=order)
+			wrf_error = 100*np.linalg.norm(df_wrf_i[fields[j]][idx]-df_obs[fields[j]][idx], ord=order)/np.linalg.norm(df_obs[fields[j]][idx], ord=order)
 			axs[j].set_title(r'Relative $l_'+str(order)+'$-errors: MetCoOp: '+'{0:.1f}'.format(yr_error)+'%, WRF: '+'{0:.1f}'.format(wrf_error)+'%')
 			axs[j].semilogy(df_obs.time,100*np.abs(df_YR_i[fields[j]]-df_obs[fields[j]])/max(np.abs(df_obs[fields[j]])),'g', label = 'MetCoOp')
 			axs[j].semilogy(df_obs.time,100*np.abs(df_wrf_i[fields[j]]-df_obs[fields[j]])/max(np.abs(df_obs[fields[j]])),'b', label = 'WRF')
