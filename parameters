@@ -58,8 +58,7 @@ then
 	RUN_HOURS=0
 	D_I_PARENT_START="1, 84, 34, 34, 34, 34, 34,"
 	D_J_PARENT_START="1, 34, 34, 34, 34, 34, 34," # 29
-	D_HISTORY_INTERVAL="180,180,180,180,180,180,180," # in minutes
-	D_HISTORY_INTERVAL="60,60,60,60,60,60,60," # in minutes
+	D_HISTORY_INTERVAL="3600,3600,3600,3600,3600,3600,3600," # in seconds
 	USE_ADAPTIVE_TIME_STEP=".true."
 	REF_LAT=0 # Latitude of a known reference point inside the domain
 	REF_LON=0 # Longitude of the same point as used for REF_LAT
@@ -77,7 +76,7 @@ then
 	TIME_STEP=6 # in seconds (should be 6*dx (in km))
 	RUN_DAYS=0
 
-	D_HISTORY_INTERVAL="10,10,10,10,10,10,10," # in minutes
+	D_HISTORY_INTERVAL="600,600,600,600,600,600,600," # in seconds
 	# Use Blindern location:
 	REF_LAT=59.9423 # Latitude of a known reference point inside the domain
 	REF_LON=10.72 # Longitude of the same point as used for REF_LAT
@@ -115,7 +114,8 @@ then
 	E_VERT=33 #  This number must be the same for each domain.
 	TIME_STEP=6 # in seconds (should be 6*dx (in km))
 
-	D_HISTORY_INTERVAL="10,10,10,10,10,10,10," # in minutes
+	#D_HISTORY_INTERVAL="600,600,600,600,600,600,600," # in seconds
+	D_HISTORY_INTERVAL="31,31,31,31,31,31,31,31," # in seconds
 	if [[ $CASE == "SN76914" ]]
 	then
 		REF_LAT=59.9492 # Latitude of a known reference point inside the domain
@@ -152,7 +152,7 @@ then
 	RUN_HOURS=3
 	D_I_PARENT_START="1, 84, 34, 34, 34, 34, 34,"
 	D_J_PARENT_START="1, 34, 34, 34, 34, 34, 34," # 29
-	D_HISTORY_INTERVAL="1,1,1,1,1,1,1,1," # in minutes
+	D_HISTORY_INTERVAL="60,60,60,60,60,60,60,60," # in seconds
 	REF_LAT=63.414061 # Latitude of a known reference point inside the domain
 	REF_LON=10.407602 # Longitude of the same point as used for REF_LAT
 elif [[ $CASE == "YR" ]]
@@ -161,7 +161,7 @@ then
 	E_SN=400 # number of velocity points in south north direction
 	E_VERT=51 #  This number must be the same for each domain.
 	TIME_STEP=15 # in seconds (should be 6*dx (in km))
-	D_HISTORY_INTERVAL="60,60,60,60,60,60,60," # in minutes
+	D_HISTORY_INTERVAL="3600,3600,3600,3600,3600,3600,3600," # in seconds
 	MAP_PROJ="lambert"
 	DX=2500
 	DY=2500
@@ -190,7 +190,7 @@ then
 	TIME_STEP=3600 # in seconds (should be 6*dx (in km))
 	REF_LAT=59.94234 # Latitude of a known reference point inside the domain
 	REF_LON=10.72005 # Longitude of the same point as used for REF_LAT
-	D_HISTORY_INTERVAL="60,60,60,60,60,60,60," # in minutes
+	D_HISTORY_INTERVAL="3600,3600,3600,3600,3600,3600,3600," # in seconds
 fi
 
 

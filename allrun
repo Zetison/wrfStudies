@@ -1,9 +1,9 @@
 #!/bin/bash
 #CASE="global"
 #CASE="global"
-CASE="Bessaker"
+#CASE="Bessaker"
 #CASE="SN71990"
-#CASE="Frankfurt"
+CASE="Frankfurt"
 #CASE="SN76914" # Rikshospitalet in Oslo
 #CASE="Elverum" # Sykehuset innlandet Elverum 
 #CASE="SN18700" # OSLO - BLINDERN
@@ -25,8 +25,8 @@ RUN_HOURS=0
 RUN_MINUTES=0
 RUN_SECONDS=0
 START_HOUR=12
-START_SIM_DATE="2020-09-30 12:00:00"
-START_SIM_DATE="$(date -u +'%Y-%m-%d') $START_HOUR:00:00" # Get date in UTC
+START_SIM_DATE="2020-12-05 12:00:00"
+#START_SIM_DATE="$(date -u +'%Y-%m-%d') $START_HOUR:00:00" # Get date in UTC
 
 while true
 do
