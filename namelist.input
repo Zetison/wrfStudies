@@ -13,7 +13,7 @@
  end_hour                            = SED_D_END_HOUR
  interval_seconds                    = SED_INTERVAL_SECONDS,
  input_from_file                     = .true.,
- history_interval_s                  = SED_D_HISTORY_INTERVAL
+ history_interval                    = SED_D_HISTORY_INTERVAL
  frames_per_outfile                  = SED_D_FRAMES_PER_OUTFILE
  restart                             = .false.,
  restart_interval                    = 7200,
@@ -82,7 +82,7 @@
  surface_input_source                = 1,
  sst_update                          = SED_SST_UPDATE,
  usemonalb                           = .true.,
- prec_acc_dt                         = SED_D_HISTORY_INTERVAL
+ prec_acc_dt                         = 0.,
  /
 
  &fdda

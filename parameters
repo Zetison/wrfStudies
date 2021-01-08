@@ -50,8 +50,7 @@ then
 	#E_SN=91 # number of velocity points in south north direction
 	E_WE=41 # number of velocity points in east west direction
 	E_SN=21 # number of velocity points in south north direction
-	E_VERT=50 # number of points in the vertical directions. This number must be the same for each domain.
-	TIME_STEP=300 # in seconds (should be 6*dx (in km))
+	E_VERT=50 # number of points in the vertical directions. This number must be the same for each domain.  TIME_STEP=300 # in seconds (should be 6*dx (in km))
 	#TIME_STEP=600 # in seconds (should be 6*dx (in km))
 	#TIME_STEP=3600 # in seconds (should be 6*dx (in km))
 	RUN_DAYS=30
@@ -115,7 +114,10 @@ then
 	TIME_STEP=6 # in seconds (should be 6*dx (in km))
 
 	#D_HISTORY_INTERVAL="600,600,600,600,600,600,600," # in seconds
-	D_HISTORY_INTERVAL="31,31,31,31,31,31,31,31," # in seconds
+	#D_HISTORY_INTERVAL="31,31,31,31,31,31,31,31," # in seconds
+	#D_HISTORY_INTERVAL="10,10,10,10,10,10,10," # in seconds
+	D_HISTORY_INTERVAL="2,2,2,2,2,2,2,2,2," # in seconds
+	#D_HISTORY_INTERVAL="1,1,1,1,1,1,1," # in seconds
 	if [[ $CASE == "SN76914" ]]
 	then
 		REF_LAT=59.9492 # Latitude of a known reference point inside the domain
@@ -187,10 +189,11 @@ then
 	E_WE=16 # number of velocity points in east west direction
 	E_SN=16 # number of velocity points in south north direction
 	E_VERT=33 #  This number must be the same for each domain.
-	TIME_STEP=3600 # in seconds (should be 6*dx (in km))
+	TIME_STEP=6 # in seconds (should be 6*dx (in km))
 	REF_LAT=59.94234 # Latitude of a known reference point inside the domain
 	REF_LON=10.72005 # Longitude of the same point as used for REF_LAT
 	D_HISTORY_INTERVAL="3600,3600,3600,3600,3600,3600,3600," # in seconds
+	D_HISTORY_INTERVAL="1,1,1,1,1,1,1," # in seconds
 fi
 
 
