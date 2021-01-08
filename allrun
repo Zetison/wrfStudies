@@ -3,14 +3,14 @@
 #CASE="global"
 #CASE="Bessaker"
 #CASE="SN71990"
-#CASE="Frankfurt"
+CASE="Frankfurt"
 #CASE="SN76914" # Rikshospitalet in Oslo
 #CASE="Elverum" # Sykehuset innlandet Elverum 
 #CASE="SN18700" # OSLO - BLINDERN
 #CASE="ATBcase1" # OSLO - BLINDERN
 #CASE="nested"
 #CASE="YR"
-CASE="debug"
+#CASE="debug"
 if [ -z "$DISPLAY" ]
 then
 	echo "Error: set the DISPLAY variable" #The display variable should be set for post processing purposes in paraview. This issue arises when using screen, and can be resolved by first getting the display variable outside the screen session (echo $DISPLAY) and then inside the screen session setting the variable to this value (i.e. export DISPLAY=localhost:10.0)"
@@ -18,13 +18,20 @@ fi
 source $HOME/kode/bashScripts/sourceWRF
 pathToWPS="$WRFDIRECTORY/Build_WRF/WPS"
 pathToWRF="$WRFDIRECTORY/Build_WRF/WRF/run"
-loopForecast=true
+loopForecast=false
 clearNCEPdata=false
-RUN_DAYS=1
-RUN_HOURS=0
+if [[ $CASE == "debug" ]]
+then
+    RUN_DAYS=0
+    RUN_HOURS=3
+else
+    RUN_DAYS=2
+    RUN_HOURS=0
+fi
 RUN_MINUTES=0
 RUN_SECONDS=0
 START_HOUR=12
+#START_SIM_DATE="2021-01-07 12:00:00"
 START_SIM_DATE="2020-12-05 12:00:00"
 #START_SIM_DATE="2020-12-14 12:00:00"
 #START_SIM_DATE="$(date -u +'%Y-%m-%d') $START_HOUR:00:00" # Get date in UTC
