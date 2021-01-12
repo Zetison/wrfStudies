@@ -1,0 +1,38 @@
+#!/bin/bash
+folderName=$HOME/results/WRF/Frankfurt/lidar/
+pushd $folderName > /dev/null
+filetypes="azi ele vol"
+for filetype in $filetypes
+do
+    pvdfilename="$filetype.pvd"
+    echo -e "<VTKFile type=\"Collection\">" > $pvdfilename
+    echo -e "\t<Collection>" >> $pvdfilename
+    i=0
+    mkdir -p $filetype.pvd-data
+    dateStrings="2020-12-05 2020-12-06"
+    for dateString in $dateStrings 
+    do
+        fileNames=$(ls $dateString/*.$filetype.h5)
+        for filename in $fileNames
+        do
+            time=${filename:34:14}
+            START_SIM_DATE="${time:0:4}-${time:4:2}-${time:6:2} ${time:8:2}:${time:10:2}:${time:12:2}"
+            target_epoch=$(date -u +'%s' --date="$START_SIM_DATE UTC")
+            if [[ "$i" == 0 ]]
+            then
+        	    current_epoch=$target_epoch
+            fi
+        	t=$(( $target_epoch - $current_epoch - 43200 ))
+            vtuFilename=${pvdfilename}-data/data-${i}.vtu
+            vtuFileName=${pvdfilename}-data/data-${i}-1.vtu
+            echo -e "\t\t<DataSet timestep=\"$t\" part=\"0\" file=\"${vtuFileName}\" />" >> $pvdfilename
+            siso -f vtu $filename $vtuFilename --coords utm:32u 
+            i=$(( i + 1 ))
+        done
+    done
+    echo -e "\t</Collection>" >> $pvdfilename
+    echo -e "</VTKFile>" >> $pvdfilename
+done 
+popd > /dev/null
+#siso -f pvd las01_fra_lidar_skiron_2020101123554000V.vol.h5 --coords utm:32u
+#python ~/kode/wrfStudies/plotComparison.py --sourceid Frankfurt --startdate "2020-10-11 12:00:00" --enddate "2020-10-12 12:00:00" --ploterror
