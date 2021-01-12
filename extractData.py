@@ -14,21 +14,39 @@ home = expanduser("~")
 # Insert your own client ID here
 client_id = '24c65298-cf22-4c73-ad01-7c6b2c009626'
 
-def getYRdata(endpoint, parameters, field):
+def getMetdata(endpoint, parameters, field):
     # Issue an HTTP GET request
-    r = requests.get(endpoint, parameters, auth=(client_id,''))
+    rObj = requests.get(endpoint, parameters, auth=(client_id,''))
+    endpoint = rObj.url
+    rObj = requests.get(endpoint, auth=(client_id,''))
     # Extract JSON data
-    json = r.json()
+    json = rObj.json()
     
     # Check if the request worked, print out any errors
-    if r.status_code == 200:
+    if rObj.status_code == 200:
         return json[field]
         print('Data retrieved from frost.met.no!')
     else:
-        print('Error! Returned status code %s' % r.status_code)
+        print('Error! Returned status code %s' % rObj.status_code)
         print('Message: %s' % json['error']['message'])
         print('Reason: %s' % json['error']['reason'])
 
+def getYRdata(endpoint, parameters, field):
+    # Issue an HTTP GET request
+    headers = {
+            'User-Agent': 'jonv',
+            'From': 'jonvegard.venas@sintef.no'  # This is another valid field
+    }
+
+    rObj = requests.get(endpoint, parameters, headers=headers)
+    # Check if the request worked, print out any errors
+    if rObj.status_code == 200:
+        return rObj.json()[field]
+        print('Data retrieved from frost.met.no!')
+    else:
+        print('Error! Returned status code %s' % rObj.status_code)
+        print('url: %s' % rObj.url)
+        
 @click.command()
 @click.option('--folder', default=home+'/results/forecastData/')
 @click.option('--append/--no-append', default=True)
@@ -37,11 +55,11 @@ def getYRdata(endpoint, parameters, field):
 @click.option('--extract_met/--no-extract_met', default=False)
 def main(folder,append,extract_met,extract_yr,extract_wrf): 
     sourceIDlist = ["SN18700", # OSLO - BLINDERN          
-                                "SN6700",  # RV3 Svingen - Elverum
-                                    "SN71900", # Bessaker
-                                    "SN71990", # Buholmråsa fyr
-                                  "SN76914", # ITASMOBAWS1 - Rikshospitalet i Oslo
-                                    "Frankfurt"] # Frankfurt airport
+                    "SN6700",  # RV3 Svingen - Elverum
+                    "SN71900", # Bessaker
+                    "SN71990", # Buholmråsa fyr
+                    "SN76914", # ITASMOBAWS1 - Rikshospitalet i Oslo
+                    "Frankfurt"] # Frankfurt airport
     for sourceID in sourceIDlist:
         ########################################################################
         # Get coordinates for observation point (lon,lat,masl)
@@ -51,7 +69,7 @@ def main(folder,append,extract_met,extract_yr,extract_wrf):
                     'ids': sourceID,
                     }
             
-            data_source = getYRdata(endpoint, parameters, 'data')
+            data_source = getMetdata(endpoint, parameters, 'data')
             masl = data_source[0]['masl']
             lon = data_source[0]['geometry']['coordinates'][0]
             lat = data_source[0]['geometry']['coordinates'][1]
@@ -151,6 +169,7 @@ def main(folder,append,extract_met,extract_yr,extract_wrf):
         # Get YR forecast
         if extract_yr:
             endpoint = 'https://api.met.no/weatherapi/locationforecast/2.0/complete'
+            endpoint = 'https://api.met.no/weatherapi/locationforecast/2.0/compact'
             parameters = {
                 'altitude': masl,
                 'lon': str(lon),
