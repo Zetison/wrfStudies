@@ -29,8 +29,6 @@ rho_inf = 1.3 # is the freestream fluid density (Air at sea level and 15 °C is 
 z_lnPltLvl = 0.6 # z coordinate of 1D plots
 VRADH_max = 3.0
 SAVE_HIST = 10
-noSteps=120
-noSteps=30
 noSteps=2113
 animStart=720
 color = 'blue' # color of SINTEF logo
@@ -43,7 +41,7 @@ plotVolumeRendering = 0
 plotyplus           = 0 
 plotOverTime        = 0
 plotMesh            = 0
-makeVideo           = 0
+makeVideo           = 1
 viewSizeSlice=[1920,520]
 viewSizeSlice2=[2*1920,2*520]
 scalarBarLength = 0.2
@@ -210,7 +208,7 @@ pdo.GetFieldData().AddArray(sexaTime)'
     renderView2.CameraPosition = [466161.5742815666, 5541002.50741783, 231205.32145070643]
     renderView2.CameraFocalPoint = [466161.5742815666, 5541002.50741783, 2535.653536324522]
     renderView2.CameraParallelScale = 17027.58881419862
-    saveAnimation(renderView1,outputPath+'lidarValidation',noSteps,makeVideo,viewSize=viewSizeSlice2,frameRate=frameRate,animStart=animStart, saveAllViews=1)
+    saveAnimation(layout1,outputPath+'lidarValidation',noSteps,makeVideo,viewSize=[1920,1080],frameRate=frameRate,animStart=animStart, saveAllViews=1)
     #saveScreenShot(renderView1,outputPath+'surfaceLICside',saveScreenShots,viewSize=viewSizeSlice)
     #ColorBy(slice1Display, ('CELLS', None))
     #slice1Display.SetScalarBarVisibility(renderView1, False)
