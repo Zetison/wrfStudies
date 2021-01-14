@@ -1,60 +1,80 @@
 #!/bin/bash
+lidarpath=/home/eivindf/cases/SKIRON_HDF5_V
 folderName=$HOME/results/WRF/Frankfurt/lidar/
 pushd $folderName > /dev/null
 #filetypes="azi ele vol"
 filetypes="azi"
 dateStrings="2020-12-05 2020-12-06"
-dateStrings="2020-12-01 2020-11-24 2020-11-17 2020-11-10 2020-11-03 2020-10-27"
-dateStrings="2020-10-27 2020-11-03 2020-11-10 2020-11-17 2020-11-24 2020-12-01"
-dateStrings="2020-10-27"
+dateStringss="2020-11-05 2020-11-06 2020-11-10 2020-11-11 2020-11-21 2020-12-04 2020-12-05"
+dateStringss="2020-11-05"
+RUN_DAYS=1
 if [[ $1 == 1 ]]
 then
-    for filetype in $filetypes
+    for dateStrings in $dateStringss
     do
-        pvdfilename="$filetype.pvd"
-        pvdfilename="$dateStrings.pvd"
-        echo -e "<VTKFile type=\"Collection\">" > $pvdfilename
-        echo -e "\t<Collection>" >> $pvdfilename
-        i=0
-        mkdir -p $filetype.pvd-data
-        for dateString in $dateStrings 
+        for filetype in $filetypes
         do
-            mkdir -p $dateString
-            cp /home/eivindf/cases/SKIRON_HDF5_V/$dateString/*.azi.h5 $dateString
-            fileNames=$(ls $dateString/*.$filetype.h5)
-            for filename in $fileNames
+            #pvdfilename="$filetype.pvd"
+            pvdfilename="$dateStrings.pvd"
+            echo -e "<VTKFile type=\"Collection\">" > $pvdfilename
+            START_SIM_DATE="$dateStrings 12:00:00"
+            current_epoch=$(date -u +'%s' --date="$START_SIM_DATE UTC")
+            echo -e "\t<Collection>" >> $pvdfilename
+            i=0
+            #mkdir -p $filetype.pvd-data
+            mkdir -p $dateStrings.pvd-data
+            for ((j=0; j<=$RUN_DAYS; j++))
             do
-                time=${filename:34:14}
-                START_SIM_DATE="${time:0:4}-${time:4:2}-${time:6:2} ${time:8:2}:${time:10:2}:${time:12:2}"
-                target_epoch=$(date -u +'%s' --date="$START_SIM_DATE UTC")
-                if [[ "$i" == 0 ]]
-                then
-                    current_epoch=$target_epoch
-                fi
-                t=$(( $target_epoch - $current_epoch - 43200 ))
-                vtuFilename=${pvdfilename}-data/data-${i}.vtu
-                vtuFileName=${pvdfilename}-data/data-${i}-1.vtu
-                echo -e "\t\t<DataSet timestep=\"$t\" part=\"0\" file=\"${vtuFileName}\" />" >> $pvdfilename
-                i=$(( i + 1 ))
+                dateString=$(date -u +'%Y-%m-%d' --date="$START_SIM_DATE UTC + $j days")
+                mkdir -p $dateString
+                cp $lidarpath/$dateString/*.azi.h5 $dateString
+                fileNames=$(ls $dateString/*.$filetype.h5)
+                for filename in $fileNames
+                do
+                    time=${filename:34:14}
+                    START_SIM_DATE="${time:0:4}-${time:4:2}-${time:6:2} ${time:8:2}:${time:10:2}:${time:12:2}"
+                    target_epoch=$(date -u +'%s' --date="$START_SIM_DATE UTC")
+                    t=$(( $target_epoch - $current_epoch ))
+                    vtuFilename=${pvdfilename}-data/data-${i}.vtu
+                    vtuFileName=${pvdfilename}-data/data-${i}-1.vtu
+                    siso -f vtu $filename $vtuFilename --coords utm:32u 
+                    echo -e "\t\t<DataSet timestep=\"$t\" part=\"0\" file=\"${vtuFileName}\" />" >> $pvdfilename
+                    i=$(( i + 1 ))
+                done
             done
-        done
-        echo -e "\t</Collection>" >> $pvdfilename
-        echo -e "</VTKFile>" >> $pvdfilename
-    done 
+            echo -e "\t</Collection>" >> $pvdfilename
+            echo -e "</VTKFile>" >> $pvdfilename
+        done 
+    done
 fi
 if [[ $2 == 1 ]]
 then
-    for dateString in $dateStrings
+    for dateStrings in $dateStringss
     do
-        WRF_FOLDER="${dateString//-}"12
-        SED_VARIABLES="current_epoch WRF_FOLDER"
+        START_SIM_DATE="$dateStrings 12:00:00"
+        pvdfilename="$dateStrings.pvd"
+        current_epoch=$(date -u +'%s' --date="$START_SIM_DATE UTC")
+        WRF_FOLDER="${dateStrings//-}"12
+        SED_VARIABLES="current_epoch pvdfilename WRF_FOLDER"
         DICTS="lidarValidation.py"
         cp $HOME/kode/wrfStudies/lidarValidation.py .
         source $HOME/kode/bashScripts/sedFiles
-        siso -f vtu $filename $vtuFilename --coords utm:32u 
-        pvbatch lidarValidation.py
+        pushd ../$WRF_FOLDER > /dev/null
+        siso -f pvd wrfout_d04.nc wrfout_d04_vol.pvd --coords utm:32u -l P,T,U,V,W
+        popd > /dev/null
+        /usr/lib/ParaView-5.8.1-osmesa-MPI-Linux-Python3.7-64bit/bin/pvbatch lidarValidation.py
     done
 fi
 popd > /dev/null
+
+if [[ $3 == 1 ]]
+then
+    folders=$(ls $lidarpath )
+    for folder in $folders
+    do
+        echo "Number of azi files in folder "$folder
+        find $lidarpath/$folder -mindepth 1 -type f -name "*.azi.h5" -printf x | wc -c
+    done
+fi
 #siso -f pvd las01_fra_lidar_skiron_2020101123554000V.vol.h5 --coords utm:32u
 #python ~/kode/wrfStudies/plotComparison.py --sourceid Frankfurt --startdate "2020-10-11 12:00:00" --enddate "2020-10-12 12:00:00" --ploterror
