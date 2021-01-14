@@ -1,17 +1,6 @@
 from os.path import expanduser,exists
-import sys
-import numpy as np
-
-import vtk
-from splipy.io import G2
-import numpy as np
-from vtk.util.numpy_support import vtk_to_numpy
-import vtk.util.numpy_support as vtknp
-import splipy.surface_factory as sfac
-from splipy import SplineObject,BSplineBasis
-
-#### import the simple module from the paraview
 from paraview.simple import *
+#### disable automatic camera reset on 'Show'
 #### disable automatic camera reset on 'Show'
 paraview.simple._DisableFirstRenderCameraReset()
  
@@ -21,6 +10,7 @@ from utils import *
 from sources import cone 
 ref = 0
 outputPath = home+'/results/WRF/Frankfurt/lidar/'
+ImportPresets(filename=home+'/kode/colormaps/SINTEF1.json')
 saveScreenShots = True
 importData = False
 u_inf = 10.0 # is the freestream velocity of the fluid
@@ -42,7 +32,7 @@ plotVolumeRendering = 0
 plotyplus           = 0 
 plotOverTime        = 0
 plotMesh            = 0
-makeVideo           = 1
+makeVideo           = 1 
 viewSizeSlice=[1920,520]
 viewSizeSlice2=[2*1920,2*520]
 scalarBarLength = 0.2
@@ -52,11 +42,10 @@ phi = 3
 h_max = 900 - lidarLoc[2]
 # get animation scene
 animationScene1 = GetAnimationScene()
-LoadPlugin(home+'/programs/paraview_build/lib/paraview-5.8/plugins/SurfaceLIC/SurfaceLIC.so', remote=False, ns=globals())
 # get the time-keeper
 timeKeeper1 = GetTimeKeeper()
-fileName = outputPath+'azi.pvd'
-wrfFileName = outputPath+'../SED_WRF_FOLDER/wrfout_d04.pvd'
+fileName = outputPath+'SED_pvdfilename'
+wrfFileName = outputPath+'../SED_WRF_FOLDER/wrfout_d04_vol.pvd'
 
 vtkName = outputPath+'cone'
 cone(lidarLoc,h_max,phi,n=200,name=vtkName)
@@ -81,8 +70,6 @@ calculator0 = Calculator(registrationName='Calculator_r', Input=wrf)
 calculator0.Function = '(coordsX-'+str(lidarLoc[0])+')*iHat + (coordsY-'+str(lidarLoc[1])+')*jHat + (coordsZ-'+str(lidarLoc[2])+')*kHat'
 calculator0.ResultArrayName = 'r' 
 
-CGL2LUT = GetColorTransferFunction(CGL2fields[CGL2fields_idx[0]])
-CGL2PWF = GetOpacityTransferFunction(CGL2fields[CGL2fields_idx[0]])
 # create a new 'Calculator'
 calculator1 = Calculator(registrationName='Calculator1', Input=calculator0)
 calculator1.ResultArrayName = 'VRADH'
@@ -155,7 +142,7 @@ pdo.GetFieldData().AddArray(sexaTime)'
     
     # show data in view
     annotateAttributeData1Display = Show(annotateAttributeData1, renderView1, 'TextSourceRepresentation')
-    annotateAttributeData1Display.FontSize = 10
+    annotateAttributeData1Display.FontSize = 8
     #annotateTimeStep(calculator1,renderView1,'UpperLeftCorner', SAVE_HIST,color=[0.0,0.0,0.0])
 
     VRADHLUTColorBar = GetScalarBar(VRADHLUT, renderView1)
@@ -182,13 +169,17 @@ pdo.GetFieldData().AddArray(sexaTime)'
     renderView1.CameraPosition = [466161.5742815666, 5541002.50741783, 231205.32145070643]
     renderView1.CameraFocalPoint = [466161.5742815666, 5541002.50741783, 2535.653536324522]
     renderView1.CameraParallelScale = 17027.58881419862
+    renderView1.ViewSize = [960,1080]
     
     renderView2.OrientationAxesVisibility = 0
     renderView2.InteractionMode = '2D'
     renderView2.CameraPosition = [466161.5742815666, 5541002.50741783, 231205.32145070643]
     renderView2.CameraFocalPoint = [466161.5742815666, 5541002.50741783, 2535.653536324522]
     renderView2.CameraParallelScale = 17027.58881419862
+    renderView2.ViewSize = [960,1080]
+    timeKeeper1 = GetTimeKeeper()
+    timeKeeper1.Time = 0.0
+    saveScreenShot(layout1,outputPath+'SED_WRF_FOLDER',saveScreenShots, saveAllViews=1)
     saveAnimation(layout1,outputPath+'SED_WRF_FOLDER',noSteps,makeVideo,viewSize=[1920,1080],frameRate=frameRate,animStart=animStart, saveAllViews=1)
-
 
 RenderAllViews()
