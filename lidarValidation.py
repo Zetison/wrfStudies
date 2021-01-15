@@ -42,6 +42,8 @@ phi = 3
 h_max = 900 - lidarLoc[2]
 # get animation scene
 animationScene1 = GetAnimationScene()
+# get the time-keeper
+timeKeeper1 = GetTimeKeeper()
 fileName = outputPath+'SED_pvdfilename'
 wrfFileName = outputPath+'../SED_WRF_FOLDER/wrfout_d04_vol.pvd'
 
