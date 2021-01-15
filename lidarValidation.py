@@ -20,7 +20,7 @@ z_lnPltLvl = 0.6 # z coordinate of 1D plots
 VRADH_max = 3.0
 SAVE_HIST = 10
 noSteps=2113
-noSteps=1056
+noSteps=1584
 animStart=720
 color = 'blue' # color of SINTEF logo
 frameRate = 20
@@ -42,8 +42,6 @@ phi = 3
 h_max = 900 - lidarLoc[2]
 # get animation scene
 animationScene1 = GetAnimationScene()
-# get the time-keeper
-timeKeeper1 = GetTimeKeeper()
 fileName = outputPath+'SED_pvdfilename'
 wrfFileName = outputPath+'../SED_WRF_FOLDER/wrfout_d04_vol.pvd'
 
@@ -60,6 +58,13 @@ cellDatatoPointData1 = CellDatatoPointData(registrationName='CellDatatoPointData
 cellDatatoPointData1.CellDataArraytoprocess = ['VRADH']
 # update animation scene based on data timesteps
 animationScene1.UpdateAnimationUsingDataTimeSteps()
+
+# get the time-keeper
+timeKeeper1 = GetTimeKeeper()
+timestepValues = np.array(timeKeeper1.TimestepValues)
+animStart = np.where(timestepValues >= 0.0)[0][0]
+endStep = np.where(timestepValues <= 24*3600)[0][-1]
+noSteps = endStep-animStart+1
 
 # get active view
 renderView1 = GetActiveViewOrCreate('RenderView')
