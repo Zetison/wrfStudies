@@ -22,7 +22,7 @@ RUNGLOBAL=false
 # In order for (REF_LAT REF_LON) to be included as a coordinate in centered nested domains one should have E_WE = 3*n+1, E_SN = 3*m+1 for some integer n and m
 
 USE_ADAPTIVE_TIME_STEP=".true."
-USE_ADAPTIVE_TIME_STEP=".false."
+#USE_ADAPTIVE_TIME_STEP=".false."
 PARM_CONF=0
 FRAMES_PER_OUTFILE=1000000
 #STAND_LON=0
@@ -103,8 +103,8 @@ then
 	#E_SN=16 # number of velocity points in south north direction
 	#E_VERT=33 #  This number must be the same for each domain.
 
-	#D_HISTORY_INTERVAL="600,600,600,600,600,600,600," # in seconds
-	D_HISTORY_INTERVAL="31,31,31,31,31,31,31,31," # in seconds
+	D_HISTORY_INTERVAL="600,600,600,600,600,600,600," # in seconds
+	#D_HISTORY_INTERVAL="31,31,31,31,31,31,31,31," # in seconds
 	#D_HISTORY_INTERVAL="10,10,10,10,10,10,10," # in seconds
 	#D_HISTORY_INTERVAL="2,2,2,2,2,2,2,2,2," # in seconds
 	#D_HISTORY_INTERVAL="1,1,1,1,1,1,1," # in seconds

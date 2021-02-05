@@ -18,21 +18,21 @@ fi
 source $HOME/kode/bashScripts/sourceWRF
 pathToWPS="$WRFDIRECTORY/Build_WRF/WPS"
 pathToWRF="$WRFDIRECTORY/Build_WRF/WRF/run"
-loopForecast=false
+loopForecast=true
 clearNCEPdata=false
 if [[ $CASE == "debug" ]]
 then
     RUN_DAYS=0
     RUN_HOURS=3
 else
-    RUN_DAYS=2
+    RUN_DAYS=1
     RUN_HOURS=0
 fi
 RUN_MINUTES=0
 RUN_SECONDS=0
 START_HOUR=12
-#START_SIM_DATE="2021-01-07 12:00:00"
-START_SIM_DATE="2020-12-05 12:00:00"
+START_SIM_DATE="2021-01-12 12:00:00"
+#START_SIM_DATE="2020-12-06 12:00:00"
 #START_SIM_DATE="2020-12-14 12:00:00"
 #START_SIM_DATE="$(date -u +'%Y-%m-%d') $START_HOUR:00:00" # Get date in UTC
 
@@ -100,7 +100,7 @@ do
 	
 	##############################################################################################
 	## WPS
-	pathToResults="$HOME/results/WRF/$CASE/fine_$COMP_START_DATE"
+	pathToResults="$HOME/results/WRF/$CASE/$COMP_START_DATE"
 	mkdir -p $pathToResults
 	cp -f namelist.wps plotgrids_new.ncl plotgrids_global.ncl wrf_wps_ter.ncl $pathToWPS
 

@@ -9,7 +9,7 @@ sys.path.insert(1, home+'/kode/paraUtils')
 from utils import *
 from sources import cone 
 ref = 0
-outputPath = home+'/results/WRF/Frankfurt/lidar/'
+outputPath = home+'/results/WRF/Frankfurt/lidar/SED_SUBFOLDER'
 ImportPresets(filename=home+'/kode/colormaps/SINTEF1.json')
 saveScreenShots = True
 importData = False
@@ -44,11 +44,11 @@ h_max = 900 - lidarLoc[2]
 animationScene1 = GetAnimationScene()
 # get the time-keeper
 timeKeeper1 = GetTimeKeeper()
-fileName = outputPath+'SED_pvdfilename'
-wrfFileName = outputPath+'../SED_WRF_FOLDER/wrfout_d04_vol.pvd'
+fileName = outputPath+'/SED_pvdfilename'
+wrfFileName = home+'/results/WRF/Frankfurt/SED_WRF_FOLDER/wrfout_d04_vol.pvd'
 
-vtkName = outputPath+'cone'
-cone(lidarLoc,h_max,phi,n=200,name=vtkName)
+#vtkName = outputPath+'cone'
+#cone(lidarLoc,h_max,phi,n=200,name=vtkName)
 # create a new 'XML Unstructured Grid Reader'
 lidar = PVDReader(registrationName='lidar', FileName=fileName)
 wrf = PVDReader(registrationName='wrf', FileName=wrfFileName)
@@ -92,7 +92,7 @@ renderView1.OrientationAxesVisibility = 0
 ## Layout 1 - Surface LIC plots
 # create a new 'Clip'
 if plotLIC:
-    cone = LegacyVTKReader(registrationName='Cone', FileNames=[vtkName+'.vtk'])
+    #cone = LegacyVTKReader(registrationName='Cone', FileNames=[vtkName+'.vtk'])
     
     resampleWithDataset1 = ResampleWithDataset(SourceDataArrays=calculator1, DestinationMesh=lidar)
     resampleWithDataset1.CellLocator = 'Static Cell Locator'
@@ -186,7 +186,7 @@ pdo.GetFieldData().AddArray(sexaTime)'
     renderView2.ViewSize = [960,1080]
     timeKeeper1 = GetTimeKeeper()
     timeKeeper1.Time = 0.0
-    saveScreenShot(layout1,outputPath+'SED_WRF_FOLDER',saveScreenShots, saveAllViews=1)
-    saveAnimation(layout1,outputPath+'SED_WRF_FOLDER',noSteps,makeVideo,viewSize=[1920,1080],frameRate=frameRate,animStart=animStart, saveAllViews=1)
+    saveScreenShot(layout1,outputPath+'/SED_WRF_FOLDER',saveScreenShots, saveAllViews=1)
+    saveAnimation(layout1,outputPath+'/SED_WRF_FOLDER',noSteps,makeVideo,viewSize=[1920,1080],frameRate=frameRate,animStart=animStart, saveAllViews=1)
 
 RenderAllViews()

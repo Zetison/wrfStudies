@@ -1,9 +1,12 @@
 #!/bin/bash
-lidarpath=/home/eivindf/cases/SKIRON_HDF5_V
-folderName=$HOME/results/WRF/Frankfurt/lidar/
+#lidarpath=/home/eivindf/cases/SKIRON_HDF5_V
+SUBFOLDER=cappifiles/Cap420.cappi
+lidarpath=$HOME/results/WRF/Frankfurt/lidar/$SUBFOLDER
+folderName=$HOME/results/WRF/Frankfurt/lidar/$SUBFOLDER
 pushd $folderName > /dev/null
 #filetypes="azi ele vol"
-filetypes="azi"
+#filetypes="azi"
+filetypes="cappi"
 dateStrings="2020-12-05 2020-12-06"
 dateStringss="2020-11-05 2020-11-06 2020-11-10 2020-11-11 2020-11-21 2020-12-04 2020-12-05"
 #dateStringss="2020-11-05"
@@ -27,13 +30,15 @@ then
             do
                 dateString=$(date -u +'%Y-%m-%d' --date="$START_SIM_DATE UTC + $j days")
                 mkdir -p $dateString
-                cp $lidarpath/$dateString/*.azi.h5 $dateString
+                #cp $lidarpath/$dateString/*.$filetype.h5 $dateString
                 fileNames=$(ls $dateString/*.$filetype.h5)
                 for filename in $fileNames
                 do
-                    time=${filename:34:14}
+                    #time=${filename:34:14}
+                    time=${filename:11:14}
                     START_SIM_DATE="${time:0:4}-${time:4:2}-${time:6:2} ${time:8:2}:${time:10:2}:${time:12:2}"
                     target_epoch=$(date -u +'%s' --date="$START_SIM_DATE UTC")
+                    echo $START_SIM_DATE
                     t=$(( $target_epoch - $current_epoch ))
                     vtuFilename=${pvdfilename}-data/data-${i}.vtu
                     vtuFileName=${pvdfilename}-data/data-${i}-1.vtu
@@ -55,13 +60,13 @@ then
         pvdfilename="$dateStrings.pvd"
         current_epoch=$(date -u +'%s' --date="$START_SIM_DATE UTC")
         WRF_FOLDER="${dateStrings//-}"12
-        SED_VARIABLES="current_epoch pvdfilename WRF_FOLDER"
+        SED_VARIABLES="current_epoch pvdfilename WRF_FOLDER SUBFOLDER"
         DICTS="lidarValidation.py"
         cp $HOME/kode/wrfStudies/lidarValidation.py .
         source $HOME/kode/bashScripts/sedFiles
-        pushd ../$WRF_FOLDER > /dev/null
-        siso -f pvd wrfout_d04.nc wrfout_d04_vol.pvd --coords utm:32u -l P,T,U,V,W
-        popd > /dev/null
+        #pushd ../$WRF_FOLDER > /dev/null
+        #siso -f pvd wrfout_d04.nc wrfout_d04_vol.pvd --coords utm:32u -l P,T,U,V,W
+        #popd > /dev/null
         /usr/lib/ParaView-5.8.1-osmesa-MPI-Linux-Python3.7-64bit/bin/pvbatch lidarValidation.py
     done
 fi
@@ -79,8 +84,8 @@ then
     folders=$(ls $lidarpath )
     for folder in $folders
     do
-        echo "Number of azi files in folder "$folder
-        find $lidarpath/$folder -mindepth 1 -type f -name "*.azi.h5" -printf x | wc -c
+        echo "Number of $filetype files in folder "$folder
+        find $lidarpath/$folder -mindepth 1 -type f -name "*.$filetype.h5" -printf x | wc -c
     done
 fi
 #siso -f pvd las01_fra_lidar_skiron_2020101123554000V.vol.h5 --coords utm:32u
