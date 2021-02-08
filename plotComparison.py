@@ -139,12 +139,12 @@ def main(sourceid,folder,timeresolution,plotdata,ploterror,startdate,enddate):
         for i in range(0,fields.shape[0]):
             for j in range(0,fields.shape[1]):
                 if yrDataFound:
-                    axs[i,j].plot(df_YR.time,df_YR[fields[i,j]],'g', label = 'MetCoOp forecast')
+                    axs[i,j].plot(df_YR.time.to_numpy(),df_YR[fields[i,j]].to_numpy(),'g', label = 'MetCoOp forecast')
         
                 if wrfDataFound:    
-                    axs[i,j].plot(df_wrf.time,df_wrf[fields[i,j]],'b', label = 'WRF forecast')
+                    axs[i,j].plot(df_wrf.time.to_numpy(),df_wrf[fields[i,j]].to_numpy(),'b', label = 'WRF forecast')
         
-                axs[i,j].plot(df_obs.time,df_obs[fields[i,j]],'r', label = 'Observation data')
+                axs[i,j].plot(df_obs.time.to_numpy(),df_obs[fields[i,j]].to_numpy(),'r', label = 'Observation data')
     
                 axs[i,j].legend()
                 axs[i,j].set(xlabel='Time', ylabel=ylabels[i,j])
@@ -187,8 +187,10 @@ def main(sourceid,folder,timeresolution,plotdata,ploterror,startdate,enddate):
                 yr_error = 100*np.linalg.norm(diff_YR[idx], ord=order)/np.linalg.norm(df_obs[fields[i,j]][idx], ord=order)
                 wrf_error = 100*np.linalg.norm(diff_wrf_i[idx], ord=order)/np.linalg.norm(df_obs[fields[i,j]][idx], ord=order)
                 axs[i,j].set_title(r'Relative $l_'+str(order)+'$-errors: MetCoOp: '+'{0:.1f}'.format(yr_error)+'%, WRF: '+'{0:.1f}'.format(wrf_error)+'%')
-                axs[i,j].semilogy(df_obs.time,100*np.abs(diff_YR)/max(np.abs(df_obs[fields[i,j]])),'g', label = 'MetCoOp')
-                axs[i,j].semilogy(df_obs.time,100*np.abs(diff_wrf_i)/max(np.abs(df_obs[fields[i,j]])),'b', label = 'WRF')
+                yr_errors = 100*np.abs(diff_YR)/max(np.abs(df_obs[fields[i,j]]))
+                wrf_errors = 100*np.abs(diff_wrf_i)/max(np.abs(df_obs[fields[i,j]]))
+                axs[i,j].semilogy(df_obs.time.to_numpy(),yr_errors.to_numpy(),'g', label = 'MetCoOp')
+                axs[i,j].semilogy(df_obs.time.to_numpy(),wrf_errors.to_numpy(),'b', label = 'WRF')
     
                 axs[i,j].legend()
                 axs[i,j].set_xlim(startdate,enddate)
