@@ -21,6 +21,7 @@ pathToWRF="$WRFDIRECTORY/Build_WRF/WRF/run"
 loopForecast=true
 clearNCEPdata=false
 assumeNCEPdataExist=false
+runPreproc=false
 if [[ $CASE == "debug" ]]
 then
     RUN_DAYS=0
@@ -33,13 +34,16 @@ RUN_MINUTES=0
 RUN_SECONDS=0
 START_HOUR=12
 START_SIM_DATE="2020-12-05 12:00:00"
-START_SIM_DATE="2021-01-12 12:00:00"
 START_SIM_DATE="2021-03-01 12:00:00"
+#START_SIM_DATE="2021-01-12 12:00:00"
+#START_SIM_DATE="2020-12-06 12:00:00"
 #START_SIM_DATE="2020-12-14 12:00:00"
+START_SIM_DATE="2020-10-01 12:00:00"
 #START_SIM_DATE="$(date -u +'%Y-%m-%d') $START_HOUR:00:00" # Get date in UTC
 
 while true
 do
+    echo "Running WRF program for date "$START_SIM_DATE
 	if [[ "$loopForecast" = true ]]
 	then
 		current_epoch=$(date -u +%s)
@@ -83,54 +87,58 @@ do
 		popd > /dev/null
 	fi
 
-	##############################################################################################
-	## Get NCEP data
-    if [[ "$assumeNCEPdataExist" == true ]]
+	if [[ "$runPreproc" = true ]]
     then
-	    mkdir -p $WRFDIRECTORY/Build_WRF/DATA
-	    if [[ "$clearNCEPdata" = true ]]
-	    then
-	    	rm -f $WRFDIRECTORY/Build_WRF/DATA/*
-	    fi
+        ##############################################################################################
+        ## Get NCEP data
+        if [[ "$assumeNCEPdataExist" == true ]]
+        then
+            mkdir -p $WRFDIRECTORY/Build_WRF/DATA
+            if [[ "$clearNCEPdata" = true ]]
+            then
+                rm -f $WRFDIRECTORY/Build_WRF/DATA/*
+            fi
 
-	    pushd $WRFDIRECTORY/Build_WRF/DATA > /dev/null
-	    if [[ $NCEPstorageDate -ge $(date -d ${START_DATE:0:10} +%s) ]]
-	    then
-	    	$HOME/kode/bashScripts/getHistoricNCEPdata $START_DATE $END_DATE $INTERVAL_SECONDS $GFS_RES 
-	    else
-	    	$HOME/kode/bashScripts/getNCEPdata $START_DATE $END_DATE $INTERVAL_SECONDS $GFS_RES 
-	    fi
-	    popd > /dev/null
+            pushd $WRFDIRECTORY/Build_WRF/DATA > /dev/null
+            if [[ $NCEPstorageDate -ge $(date -d ${START_DATE:0:10} +%s) ]]
+            then
+                $HOME/kode/bashScripts/getHistoricNCEPdata $START_DATE $END_DATE $INTERVAL_SECONDS $GFS_RES 
+            else
+                $HOME/kode/bashScripts/getNCEPdata $START_DATE $END_DATE $INTERVAL_SECONDS $GFS_RES 
+            fi
+            popd > /dev/null
+        fi
+        
+        ##############################################################################################
+        ## WPS
+        pathToResults="$HOME/results/WRF/$CASE/$COMP_START_DATE"
+        mkdir -p $pathToResults
+        cp -f namelist.wps plotgrids_new.ncl plotgrids_global.ncl wrf_wps_ter.ncl $pathToWPS
+
+        pushd $pathToWPS > /dev/null
+        if [[ "$RUNGLOBAL" = true ]]
+        then
+            sed -i '/SED_DX/d;/SED_DY/d;/SED_REF_LAT/d;/SED_REF_LON/d' namelist.wps
+        fi
+        if [[ "$MAP_PROJ" == "lat-lon" ]]
+        then
+            sed -i '/truelat1/d;/truelat2/d' namelist.wps
+        else
+            sed -i '/SED_POLE_LAT/d;/SED_POLE_LON/d' namelist.wps
+        fi
+        
+        DICTS="namelist.wps plotgrids_new.ncl plotgrids_global.ncl wrf_wps_ter.ncl"
+        source $HOME/kode/bashScripts/sedFiles
+        rm *.png
+        if [[ "$RUNGLOBAL" = true ]]
+        then
+            ncl plotgrids_global.ncl # Plot domains
+        else
+            ncl plotgrids_new.ncl # Plot domains
+        fi
+        popd > /dev/null
     fi
-	
-	##############################################################################################
-	## WPS
-	#pathToResults="$HOME/results/WRF/$CASE/$COMP_START_DATE"
-	pathToResults="$HOME/results/WRF/$CASE/${COMP_START_DATE}"
-	mkdir -p $pathToResults
-	cp -f namelist.wps plotgrids_new.ncl plotgrids_global.ncl wrf_wps_ter.ncl $pathToWPS
-
-	pushd $pathToWPS > /dev/null
-	if [[ "$RUNGLOBAL" = true ]]
-	then
-		sed -i '/SED_DX/d;/SED_DY/d;/SED_REF_LAT/d;/SED_REF_LON/d' namelist.wps
-	fi
-	if [[ "$MAP_PROJ" == "lat-lon" ]]
-	then
-		sed -i '/truelat1/d;/truelat2/d' namelist.wps
-	else
-		sed -i '/SED_POLE_LAT/d;/SED_POLE_LON/d' namelist.wps
-	fi
-	
-	DICTS="namelist.wps plotgrids_new.ncl plotgrids_global.ncl wrf_wps_ter.ncl"
-	source $HOME/kode/bashScripts/sedFiles
-	rm *.png
-	if [[ "$RUNGLOBAL" = true ]]
-	then
-		ncl plotgrids_global.ncl # Plot domains
-	else
-		ncl plotgrids_new.ncl # Plot domains
-	fi
+    pushd $pathToWPS > /dev/null
 	if [[ $1 == 1 ]] 
 	then
 		rm -f PFILE* FILE* met_em* geo_em* *.log.* GRIBFILE*
