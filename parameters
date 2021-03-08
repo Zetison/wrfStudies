@@ -99,6 +99,7 @@ then
 	E_WE=100 # number of velocity points in east west direction
 	E_SN=100 # number of velocity points in south north direction
 	E_VERT=50 #  This number must be the same for each domain.
+	#E_VERT=138 #  This number must be the same for each domain.
 	#E_WE=16 # number of velocity points in east west direction
 	#E_SN=16 # number of velocity points in south north direction
 	#E_VERT=33 #  This number must be the same for each domain.
@@ -359,13 +360,19 @@ END_MONTH=${END_DATE:5:2}
 END_DAY=${END_DATE:8:2}
 END_HOUR=${END_DATE:11:2}
 
-TODAY="$(date -u +'%Y-%m-%d')" # Get date in UTC
-NCEPstorageDate=$(date -u +'%s' --date="$TODAY - 10 days")
-if [[ $GFS_RES == "0p25" ]] && [[ $NCEPstorageDate -lt $(date -d ${START_DATE:0:10} +%s) ]]
+
+if [[ "$assumeNCEPdataExist" == false ]]
 then
-	INTERVAL_SECONDS=3600
+    TODAY="$(date -u +'%Y-%m-%d')" # Get date in UTC
+    NCEPstorageDate=$(date -u +'%s' --date="$TODAY - 10 days")
+    if [[ $GFS_RES == "0p25" ]] && [[ $NCEPstorageDate -lt $(date -d ${START_DATE:0:10} +%s) ]]
+    then
+    	INTERVAL_SECONDS=3600
+    else
+    	INTERVAL_SECONDS=10800
+    fi
 else
-	INTERVAL_SECONDS=10800
+    INTERVAL_SECONDS=3600
 fi
 
 COMP_START_DATE="${START_YEAR}${START_MONTH}${START_DAY}${START_HOUR}"
