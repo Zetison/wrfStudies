@@ -125,12 +125,12 @@ def main(sourceid,folder,timeresolution,plotdata,ploterror,startdate,enddate):
                            ['windDirX', 'windDirY']])
     ylabels = np.array([['Temperature [°C]', 'Wind speed [m/s]'], 
                             ['Wind direction - X','Wind direction - Y']])
-    df_obs['windDirX'] = np.cos(np.radians(df_obs['wind_from_direction']))
-    df_obs['windDirY'] = np.sin(np.radians(df_obs['wind_from_direction']))
-    df_wrf['windDirX'] = np.cos(np.radians(df_wrf['wind_from_direction']))
-    df_wrf['windDirY'] = np.sin(np.radians(df_wrf['wind_from_direction']))
-    df_YR['windDirX'] = np.cos(np.radians(df_YR['wind_from_direction']))
-    df_YR['windDirY'] = np.sin(np.radians(df_YR['wind_from_direction']))
+    df_obs['windDirX'] = np.sin(np.radians(df_obs['wind_from_direction']))
+    df_obs['windDirY'] = np.cos(np.radians(df_obs['wind_from_direction']))
+    df_wrf['windDirX'] = np.sin(np.radians(df_wrf['wind_from_direction']))
+    df_wrf['windDirY'] = np.cos(np.radians(df_wrf['wind_from_direction']))
+    df_YR['windDirX'] = np.sin(np.radians(df_YR['wind_from_direction']))
+    df_YR['windDirY'] = np.cos(np.radians(df_YR['wind_from_direction']))
     if plotdata:
         fig, axs = plt.subplots(2,2, sharex=sharex)
         mng = plt.get_current_fig_manager()
