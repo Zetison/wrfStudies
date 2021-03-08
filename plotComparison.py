@@ -27,7 +27,7 @@ def getYRdata(endpoint, parameters, field):
 
 
 @click.command()
-@click.option('--sourceid', default='SN18700')
+@click.option('--sourceid', default='Frankfurt')
 @click.option('--timeresolution', default='PT1H')
 @click.option('--plotdata/--no-plotdata', default=True)
 @click.option('--ploterror/--no-ploterror', default=False)
@@ -92,7 +92,7 @@ def main(sourceid,folder,timeresolution,plotdata,ploterror,startdate,enddate):
             row = pd.DataFrame({'time': [data[i]['referenceTime']] })
             noFields = min(len(fields),len(data[i]['observations'])+1)
             for j in range(1,noFields):
-                row[fields[i,j]] = data[i]['observations'][j-1]['value']
+                row[fields[j]] = data[i]['observations'][j-1]['value']
             df = df.append(row)
         
         df = df.reset_index()
@@ -134,7 +134,8 @@ def main(sourceid,folder,timeresolution,plotdata,ploterror,startdate,enddate):
     if plotdata:
         fig, axs = plt.subplots(2,2, sharex=sharex)
         mng = plt.get_current_fig_manager()
-        mng.resize(*mng.window.maxsize())
+        #mng.resize(*mng.window.maxsize())
+        mng.window.showMaximized()
         fig.suptitle('Weather forecast comparison between MetCoOp and WRF simulations at '+sourceid)
         for i in range(0,fields.shape[0]):
             for j in range(0,fields.shape[1]):
@@ -159,7 +160,8 @@ def main(sourceid,folder,timeresolution,plotdata,ploterror,startdate,enddate):
     if ploterror:
         fig, axs = plt.subplots(2,2, sharex=sharex)
         mng = plt.get_current_fig_manager()
-        mng.resize(*mng.window.maxsize())
+        #mng.resize(*mng.window.maxsize())
+        mng.window.showMaximized()
         fig.suptitle('Weather forecast comparison between MetCoOp and WRF simulations at '+sourceid)
         df_YR_i = df_obs[fields[0,0]].copy() 
         df_wrf_i = df_obs[fields[0,0]].copy() 

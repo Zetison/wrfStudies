@@ -125,9 +125,10 @@ def main(folder,append,extract_met,extract_yr,extract_wrf):
                 
                 if path.exists(folder+'df_wrf_'+sourceID+'.csv') and append:
                     df_wrf_hist = pd.read_csv(folder+'df_wrf_'+sourceID+'.csv')
-                    df_wrf_hist = df_wrf_hist[df_wrf_hist['time'] <= str(df_wrf['time'][0])]
-                    df_wrf_hist = df_wrf_hist.append(df_wrf)
-                    df_wrf_hist.to_csv(folder+'df_wrf_'+sourceID+'.csv', index=False)
+                    if df_wrf_hist['time'][-1] < df_wrf['time'][-1]:
+                        df_wrf_hist = df_wrf_hist[df_wrf_hist['time'] <= str(df_wrf['time'][0])]
+                        df_wrf_hist = df_wrf_hist.append(df_wrf)
+                        df_wrf_hist.to_csv(folder+'df_wrf_'+sourceID+'.csv', index=False)
                 else:
                     df_wrf.to_csv(folder+'df_wrf_'+sourceID+'.csv', index=False)
 
