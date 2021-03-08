@@ -22,6 +22,8 @@ loopForecast=true
 clearNCEPdata=false
 assumeNCEPdataExist=false
 runPreproc=false
+#extractOptions="--extract_yr --folder=$HOME/results/forecastData/"
+extractOptions="--folder=$HOME/results/forecastData/"
 if [[ $CASE == "debug" ]]
 then
     RUN_DAYS=0
@@ -55,7 +57,7 @@ do
 		do
 			echo -ne "Time until extraction of MetCoOp data: $(date -u --date @$(($date1 - `date +%s` )) +%H:%M:%S)\r";
 		done
-		python3 extractData.py --extract_yr --folder="$HOME/results/forecastData/"
+		python3 extractData.py $extractOptions
 
 		current_epoch=$(date -u +%s)
 		TODAY="$(date -u +'%Y-%m-%d')" # Get date in UTC
