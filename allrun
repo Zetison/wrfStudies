@@ -22,8 +22,9 @@ loopForecast=true
 clearNCEPdata=false
 assumeNCEPdataExist=false
 runPreproc=false
-#extractOptions="--extract_yr --folder=$HOME/results/forecastData/"
-extractOptions="--folder=$HOME/results/forecastData/"
+forecastDataFolder=$HOME/results/forecastData/
+plotResultsInParaview=false
+extractOptions="--folder=$forecastDataFolder"
 if [[ $CASE == "debug" ]]
 then
     RUN_DAYS=0
@@ -57,6 +58,8 @@ do
 		do
 			echo -ne "Time until extraction of MetCoOp data: $(date -u --date @$(($date1 - `date +%s` )) +%H:%M:%S)\r";
 		done
+		mkdir -p $forecastDataFolder
+		#python3 extractData.py $extractOptions --extract_yr
 		python3 extractData.py $extractOptions
 
 		current_epoch=$(date -u +%s)
@@ -89,6 +92,7 @@ do
 		popd > /dev/null
 	fi
 
+    pathToResults="$HOME/results/WRF/$CASE/$COMP_START_DATE"
 	if [[ "$runPreproc" = true ]]
     then
         ##############################################################################################
@@ -113,7 +117,6 @@ do
         
         ##############################################################################################
         ## WPS
-        pathToResults="$HOME/results/WRF/$CASE/$COMP_START_DATE"
         mkdir -p $pathToResults
         cp -f namelist.wps plotgrids_new.ncl plotgrids_global.ncl wrf_wps_ter.ncl $pathToWPS
 
@@ -172,17 +175,17 @@ do
 	
 	##############################################################################################
 	## WRF
-	cp namelist.input wrf_Surface*.ncl $pathToWRF
-	pushd $pathToWRF > /dev/null
-	DICTS="namelist.input wrf_Surface1.ncl wrf_Surface2.ncl wrf_Surface3.ncl"
-	if [[ "$MAP_PROJ" == "lat-lon" ]]
-	then
-		sed -i "s/SED_DX/${DX}/g;s/SED_DY/${DY}/g" namelist.input
-	fi
-	sed -i "s/SED_MAX_TIME_STEP/${MAX_TIME_STEP}/g;s/SED_MIN_TIME_STEP/${MIN_TIME_STEP}/g" namelist.input
-	source $HOME/kode/bashScripts/sedFiles
 	if [[ $2 == 1 ]]
 	then
+	    cp namelist.input wrf_Surface*.ncl $pathToWRF
+	    pushd $pathToWRF > /dev/null
+	    DICTS="namelist.input wrf_Surface1.ncl wrf_Surface2.ncl wrf_Surface3.ncl"
+	    if [[ "$MAP_PROJ" == "lat-lon" ]]
+	    then
+	    	sed -i "s/SED_DX/${DX}/g;s/SED_DY/${DY}/g" namelist.input
+	    fi
+	    sed -i "s/SED_MAX_TIME_STEP/${MAX_TIME_STEP}/g;s/SED_MIN_TIME_STEP/${MIN_TIME_STEP}/g" namelist.input
+	    source $HOME/kode/bashScripts/sedFiles
 		rm -f rsl.* met_em* wrfout* wrfbdy_* wrfinput_d0* *.png *.avi *.gif *.mpeg *.ogg
 	
 		ln -sf ../../WPS/met_em* .	
@@ -191,11 +194,11 @@ do
 		mpirun -np $NP $pathToWRF/wrf.exe
 		# tail -F rsl.out.0000
 		# tail rsl.error.0000
+	    rm -rf $pathToResults/wrfout_d* $pathToResults/wrf_Surface*.ncl $pathToResults/namelist.input
+	    mv wrfout_d* $pathToResults
+	    cp -ruf *.png wrf_Surface*.ncl namelist.input $pathToResults
+	    popd > /dev/null
 	fi
-	rm -rf $pathToResults/wrfout_d* $pathToResults/wrf_Surface*.ncl $pathToResults/namelist.input
-	mv wrfout_d* $pathToResults
-	cp -ruf *.png wrf_Surface*.ncl namelist.input $pathToResults
-	popd > /dev/null
 	
 	##############################################################################################
 	## Post processing
@@ -203,33 +206,36 @@ do
 	then
 		cp extractData.py $pathToResults
 		pushd $pathToResults > /dev/null
-		rm *.vts *.pvd
-		for i_domain in $(seq -f "%02g" 1 ${MAX_DOM})
-		do
-			temp="wrf_Surface3_d${i_domain}.ncl"
-			cp "wrf_Surface3.ncl" "$temp" 
-			sed -i "s/SED_I_DOMAIN/$i_domain/g" $temp
-			#ncl "$temp"
-			#idt plt_Surface3.ncgm # Animate result in a GUI. Assumes NCL_OUTPUT_TYPE="ncgm"
-			#convert -delay 100 *.png "anim_d${i_domain}.mpeg"
-			#python3 ~/kode/python/WRF2VTK.py -v T,T2,CLDFRA -w U:U:V:W,P wrfout_d${i_domain}*
-			#rename "s/(.*)\$/d${i_domain}_\$1/" surface*.vts
-			#rename "s/(.*)\$/d${i_domain}_\$1/" atm*.vts
-			#sed -i "s/surface/d${i_domain}_surface/g" surface.pvd
-			#sed -i "s/atm/d${i_domain}_atm/g" atm.pvd
-			#mv surface.pvd d${i_domain}_surface.pvd
-			#mv atm.pvd d${i_domain}_atm.pvd
-			wrfName="wrfout_d${i_domain}"
-			mv ${wrfName}* "${wrfName}.nc"
-			wrfName="${wrfName}.nc"
-			if [[ "$RUNGLOBAL" = true ]]
-			then
-				siso -f pvd $wrfName --coords geocentric -l P,T,U,V,W,T2,U10,V10 --planar --periodic
-			else
-				siso -f pvd $wrfName --coords geocentric -l P,T,U,V,W,T2,U10,V10 --planar
-			fi
-		done
-		python3 extractData.py --extract_wrf
+        if [[ "$plotResultsInParaview" = true ]]
+        then
+		    rm *.vts *.pvd
+		    for i_domain in $(seq -f "%02g" 1 ${MAX_DOM})
+		    do
+		    	temp="wrf_Surface3_d${i_domain}.ncl"
+		    	cp "wrf_Surface3.ncl" "$temp" 
+		    	sed -i "s/SED_I_DOMAIN/$i_domain/g" $temp
+		    	#ncl "$temp"
+		    	#idt plt_Surface3.ncgm # Animate result in a GUI. Assumes NCL_OUTPUT_TYPE="ncgm"
+		    	#convert -delay 100 *.png "anim_d${i_domain}.mpeg"
+		    	#python3 ~/kode/python/WRF2VTK.py -v T,T2,CLDFRA -w U:U:V:W,P wrfout_d${i_domain}*
+		    	#rename "s/(.*)\$/d${i_domain}_\$1/" surface*.vts
+		    	#rename "s/(.*)\$/d${i_domain}_\$1/" atm*.vts
+		    	#sed -i "s/surface/d${i_domain}_surface/g" surface.pvd
+		    	#sed -i "s/atm/d${i_domain}_atm/g" atm.pvd
+		    	#mv surface.pvd d${i_domain}_surface.pvd
+		    	#mv atm.pvd d${i_domain}_atm.pvd
+		    	wrfName="wrfout_d${i_domain}"
+		    	mv ${wrfName}* "${wrfName}.nc"
+		    	wrfName="${wrfName}.nc"
+		    	if [[ "$RUNGLOBAL" = true ]]
+		    	then
+		    		siso -f pvd $wrfName --coords geocentric -l P,T,U,V,W,T2,U10,V10 --planar --periodic
+		    	else
+		    		siso -f pvd $wrfName --coords geocentric -l P,T,U,V,W,T2,U10,V10 --planar
+		    	fi
+		    done
+        fi
+		python3 extractData.py $extractOptions --extract_wrf
 		popd > /dev/null
 	fi
 	if [ "$loopForecast" = true ]

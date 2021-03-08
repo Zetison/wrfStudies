@@ -6,7 +6,7 @@ import pandas as pd
 from netCDF4 import Dataset
 import numpy as np
 import wrf
-from datetime import date
+from datetime import date,datetime
 from os import path
 import click
 home = expanduser("~")
@@ -53,13 +53,14 @@ def getYRdata(endpoint, parameters, field):
 @click.option('--extract_yr/--no-extract_yr', default=False)
 @click.option('--extract_wrf/--no-extract_wrf', default=False)
 @click.option('--extract_met/--no-extract_met', default=False)
-def main(folder,append,extract_met,extract_yr,extract_wrf): 
-    sourceIDlist = ["SN18700", # OSLO - BLINDERN          
-                    "SN6700",  # RV3 Svingen - Elverum
-                    "SN71900", # Bessaker
-                    "SN71990", # Buholmråsa fyr
-                    "SN76914", # ITASMOBAWS1 - Rikshospitalet i Oslo
-                    "Frankfurt"] # Frankfurt airport
+def main(folder,append,extract_yr,extract_wrf,extract_met): 
+    sourceIDlist = ["Frankfurt"]
+    #sourceIDlist = ["SN18700", # OSLO - BLINDERN          
+    #                "SN6700",  # RV3 Svingen - Elverum
+    #                "SN71900", # Bessaker
+    #                "SN71990", # Buholmråsa fyr
+    #                "SN76914", # ITASMOBAWS1 - Rikshospitalet i Oslo
+    #                "Frankfurt"] # Frankfurt airport
     for sourceID in sourceIDlist:
         ########################################################################
         # Get coordinates for observation point (lon,lat,masl)
@@ -89,6 +90,7 @@ def main(folder,append,extract_met,extract_yr,extract_wrf):
         ########################################################################
         # Get data from WRF file
         if extract_wrf:
+            print('Extracting wrf data')
             i_domain = 10
             isOutside = True
             while isOutside:
@@ -125,7 +127,7 @@ def main(folder,append,extract_met,extract_yr,extract_wrf):
                 
                 if path.exists(folder+'df_wrf_'+sourceID+'.csv') and append:
                     df_wrf_hist = pd.read_csv(folder+'df_wrf_'+sourceID+'.csv')
-                    if df_wrf_hist['time'][-1] < df_wrf['time'][-1]:
+                    if datetime.strptime(df_wrf_hist['time'].iloc[-1],"%Y-%m-%d %H:%M:%S") < df_wrf['time'].iloc[-1]:
                         df_wrf_hist = df_wrf_hist[df_wrf_hist['time'] <= str(df_wrf['time'][0])]
                         df_wrf_hist = df_wrf_hist.append(df_wrf)
                         df_wrf_hist.to_csv(folder+'df_wrf_'+sourceID+'.csv', index=False)
