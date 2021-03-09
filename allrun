@@ -21,9 +21,9 @@ pathToWRF="$WRFDIRECTORY/Build_WRF/WRF/run"
 loopForecast=true
 clearNCEPdata=false
 assumeNCEPdataExist=false
-runPreproc=false
+runPreproc=true
 forecastDataFolder=$HOME/results/forecastData/
-plotResultsInParaview=false
+plotResultsInParaview=true
 extractOptions="--folder=$forecastDataFolder"
 if [[ $CASE == "debug" ]]
 then
@@ -37,11 +37,11 @@ RUN_MINUTES=0
 RUN_SECONDS=0
 START_HOUR=12
 START_SIM_DATE="2020-12-05 12:00:00"
-START_SIM_DATE="2021-03-01 12:00:00"
+START_SIM_DATE="2021-03-02 12:00:00"
 #START_SIM_DATE="2021-01-12 12:00:00"
 #START_SIM_DATE="2020-12-06 12:00:00"
 #START_SIM_DATE="2020-12-14 12:00:00"
-START_SIM_DATE="2020-10-01 12:00:00"
+#START_SIM_DATE="2020-10-01 12:00:00"
 #START_SIM_DATE="$(date -u +'%Y-%m-%d') $START_HOUR:00:00" # Get date in UTC
 
 while true
@@ -97,7 +97,7 @@ do
     then
         ##############################################################################################
         ## Get NCEP data
-        if [[ "$assumeNCEPdataExist" == true ]]
+        if [[ "$assumeNCEPdataExist" == false ]]
         then
             mkdir -p $WRFDIRECTORY/Build_WRF/DATA
             if [[ "$clearNCEPdata" = true ]]
