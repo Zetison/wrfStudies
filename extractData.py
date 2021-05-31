@@ -17,8 +17,7 @@ client_id = '24c65298-cf22-4c73-ad01-7c6b2c009626'
 def getMetdata(endpoint, parameters, field):
     # Issue an HTTP GET request
     rObj = requests.get(endpoint, parameters, auth=(client_id,''))
-    endpoint = rObj.url
-    rObj = requests.get(endpoint, auth=(client_id,''))
+    rObj = requests.get(rObj.url, auth=(client_id,''))
     # Extract JSON data
     json = rObj.json()
     
