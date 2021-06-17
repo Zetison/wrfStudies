@@ -5,6 +5,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
 import click
+from os.path import expanduser
+home = expanduser("~")
 
 client_id = '24c65298-cf22-4c73-ad01-7c6b2c009626'
 #sourceid = "SN18700" # OSLO - BLINDERN
@@ -30,11 +32,12 @@ def getYRdata(endpoint, parameters, field):
 @click.option('--sourceid', default='Frankfurt')
 @click.option('--timeresolution', default='PT1H')
 @click.option('--plotdata/--no-plotdata', default=True)
-@click.option('--ploterror/--no-ploterror', default=False)
-@click.option('--folder', default='/home/zetison/results/forecastData/')
+@click.option('--ploterror/--no-ploterror', default=True)
+@click.option('--folder', default=home+'/results/forecastData/')
+@click.option('--meteobluefile', default=home+'/results/WRF/Frankfurt/meteoblue/AirportFrankfurtMain.csv')
 @click.option('--startdate', default='') # in the format '2020-09-29 00:00:00'
 @click.option('--enddate', default='')
-def main(sourceid,folder,timeresolution,plotdata,ploterror,startdate,enddate):
+def main(sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,startdate,enddate):
     
 
     ########################################################################
@@ -102,7 +105,7 @@ def main(sourceid,folder,timeresolution,plotdata,ploterror,startdate,enddate):
         # Convert the time value to something Python understands
         df_obs['time'] = pd.to_datetime(df_obs['time'])
     elif sourceid == 'Frankfurt':
-        df_obs = pd.read_csv(folder+'df_meteoblue_'+sourceid+'.csv', skiprows=9)
+        df_obs = pd.read_csv(meteobluefile, skiprows=9)
         df_obs['time'] = pd.to_datetime(df_obs['timestamp'])
         df_obs['air_temperature'] = df_obs['Airport Frankfurt Main Temperature [2 m elevation corrected]']
         df_obs['wind_speed'] = df_obs['Airport Frankfurt Main Wind Speed [10 m]']
