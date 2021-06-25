@@ -7,9 +7,8 @@ pushd $folderName > /dev/null
 #filetypes="azi ele vol"
 #filetypes="azi"
 filetypes="cappi"
-#dateStringss="2020-12-05"
-dateStringss="2020-11-05 2020-11-06 2020-11-10 2020-11-11 2020-11-21 2020-12-04 2020-12-05"
-#dateStringss="2020-11-05"
+dateStringss="2020-12-05"
+#dateStringss="2020-11-05 2020-11-06 2020-11-10 2020-11-11 2020-11-21 2020-12-04 2020-12-05"
 RUN_DAYS=1
 if [[ $1 == 1 ]]
 then
@@ -68,8 +67,8 @@ then
         #siso -f pvd wrfout_d04.nc wrfout_d04_vol.pvd --coords utm:32u -l P,T,U,V,W
         #popd > /dev/null
         #/usr/lib/ParaView-5.8.1-osmesa-MPI-Linux-Python3.7-64bit/bin/pvbatch lidarValidation.py
-        pvbatch lidarValidation.py
-        #paraview --script=lidarValidation.py
+        #pvbatch lidarValidation.py
+        paraview --script=lidarValidation.py
     done
 fi
 

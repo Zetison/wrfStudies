@@ -3,14 +3,14 @@
 #CASE="global"
 #CASE="Bessaker"
 #CASE="SN71990"
-CASE="Frankfurt"
+#CASE="Frankfurt"
 #CASE="SN76914" # Rikshospitalet in Oslo
 #CASE="Elverum" # Sykehuset innlandet Elverum 
 #CASE="SN18700" # OSLO - BLINDERN
 #CASE="ATBcase1" # OSLO - BLINDERN
 #CASE="nested"
 #CASE="YR"
-#CASE="debug"
+CASE="debug"
 if [ -z "$DISPLAY" ]
 then
 	echo "Error: set the DISPLAY variable" #The display variable should be set for post processing purposes in paraview. This issue arises when using screen, and can be resolved by first getting the display variable outside the screen session (echo $DISPLAY) and then inside the screen session setting the variable to this value (i.e. export DISPLAY=localhost:10.0)"
@@ -18,20 +18,22 @@ fi
 source $HOME/kode/bashScripts/sourceWRF
 pathToWPS="$WRFDIRECTORY/Build_WRF/WPS"
 pathToWRF="$WRFDIRECTORY/Build_WRF/WRF/run"
-loopForecast=true
+loopForecast=false
 clearNCEPdata=false
 assumeNCEPdataExist=false
 runPreproc=true
 forecastDataFolder=$HOME/results/forecastData/
-plotResultsInParaview=true
+plotResultsInParaview=false
 extractOptions="--folder=$forecastDataFolder"
 if [[ $CASE == "debug" ]]
 then
     RUN_DAYS=0
     RUN_HOURS=3
 else
-    RUN_DAYS=1
-    RUN_HOURS=0
+    #RUN_DAYS=1
+    RUN_DAYS=0
+    #RUN_HOURS=0
+    RUN_HOURS=3
 fi
 RUN_MINUTES=0
 RUN_SECONDS=0
@@ -92,6 +94,8 @@ do
 		popd > /dev/null
 	fi
 
+    ##############################################################################################
+    ## WPS
     pathToResults="$HOME/results/WRF/$CASE/$COMP_START_DATE"
 	if [[ "$runPreproc" = true ]]
     then
@@ -115,12 +119,12 @@ do
             popd > /dev/null
         fi
         
-        ##############################################################################################
-        ## WPS
         mkdir -p $pathToResults
-        cp -f namelist.wps plotgrids_new.ncl plotgrids_global.ncl wrf_wps_ter.ncl $pathToWPS
+        mkdir -p $pathToResults/metgrid
+        mkdir -p $pathToResults/geogrid
+        cp -f GEOGRID.TBL METGRID.TBL namelist.wps plotgrids_new.ncl plotgrids_global.ncl wrf_wps_ter.ncl $pathToResults
 
-        pushd $pathToWPS > /dev/null
+        pushd $pathToResults > /dev/null
         if [[ "$RUNGLOBAL" = true ]]
         then
             sed -i '/SED_DX/d;/SED_DY/d;/SED_REF_LAT/d;/SED_REF_LON/d' namelist.wps
@@ -146,9 +150,9 @@ do
     pushd $pathToWPS > /dev/null
 	if [[ $1 == 1 ]] 
 	then
-		rm -f PFILE* FILE* met_em* geo_em* *.log.* GRIBFILE*
-		mpirun -np $NP $pathToWPS/geogrid.exe | tee log.geogrid
-		#$pathToWPS/geogrid.exe | tee log.geogrid
+        echo "Running geogrid ..."
+		#mpirun -np $NP $pathToWPS/geogrid.exe >> log.geogrid
+		$pathToWPS/geogrid.exe | tee log.geogrid
 		for i_domain in $(seq -f "%02g" 1 ${MAX_DOM})
 		do
 			ncl a="addfile(\"./geo_em.d${i_domain}.nc\",\"r\")" wrf_wps_ter.ncl
@@ -156,12 +160,14 @@ do
 		done
 		$pathToWPS/link_grib.csh $WRFDIRECTORY/Build_WRF/DATA/GFS_${GFS_RES}_${COMP_START_DATE}
 		ln -sf ungrib/Variable_Tables/Vtable.GFS Vtable
-		mpirun -np $NP $pathToWPS/ungrib.exe | tee log.ungrib
-		#$pathToWPS/ungrib.exe | tee log.ungrib
-		mpirun -np $NP $pathToWPS/metgrid.exe | tee log.metgrid
-		#$pathToWPS/metgrid.exe | tee log.metgrid
-		# ncview geo_em.d01.nc
-		cp -rf geo_em.* *.png plotgrids_new.ncl wrf_wps_ter.ncl namelist.wps $pathToResults
+        #echo "Running ungrib ..."
+		#mpirun -np $NP $pathToWPS/ungrib.exe >> log.ungrib
+		##$pathToWPS/ungrib.exe | tee log.ungrib
+        #echo "Running metgrid ..."
+		#mpirun -np $NP $pathToWPS/metgrid.exe >> log.metgrid
+		##$pathToWPS/metgrid.exe | tee log.metgrid
+		## ncview geo_em.d01.nc
+		#cp -rf geo_em.* *.png plotgrids_new.ncl wrf_wps_ter.ncl namelist.wps $pathToResults
 	fi
 	
 	if [[ "$MAP_PROJ" == "lat-lon" ]]
@@ -177,8 +183,8 @@ do
 	## WRF
 	if [[ $2 == 1 ]]
 	then
-	    cp namelist.input wrf_Surface*.ncl $pathToWRF
-	    pushd $pathToWRF > /dev/null
+	    cp namelist.input wrf_Surface*.ncl $pathToResults
+	    pushd $pathToResults > /dev/null
 	    DICTS="namelist.input wrf_Surface1.ncl wrf_Surface2.ncl wrf_Surface3.ncl"
 	    if [[ "$MAP_PROJ" == "lat-lon" ]]
 	    then
@@ -186,7 +192,6 @@ do
 	    fi
 	    sed -i "s/SED_MAX_TIME_STEP/${MAX_TIME_STEP}/g;s/SED_MIN_TIME_STEP/${MIN_TIME_STEP}/g" namelist.input
 	    source $HOME/kode/bashScripts/sedFiles
-		rm -f rsl.* met_em* wrfout* wrfbdy_* wrfinput_d0* *.png *.avi *.gif *.mpeg *.ogg
 	
 		ln -sf ../../WPS/met_em* .	
 		mpirun -np $NP $pathToWRF/real.exe
