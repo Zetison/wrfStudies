@@ -83,6 +83,32 @@ then
 		START_HOUR=12
 		RUN_HOURS=6
 	fi
+elif [[ $CASE == "nested" ]]
+then
+	MAX_DOM=7
+	GFS_RES="0p25" # resolution (in degrees) in longitude and latitude direction (NOTE: if > 0.25 (0p25) then INTERVAL_SECONDS must be > 10800) First 120 hours available hourly, after that every 3 hours
+	E_WE=201 # number of velocity points in east west direction
+	E_SN=101 # number of velocity points in south north direction
+	E_VERT=50 #  This number must be the same for each domain.
+	RUN_DAYS=0
+	RUN_HOURS=3
+	D_I_PARENT_START="1, 84, 34, 34, 34, 34, 34,"
+	D_J_PARENT_START="1, 34, 34, 34, 34, 34, 34," # 29
+	D_HISTORY_INTERVAL="60,60,60,60,60,60,60,60," # in seconds
+	REF_LAT=63.414061 # Latitude of a known reference point inside the domain
+	REF_LON=10.407602 # Longitude of the same point as used for REF_LAT
+elif [[ $CASE == "YR" ]]
+then
+	E_WE=400 # number of velocity points in east west direction
+	E_SN=400 # number of velocity points in south north direction
+	E_VERT=51 #  This number must be the same for each domain.
+	D_HISTORY_INTERVAL="3600,3600,3600,3600,3600,3600,3600," # in seconds
+	MAP_PROJ="lambert"
+	DX=2500
+	DY=2500
+	REF_LAT=66 # Latitude of a known reference point inside the domain
+	REF_LON=12 # Longitude of the same point as used for REF_LAT
+	RUN_HOURS=66
 elif [[ $CASE == "SN76914" ]] || [[ $CASE == "SN18700" ]] || [[ $CASE == "Elverum" ]] || [[ $CASE == "Bessaker" ]] || [[ $CASE == "SN71990" ]] || [[ $CASE == "Frankfurt" ]]
 then
 	#NP=1
@@ -133,49 +159,25 @@ then
 		REF_LAT=59.9423 # Latitude of a known reference point inside the domain
 		REF_LON=10.72 # Longitude of the same point as used for REF_LAT
 	fi
-elif [[ $CASE == "nested" ]]
-then
-	MAX_DOM=7
-	GFS_RES="0p25" # resolution (in degrees) in longitude and latitude direction (NOTE: if > 0.25 (0p25) then INTERVAL_SECONDS must be > 10800) First 120 hours available hourly, after that every 3 hours
-	E_WE=201 # number of velocity points in east west direction
-	E_SN=101 # number of velocity points in south north direction
-	E_VERT=50 #  This number must be the same for each domain.
-	RUN_DAYS=0
-	RUN_HOURS=3
-	D_I_PARENT_START="1, 84, 34, 34, 34, 34, 34,"
-	D_J_PARENT_START="1, 34, 34, 34, 34, 34, 34," # 29
-	D_HISTORY_INTERVAL="60,60,60,60,60,60,60,60," # in seconds
-	REF_LAT=63.414061 # Latitude of a known reference point inside the domain
-	REF_LON=10.407602 # Longitude of the same point as used for REF_LAT
-elif [[ $CASE == "YR" ]]
-then
-	E_WE=400 # number of velocity points in east west direction
-	E_SN=400 # number of velocity points in south north direction
-	E_VERT=51 #  This number must be the same for each domain.
-	D_HISTORY_INTERVAL="3600,3600,3600,3600,3600,3600,3600," # in seconds
-	MAP_PROJ="lambert"
-	DX=2500
-	DY=2500
-	REF_LAT=66 # Latitude of a known reference point inside the domain
-	REF_LON=12 # Longitude of the same point as used for REF_LAT
-	RUN_HOURS=66
 elif [[ $CASE == "debug" ]]
 then
 	PARM_CONF=0
-	MAX_DOM=2
-	GFS_RES="0p25" # resolution (in degrees) in longitude and latitude direction (NOTE: if > 0.25 (0p25) then INTERVAL_SECONDS must be > 10800) First 120 hours available hourly, after that every 3 hours
-	GFS_RES="1p00" # resolution (in degrees) in longitude and latitude direction (NOTE: if > 0.25 (0p25) then INTERVAL_SECONDS must be > 10800) First 120 hours available hourly, after that every 3 hours
-	GEOG_DATA_RES="30s" #10m (~19km), 5m (~9km), 2m (~4km), and 30s (~0.9km).
-	NP=1
+	MAX_DOM=4
+	MAP_PROJ="lat-lon" # Accepted projections are 'lambert', 'polar', 'mercator', and 'lat-lon.'
 	DX=0.25
 	DY=0.25
+	GFS_RES="0p25" # resolution (in degrees) in longitude and latitude direction (NOTE: if > 0.25 (0p25) then INTERVAL_SECONDS must be > 10800) First 120 hours available hourly, after that every 3 hours
+	#GFS_RES="1p00" # resolution (in degrees) in longitude and latitude direction (NOTE: if > 0.25 (0p25) then INTERVAL_SECONDS must be > 10800) First 120 hours available hourly, after that every 3 hours
+	GEOG_DATA_RES="30s" #10m (~19km), 5m (~9km), 2m (~4km), and 30s (~0.9km).
+	NP=1
 	E_WE=16 # number of velocity points in east west direction
 	E_SN=16 # number of velocity points in south north direction
-	E_VERT=33 #  This number must be the same for each domain.
-	REF_LAT=59.94234 # Latitude of a known reference point inside the domain
-	REF_LON=10.72005 # Longitude of the same point as used for REF_LAT
-	D_HISTORY_INTERVAL="3600,3600,3600,3600,3600,3600,3600," # in seconds
-	D_HISTORY_INTERVAL="10,10,10,10,10,10,10," # in seconds
+	E_WE=30 # number of velocity points in east west direction
+	E_SN=30 # number of velocity points in south north direction
+	E_VERT=50 #  This number must be the same for each domain.
+	D_HISTORY_INTERVAL="600,600,600,600,600,600,600," # in seconds
+	REF_LAT=50.02528 # Latitude of a known reference point inside the domain
+	REF_LON=8.51962 # Longitude of the same point as used for REF_LAT
 fi
 
 
