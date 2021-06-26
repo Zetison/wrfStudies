@@ -10,7 +10,7 @@ begin
 ;
 ; The WRF ARW input file.  
 ; This needs to have a ".nc" appended, so just do it.
-  a = addfile("./wrfout_dSED_I_DOMAIN_SED_START_DATE.nc","r")
+  a = addfile("./wrfout_dSED_I_DOMAIN.nc","r")
 
 ; We generate plots, but what kind do we prefer?
   type = "SED_NCL_OUTPUT_TYPE"

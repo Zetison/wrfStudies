@@ -20,6 +20,7 @@ pathToWPS="$WRFDIRECTORY/Build_WRF/WPS"
 pathToWRF="$WRFDIRECTORY/Build_WRF/WRF/run"
 loopForecast=false
 clearNCEPdata=false
+delete_wpsOutputFiles=true
 assumeNCEPdataExist=false
 runPreproc=true
 forecastDataFolder=$HOME/results/forecastData/
@@ -76,24 +77,6 @@ do
 	fi
 	source ./parameters
 
-	##############################################################################################
-	## Get geog data
-	if [[ ! -d "$GEOG_DATA_PATH" ]]
-	then
-		mkdir -p $GEOG_DATA_PATH
-		echo "Downloading geog data folder $GEOG_DATA_PATH"
-		pushd $WPSDATADIRECTORY > /dev/null
-		wget https://www2.mmm.ucar.edu/wrf/src/wps_files/geog_low_res_mandatory.tar.gz
-		gunzip geog_low_res_mandatory.tar.gz
-		tar -xf geog_low_res_mandatory.tar
-		wget https://www2.mmm.ucar.edu/wrf/src/wps_files/geog_high_res_mandatory.tar.gz
-		gunzip geog_high_res_mandatory.tar.gz
-		tar -xf geog_high_res_mandatory.tar
-		mv -n WPS_GEOG_LOW_RES/* WPS_GEOG
-		rm -rf WPS_GEOG_LOW_RES
-		popd > /dev/null
-	fi
-
     ##############################################################################################
     ## WPS
     pathToResults="$HOME/results/WRF/$CASE/$COMP_START_DATE"
@@ -119,9 +102,7 @@ do
             popd > /dev/null
         fi
         
-        mkdir -p $pathToResults
-        mkdir -p $pathToResults/metgrid
-        mkdir -p $pathToResults/geogrid
+        mkdir -p $pathToResults $pathToResults/wps_io
         cp -f GEOGRID.TBL METGRID.TBL namelist.wps plotgrids_new.ncl plotgrids_global.ncl wrf_wps_ter.ncl $pathToResults
 
         pushd $pathToResults > /dev/null
@@ -138,109 +119,119 @@ do
         
         DICTS="namelist.wps plotgrids_new.ncl plotgrids_global.ncl wrf_wps_ter.ncl"
         source $HOME/kode/bashScripts/sedFiles
-        rm *.png
-        if [[ "$RUNGLOBAL" = true ]]
-        then
-            ncl plotgrids_global.ncl # Plot domains
-        else
-            ncl plotgrids_new.ncl # Plot domains
-        fi
         popd > /dev/null
     fi
-    pushd $pathToWPS > /dev/null
+    pushd $pathToResults > /dev/null
 	if [[ $1 == 1 ]] 
 	then
+        > ncl.log
+        if [[ "$RUNGLOBAL" = true ]]
+        then
+            ncl plotgrids_global.ncl >> ncl.log # Plot domains
+        else
+            ncl plotgrids_new.ncl >> ncl.log # Plot domains
+        fi
         echo "Running geogrid ..."
-		#mpirun -np $NP $pathToWPS/geogrid.exe >> log.geogrid
-		$pathToWPS/geogrid.exe | tee log.geogrid
+        ln -sf $pathToWPS/geogrid/src/geogrid.exe geogrid.exe
+		mpirun -np $NP ./geogrid.exe > geogrid.log
+		#./geogrid.exe >> geogrid.log
 		for i_domain in $(seq -f "%02g" 1 ${MAX_DOM})
 		do
-			ncl a="addfile(\"./geo_em.d${i_domain}.nc\",\"r\")" wrf_wps_ter.ncl
+			ncl a="addfile(\"./wps_io/geo_em.d${i_domain}.nc\",\"r\")" wrf_wps_ter.ncl >> ncl.log
 			mv plt_geo_6.png "plt_geo_d${i_domain}.png"
 		done
 		$pathToWPS/link_grib.csh $WRFDIRECTORY/Build_WRF/DATA/GFS_${GFS_RES}_${COMP_START_DATE}
-		ln -sf ungrib/Variable_Tables/Vtable.GFS Vtable
-        #echo "Running ungrib ..."
-		#mpirun -np $NP $pathToWPS/ungrib.exe >> log.ungrib
-		##$pathToWPS/ungrib.exe | tee log.ungrib
-        #echo "Running metgrid ..."
-		#mpirun -np $NP $pathToWPS/metgrid.exe >> log.metgrid
-		##$pathToWPS/metgrid.exe | tee log.metgrid
-		## ncview geo_em.d01.nc
-		#cp -rf geo_em.* *.png plotgrids_new.ncl wrf_wps_ter.ncl namelist.wps $pathToResults
+		ln -sf $pathToWPS/ungrib/Variable_Tables/Vtable.GFS Vtable
+        ln -sf $pathToWPS/ungrib/src/ungrib.exe ungrib.exe
+        echo "Running ungrib ..."
+		mpirun -np $NP ./ungrib.exe > ungrib.log
+		#./ungrib.exe | tee ungrib.log
+        echo "Running metgrid ..."
+        ln -sf $pathToWPS/metgrid/src/metgrid.exe metgrid.exe
+		mpirun -np $NP ./metgrid.exe > metgrid.log
+		#./metgrid.exe | tee metgrid.log
+		# ncview geo_em.d01.nc
+        rm geogrid.exe ungrib.exe metgrid.exe Vtable GRIBFILE.* FILE*
+        if [[ "$delete_wpsOutputFiles" = true ]]
+        then
+            rm -rf wps_io
+        fi
 	fi
 	
 	if [[ "$MAP_PROJ" == "lat-lon" ]]
 	then
-		DX=$(ncdump -h geo_em.d01.nc | grep -oP '(?<=:DX = )[+-]?[0-9]+([.][0-9]+)?')
-		DY=$(ncdump -h geo_em.d01.nc | grep -oP '(?<=:DY = )[+-]?[0-9]+([.][0-9]+)?')
+		DX=$(ncdump -h wps_io/geo_em.d01.nc | grep -oP '(?<=:DX = )[+-]?[0-9]+([.][0-9]+)?')
+		DY=$(ncdump -h wps_io/geo_em.d01.nc | grep -oP '(?<=:DY = )[+-]?[0-9]+([.][0-9]+)?')
 	fi
-	NUM_METGRID_LEVELS=$(ncdump -h "met_em.d01.$START_DATE.nc" | grep -oP '(?<=num_metgrid_levels = )[0-9]+;?')
-	NUM_METGRID_SOIL_LEVELS=$(ncdump -h "met_em.d01.$START_DATE.nc" | grep -oP '(?<=num_st_layers = )[0-9]+;?')
+	NUM_METGRID_LEVELS=$(ncdump -h "wps_io/met_em.d01.$START_DATE.nc" | grep -oP '(?<=num_metgrid_levels = )[0-9]+;?')
+	NUM_METGRID_SOIL_LEVELS=$(ncdump -h "wps_io/met_em.d01.$START_DATE.nc" | grep -oP '(?<=num_st_layers = )[0-9]+;?')
 	popd > /dev/null
 	
 	##############################################################################################
 	## WRF
 	if [[ $2 == 1 ]]
 	then
-	    cp namelist.input wrf_Surface*.ncl $pathToResults
-	    pushd $pathToResults > /dev/null
-	    DICTS="namelist.input wrf_Surface1.ncl wrf_Surface2.ncl wrf_Surface3.ncl"
-	    if [[ "$MAP_PROJ" == "lat-lon" ]]
-	    then
-	    	sed -i "s/SED_DX/${DX}/g;s/SED_DY/${DY}/g" namelist.input
-	    fi
-	    sed -i "s/SED_MAX_TIME_STEP/${MAX_TIME_STEP}/g;s/SED_MIN_TIME_STEP/${MIN_TIME_STEP}/g" namelist.input
-	    source $HOME/kode/bashScripts/sedFiles
+		cp namelist.input $pathToResults
+		pushd $pathToResults > /dev/null
+		DICTS="namelist.input wrf_Surface1.ncl wrf_Surface2.ncl wrf_Surface3.ncl"
+		if [[ "$MAP_PROJ" == "lat-lon" ]]
+		then
+			sed -i "s/SED_DX/${DX}/g;s/SED_DY/${DY}/g" namelist.input
+		fi
+		sed -i "s/SED_MAX_TIME_STEP/${MAX_TIME_STEP}/g;s/SED_MIN_TIME_STEP/${MIN_TIME_STEP}/g" namelist.input
+		source $HOME/kode/bashScripts/sedFiles
 	
-		ln -sf ../../WPS/met_em* .	
-		mpirun -np $NP $pathToWRF/real.exe
+		ln -sf wps_io/met_em* .	
+        WRFrunFILES=$(ls $pathToWRF )
+        for FILE in $WRFrunFILES; do 
+            ln -sf $pathToWRF/$FILE $FILE 
+        done
+		mpirun -np $NP ./real.exe
 		# tail rsl.error.0000
-		mpirun -np $NP $pathToWRF/wrf.exe
+		mpirun -np $NP ./wrf.exe
 		# tail -F rsl.out.0000
 		# tail rsl.error.0000
-	    rm -rf $pathToResults/wrfout_d* $pathToResults/wrf_Surface*.ncl $pathToResults/namelist.input
-	    mv wrfout_d* $pathToResults
-	    cp -ruf *.png wrf_Surface*.ncl namelist.input $pathToResults
-	    popd > /dev/null
+
+        rm $WRFrunFILES met_em*
+        for i_domain in $(seq -f "%02g" 1 ${MAX_DOM})
+        do
+            wrfName="wrfout_d"$i_domain
+            mv ${wrfName}* ${wrfName}".nc"
+        done
+		popd > /dev/null
 	fi
 	
 	##############################################################################################
 	## Post processing
 	if [[ $3 == 1 ]]
 	then
-		cp extractData.py $pathToResults
+        #cp wrf_Surface*.ncl $pathToResults
 		pushd $pathToResults > /dev/null
-        if [[ "$plotResultsInParaview" = true ]]
-        then
-		    rm *.vts *.pvd
-		    for i_domain in $(seq -f "%02g" 1 ${MAX_DOM})
-		    do
-		    	temp="wrf_Surface3_d${i_domain}.ncl"
-		    	cp "wrf_Surface3.ncl" "$temp" 
-		    	sed -i "s/SED_I_DOMAIN/$i_domain/g" $temp
-		    	#ncl "$temp"
-		    	#idt plt_Surface3.ncgm # Animate result in a GUI. Assumes NCL_OUTPUT_TYPE="ncgm"
-		    	#convert -delay 100 *.png "anim_d${i_domain}.mpeg"
-		    	#python3 ~/kode/python/WRF2VTK.py -v T,T2,CLDFRA -w U:U:V:W,P wrfout_d${i_domain}*
-		    	#rename "s/(.*)\$/d${i_domain}_\$1/" surface*.vts
-		    	#rename "s/(.*)\$/d${i_domain}_\$1/" atm*.vts
-		    	#sed -i "s/surface/d${i_domain}_surface/g" surface.pvd
-		    	#sed -i "s/atm/d${i_domain}_atm/g" atm.pvd
-		    	#mv surface.pvd d${i_domain}_surface.pvd
-		    	#mv atm.pvd d${i_domain}_atm.pvd
-		    	wrfName="wrfout_d${i_domain}"
-		    	mv ${wrfName}* "${wrfName}.nc"
-		    	wrfName="${wrfName}.nc"
-		    	if [[ "$RUNGLOBAL" = true ]]
-		    	then
-		    		siso -f pvd $wrfName --coords geocentric -l P,T,U,V,W,T2,U10,V10 --planar --periodic
-		    	else
-		    		siso -f pvd $wrfName --coords geocentric -l P,T,U,V,W,T2,U10,V10 --planar
-		    	fi
-		    done
-        fi
-		python3 extractData.py $extractOptions --extract_wrf
+        for i_domain in $(seq -f "%02g" 1 ${MAX_DOM})
+        do
+            ## Plot results using ncl
+            #nclFileName="wrf_Surface3_d${i_domain}.ncl"
+            #cp "wrf_Surface3.ncl" "$nclFileName" 
+            #sed -i "s/SED_I_DOMAIN/$i_domain/g" $nclFileName
+            #ncl "$nclFileName"
+            #idt plt_Surface3.ncgm # Animate result in a GUI. Assumes NCL_OUTPUT_TYPE="ncgm"
+            #convert -delay 100 plt_Surface3.*.png "anim_d${i_domain}.mpeg"
+
+            ## ... or using Paraview
+            wrfName="wrfout_d"$i_domain".nc"
+            if [[ "$plotResultsInParaview" = true ]]
+            then
+				if [[ "$RUNGLOBAL" = true ]]
+				then
+					siso -f pvd $wrfName --coords geocentric -l P,T,U,V,W,T2,U10,V10 --planar --periodic >> siso.log
+				else
+					siso -f pvd $wrfName --coords geocentric -l P,T,U,V,W,T2,U10,V10 --planar >> siso.log
+				fi
+            fi
+            siso -f vts wrfout_d${i_domain}.nc --last --coords=utm:32u >> siso.log
+        done
+        # Extract 1D data at mast location
+		python3 $HOME/kode/wrfStudies/extractData.py $extractOptions --extract_wrf
 		popd > /dev/null
 	fi
 	if [ "$loopForecast" = true ]

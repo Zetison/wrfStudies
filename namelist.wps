@@ -5,6 +5,7 @@
  end_date   = SED_D_END_DATE
  interval_seconds = SED_INTERVAL_SECONDS,
  io_form_geogrid = 2,
+ opt_output_from_geogrid_path = './wps_io',
 /
 
 &geogrid
@@ -26,8 +27,7 @@
  ref_lat           =  SED_REF_LAT,
  ref_lon           =  SED_REF_LON,
  geog_data_path    = 'SED_GEOG_DATA_PATH',
- opt_geogrid_tbl_path	= 'SED_pathToResults/GEOGRID.TBL',
- opt_output_from_geogrid_path = 'SED_pathToResults/geogrid/',
+ opt_geogrid_tbl_path	= 'SED_pathToResults',
 /
 
 &ungrib
@@ -38,7 +38,7 @@
 &metgrid
  fg_name = 'FILE',
  io_form_metgrid = 2,
- opt_metgrid_tbl_path	= 'SED_pathToResults/METGRID.TBL',
- opt_output_from_metgrid_path	= 'SED_pathToResults/metgrid/',
+ opt_metgrid_tbl_path	= 'SED_pathToResults',
+ opt_output_from_metgrid_path	= 'SED_pathToResults/wps_io/',
 /
 

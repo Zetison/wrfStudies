@@ -1,8 +1,8 @@
 #!/bin/bash
 NP=32
 MAX_DOM=1
-GEOG_DATA_RES="usgs_lakes+30s" #10m (~19km), 5m (~9km), 2m (~4km), and 30s (~0.9km).
-GEOG_DATA_RES="30s" #10m (~19km), 5m (~9km), 2m (~4km), and 30s (~0.9km).
+#GEOG_DATA_RES="usgs_lakes+default"
+GEOG_DATA_RES="default"
 GFS_RES="0p25" # resolution (in degrees) in longitude and latitude direction (NOTE: if > 0.25 (0p25) then INTERVAL_SECONDS must be > 10800) First 120 hours available hourly, after that every 3 hours
 
 START_YEAR=${START_SIM_DATE:0:4}
@@ -33,7 +33,6 @@ if [[ $CASE == "global" ]]
 then
 	PARM_CONF=0
 	PARM_CONF=5
-	GEOG_DATA_RES="30s" #10m (~19km), 5m (~9km), 2m (~4km), and 30s (~0.9km).
 	GFS_RES="0p25" # resolution (in degrees) in longitude and latitude direction. First 120 hours available hourly, after that every 3 hours. Available resolutions: 1p00 (~111km), 0p50 (~55.7km), 0p25 (27.6km)
 	# For global runs E_WE should be 2^P*3^Q*5^R+1 for integers P,Q,R in {0,1,2,...}. E.g. (E_WE,E_SN) in {(21 11), (25 13), (31 16), (37 19), (41 21), (61 31), (73 37), (91 46), (121 61), (181 91), (361 181), (721 361), (1081 541), (1441 721), ...}
 	E_WE=721 # number of velocity points in east west direction
@@ -161,14 +160,15 @@ then
 	fi
 elif [[ $CASE == "debug" ]]
 then
+    #GEOG_DATA_RES="default"
+    GEOG_DATA_RES="lowres+default" # use lowres data to speed up preprocessing
 	PARM_CONF=0
-	MAX_DOM=1
+	MAX_DOM=4
 	MAP_PROJ="lat-lon" # Accepted projections are 'lambert', 'polar', 'mercator', and 'lat-lon.'
 	DX=0.25
 	DY=0.25
 	GFS_RES="0p25" # resolution (in degrees) in longitude and latitude direction (NOTE: if > 0.25 (0p25) then INTERVAL_SECONDS must be > 10800) First 120 hours available hourly, after that every 3 hours
 	#GFS_RES="1p00" # resolution (in degrees) in longitude and latitude direction (NOTE: if > 0.25 (0p25) then INTERVAL_SECONDS must be > 10800) First 120 hours available hourly, after that every 3 hours
-	GEOG_DATA_RES="30s" #10m (~19km), 5m (~9km), 2m (~4km), and 30s (~0.9km).
 	NP=1
 	E_WE=16 # number of velocity points in east west direction
 	E_SN=16 # number of velocity points in south north direction
