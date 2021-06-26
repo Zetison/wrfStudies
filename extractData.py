@@ -1,6 +1,5 @@
 # Script based on https://frost.met.no/python_example.html
 # Libraries needed (pandas is not standard and must be installed in Python)
-from os.path import expanduser
 import requests
 import pandas as pd
 from netCDF4 import Dataset
@@ -9,6 +8,7 @@ import wrf
 from datetime import date,datetime
 from os import path
 import click
+from os.path import expanduser
 home = expanduser("~")
 
 # Insert your own client ID here
