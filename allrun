@@ -157,7 +157,7 @@ do
         cat geogrid.log.* >> geogrid.log
         cat ungrib.log.* >> ungrib.log
         cat metgrid.log.* >> metgrid.log
-        rm geogrid.exe ungrib.exe metgrid.exe Vtable GRIBFILE.* FILE* geogrid.log.* ungrib.log.* metgrid.log.*
+        rm geogrid.exe ungrib.exe metgrid.exe Vtable GRIBFILE.* FILE* geogrid.log.* metgrid.log.*
 	fi
 	
 	if [[ "$MAP_PROJ" == "lat-lon" ]]
