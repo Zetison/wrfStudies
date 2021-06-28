@@ -248,7 +248,7 @@ do
 	
     if [[ "$delete_wpsOutputFiles" = true ]]
     then
-        rm -rf wps_io
+        rm -rf $pathToResults/wps_io
     fi
 	if [ "$loopForecast" = true ]
 	then
