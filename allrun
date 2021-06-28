@@ -20,11 +20,12 @@ pathToWPS="$WRFDIRECTORY/Build_WRF/WPS"
 pathToWRF="$WRFDIRECTORY/Build_WRF/WRF/run"
 loopForecast=true
 clearNCEPdata=false
-delete_wpsOutputFiles=false
+delete_wpsOutputFiles=true
 assumeNCEPdataExist=false
 runPreproc=true
 forecastDataFolder=$HOME/results/forecastData/
 plotResultsInParaview=false
+plotNCLresults=false
 extractOptions="--folder=$forecastDataFolder"
 if [[ $CASE == "debug" ]]
 then
@@ -39,7 +40,7 @@ RUN_SECONDS=0
 START_HOUR=12
 START_SIM_DATE="2020-12-05 12:00:00"
 START_SIM_DATE="2021-03-02 12:00:00"
-START_SIM_DATE="2021-05-23 12:00:00"
+START_SIM_DATE="2021-05-26 12:00:00"
 #START_SIM_DATE="2021-01-12 12:00:00"
 #START_SIM_DATE="2020-12-06 12:00:00"
 #START_SIM_DATE="2020-12-14 12:00:00"
@@ -102,7 +103,7 @@ do
         fi
         
         mkdir -p $pathToResults $pathToResults/wps_io
-        cp -f GEOGRID.TBL METGRID.TBL namelist.wps plotgrids_new.ncl plotgrids_global.ncl wrf_wps_ter.ncl $pathToResults
+        cp -f GEOGRID.TBL METGRID.TBL namelist.wps $pathToResults
 
         pushd $pathToResults > /dev/null
         if [[ "$RUNGLOBAL" = true ]]
@@ -116,29 +117,32 @@ do
             sed -i '/SED_POLE_LAT/d;/SED_POLE_LON/d' namelist.wps
         fi
         
-        DICTS="namelist.wps plotgrids_new.ncl plotgrids_global.ncl wrf_wps_ter.ncl"
+        DICTS="namelist.wps"
         source $HOME/kode/bashScripts/sedFiles
         popd > /dev/null
     fi
     pushd $pathToResults > /dev/null
 	if [[ $1 == 1 ]] 
 	then
-        > ncl.log
-        if [[ "$RUNGLOBAL" = true ]]
-        then
-            ncl plotgrids_global.ncl >> ncl.log # Plot domains
-        else
-            ncl plotgrids_new.ncl >> ncl.log # Plot domains
-        fi
         echo "Running geogrid ..."
         ln -sf $pathToWPS/geogrid/src/geogrid.exe geogrid.exe
 		mpirun -np $NP ./geogrid.exe > geogrid.log
 		#./geogrid.exe >> geogrid.log
-		for i_domain in $(seq -f "%02g" 1 ${MAX_DOM})
-		do
-			ncl a="addfile(\"./wps_io/geo_em.d${i_domain}.nc\",\"r\")" wrf_wps_ter.ncl >> ncl.log
-			mv plt_geo_6.png "plt_geo_d${i_domain}.png"
-		done
+        if [[ "$plotNCLresults" = true ]]
+        then
+            > ncl.log
+            if [[ "$RUNGLOBAL" = true ]]
+            then
+                ncl plotgrids_global.ncl >> ncl.log # Plot domains
+            else
+                ncl plotgrids_new.ncl >> ncl.log # Plot domains
+            fi
+            for i_domain in $(seq -f "%02g" 1 ${MAX_DOM})
+            do
+                ncl a="addfile(\"./wps_io/geo_em.d${i_domain}.nc\",\"r\")" wrf_wps_ter.ncl >> ncl.log
+                mv plt_geo_6.png "plt_geo_d${i_domain}.png"
+            done
+        fi
 		$pathToWPS/link_grib.csh $WRFDIRECTORY/Build_WRF/DATA/GFS_${GFS_RES}_${COMP_START_DATE}
 		ln -sf $pathToWPS/ungrib/Variable_Tables/Vtable.GFS Vtable
         ln -sf $pathToWPS/ungrib/src/ungrib.exe ungrib.exe
@@ -193,12 +197,12 @@ do
         for i_domain in $(seq -f "%02g" 1 ${MAX_DOM})
         do
             wrfName="wrfout_d"$i_domain
-            mv ${wrfName}_${START_SIM_DATE} ${wrfName}".nc"
+            mv ${wrfName}_${START_DATE} ${wrfName}".nc"
         done
-		popd > /dev/null
         cat rsl.error.* >> rsl.error
         cat rsl.out.* >> rsl.out
         rm rsl.error.* rsl.out.*
+		popd > /dev/null
 	fi
 	
 	##############################################################################################
@@ -214,12 +218,15 @@ do
         for i_domain in $(seq -f "%02g" 1 ${MAX_DOM})
         do
             ## Plot results using ncl
-            #nclFileName="wrf_Surface3_d${i_domain}.ncl"
-            #cp "wrf_Surface3.ncl" "$nclFileName" 
-            #sed -i "s/SED_I_DOMAIN/$i_domain/g" $nclFileName
-            #ncl "$nclFileName"
-            #idt plt_Surface3.ncgm # Animate result in a GUI. Assumes NCL_OUTPUT_TYPE="ncgm"
-            #convert -delay 100 plt_Surface3.*.png "anim_d${i_domain}.mpeg"
+            if [[ "$plotNCLresults" = true ]]
+            then
+                nclFileName="wrf_Surface3_d${i_domain}.ncl"
+                cp "wrf_Surface3.ncl" "$nclFileName" 
+                sed -i "s/SED_I_DOMAIN/$i_domain/g" $nclFileName
+                ncl "$nclFileName"
+                idt plt_Surface3.ncgm # Animate result in a GUI. Assumes NCL_OUTPUT_TYPE="ncgm"
+                convert -delay 100 plt_Surface3.*.png "anim_d${i_domain}.mpeg"
+            fi
 
             ## ... or using Paraview
             wrfName="wrfout_d"$i_domain".nc"
@@ -231,10 +238,10 @@ do
 				else
 					siso -f pvd $wrfName --coords geocentric -l P,T,U,V,W,T2,U10,V10 --planar >> siso.log
 				fi
+                #siso -f vts wrfout_d${i_domain}.nc --last --coords=utm:32u >> siso.log
             fi
-            siso -f vts wrfout_d${i_domain}.nc --last --coords=utm:32u >> siso.log
         done
-        # Extract 1D data at mast location
+        # Extract 2D data at mast location
 		python3 $HOME/kode/wrfStudies/extractData.py $extractOptions --extract_wrf
 		popd > /dev/null
 	fi
