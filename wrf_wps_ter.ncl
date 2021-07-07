@@ -11,7 +11,7 @@ begin
 
 
 
-  type = "SED_NCL_OUTPUT_TYPE"
+  ; type = "png"
   wks = gsn_open_wks(type,"plt_geo_6")         ; Create a plot workstation
   gsn_define_colormap(wks,"MPL_terrain")
 

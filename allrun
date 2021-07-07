@@ -16,16 +16,19 @@ then
 	echo "Error: set the DISPLAY variable" #The display variable should be set for post processing purposes in paraview. This issue arises when using screen, and can be resolved by first getting the display variable outside the screen session (echo $DISPLAY) and then inside the screen session setting the variable to this value (i.e. export DISPLAY=localhost:10.0)"
 fi
 source $HOME/kode/bashScripts/sourceWRF
-pathToWPS="$WRFDIRECTORY/Build_WRF/WPS"
-pathToWRF="$WRFDIRECTORY/Build_WRF/WRF/run"
+pathToWPS="$WRFDIRECTORY/Build_WRF/WPS" # Run WPS4.2
+pathToWRF="$WRFDIRECTORY/Build_WRF/WRF/run" # Run WRF4.2
+#pathToWPS="$WRFDIRECTORY/Build_WRF/WPS3" # Run WPS4.3
+#pathToWRF="$WRFDIRECTORY/Build_WRF/WRF3/run" # Run WRF4.3
 loopForecast=true
 clearNCEPdata=false
-delete_wpsOutputFiles=true
+delete_wpsOutputFiles=false
 assumeNCEPdataExist=false
 runPreproc=true
 forecastDataFolder=$HOME/results/forecastData/
+wrfStudiesFolder=$HOME/kode/wrfStudies/
 plotResultsInParaview=false
-plotNCLresults=false
+plotNCLresults=true
 extractOptions="--folder=$forecastDataFolder"
 if [[ $CASE == "debug" ]]
 then
@@ -38,13 +41,9 @@ fi
 RUN_MINUTES=0
 RUN_SECONDS=0
 START_HOUR=12
-START_SIM_DATE="2020-12-05 12:00:00"
-START_SIM_DATE="2021-03-02 12:00:00"
-START_SIM_DATE="2021-05-26 12:00:00"
-#START_SIM_DATE="2021-01-12 12:00:00"
-#START_SIM_DATE="2020-12-06 12:00:00"
-#START_SIM_DATE="2020-12-14 12:00:00"
-#START_SIM_DATE="2020-10-01 12:00:00"
+#START_SIM_DATE="2020-12-05 12:00:00"
+#START_SIM_DATE="2021-03-02 12:00:00"
+START_SIM_DATE="2021-05-23 12:00:00"
 #START_SIM_DATE="$(date -u +'%Y-%m-%d') $START_HOUR:00:00" # Get date in UTC
 
 while true
@@ -79,7 +78,7 @@ do
 
     ##############################################################################################
     ## WPS
-    pathToResults="$HOME/results/WRF/$CASE/$COMP_START_DATE"
+    pathToResults="$HOME/results/WRF/$CASE/${COMP_START_DATE}_highres"
 	if [[ "$runPreproc" = true ]]
     then
         ##############################################################################################
@@ -133,13 +132,13 @@ do
             > ncl.log
             if [[ "$RUNGLOBAL" = true ]]
             then
-                ncl plotgrids_global.ncl >> ncl.log # Plot domains
+                ncl 'type="png"' POLE_LAT=$POLE_LAT STAND_LON=$STAND_LON $wrfStudiesFolder/plotgrids_global.ncl >> ncl.log
             else
-                ncl plotgrids_new.ncl >> ncl.log # Plot domains
+                ncl 'type="png"' POLE_LAT=$POLE_LAT STAND_LON=$STAND_LON $wrfStudiesFolder/plotgrids_new.ncl >> ncl.log
             fi
             for i_domain in $(seq -f "%02g" 1 ${MAX_DOM})
             do
-                ncl a="addfile(\"./wps_io/geo_em.d${i_domain}.nc\",\"r\")" wrf_wps_ter.ncl >> ncl.log
+                ncl 'type="png"' a="addfile(\"./wps_io/geo_em.d${i_domain}.nc\",\"r\")" $wrfStudiesFolder/wrf_wps_ter.ncl >> ncl.log
                 mv plt_geo_6.png "plt_geo_d${i_domain}.png"
             done
         fi
@@ -154,16 +153,26 @@ do
 		mpirun -np $NP ./metgrid.exe > metgrid.log
 		#./metgrid.exe | tee metgrid.log
 		# ncview geo_em.d01.nc
-        cat geogrid.log.* >> geogrid.log
-        cat ungrib.log.* >> ungrib.log
-        cat metgrid.log.* >> metgrid.log
-        rm geogrid.exe ungrib.exe metgrid.exe Vtable GRIBFILE.* FILE* geogrid.log.* metgrid.log.*
+        if [ $NP -gt 1 ]
+        then
+            cat geogrid.log.* >> geogrid.log
+            cat metgrid.log.* >> metgrid.log
+            rm geogrid.log.* metgrid.log.*
+        fi
+        rm geogrid.exe ungrib.exe metgrid.exe Vtable GRIBFILE.* FILE*
 	fi
 	
 	if [[ "$MAP_PROJ" == "lat-lon" ]]
 	then
-		DX=$(ncdump -h wps_io/geo_em.d01.nc | grep -oP '(?<=:DX = )[+-]?[0-9]+([.][0-9]+)?')
-		DY=$(ncdump -h wps_io/geo_em.d01.nc | grep -oP '(?<=:DY = )[+-]?[0-9]+([.][0-9]+)?')
+        DX=""
+        DY=""
+        for i_domain in $(seq -f "%02g" 1 ${MAX_DOM})
+        do
+            temp=$(ncdump -h wps_io/geo_em.d${i_domain}.nc | grep -oP '(?<=:DX = )[+-]?[0-9]+([.][0-9]+)?')
+            DX=$DX$temp", "
+            temp=$(ncdump -h wps_io/geo_em.d${i_domain}.nc | grep -oP '(?<=:DY = )[+-]?[0-9]+([.][0-9]+)?')
+            DY=$DY$temp", "
+        done
 	fi
 	NUM_METGRID_LEVELS=$(ncdump -h "wps_io/met_em.d01.$START_DATE.nc" | grep -oP '(?<=num_metgrid_levels = )[0-9]+;?')
 	NUM_METGRID_SOIL_LEVELS=$(ncdump -h "wps_io/met_em.d01.$START_DATE.nc" | grep -oP '(?<=num_st_layers = )[0-9]+;?')
@@ -177,13 +186,13 @@ do
 		DICTS="namelist.input" 
 		if [[ "$MAP_PROJ" == "lat-lon" ]]
 		then
-			sed -i "s/SED_DX/${DX}/g;s/SED_DY/${DY}/g" namelist.input
+			sed -i "s/SED_D_DX/${DX}/g;s/SED_D_DY/${DY}/g" namelist.input
 		fi
 		sed -i "s/SED_MAX_TIME_STEP/${MAX_TIME_STEP}/g;s/SED_MIN_TIME_STEP/${MIN_TIME_STEP}/g" namelist.input
 		source $HOME/kode/bashScripts/sedFiles
 	
 		ln -sf wps_io/met_em* .	
-        WRFrunFILES=$(ls $pathToWRF )
+        WRFrunFILES=$(ls -I namelist.input $pathToWRF )
         for FILE in $WRFrunFILES; do 
             ln -sf $pathToWRF/$FILE $FILE 
         done
@@ -202,6 +211,7 @@ do
         cat rsl.error.* >> rsl.error
         cat rsl.out.* >> rsl.out
         rm rsl.error.* rsl.out.*
+        rm namelist.output
 		popd > /dev/null
 	fi
 	
@@ -209,23 +219,15 @@ do
 	## Post processing
 	if [[ $3 == 1 ]]
 	then
-        #cp wrf_Surface*.ncl $pathToResults
 		pushd $pathToResults > /dev/null
-		#DICTS="wrf_Surface1.ncl wrf_Surface2.ncl wrf_Surface3.ncl"
-		#source $HOME/kode/bashScripts/sedFiles
-        #NCL_OUTPUT_TYPE="png" # 'x11', 'pdf', 'ps', 'ncgm', 'png'
-        #SED_VARIABLES=$SED_VARIABLES" NCL_OUTPUT_TYPE"
         for i_domain in $(seq -f "%02g" 1 ${MAX_DOM})
         do
             ## Plot results using ncl
             if [[ "$plotNCLresults" = true ]]
             then
-                nclFileName="wrf_Surface3_d${i_domain}.ncl"
-                cp "wrf_Surface3.ncl" "$nclFileName" 
-                sed -i "s/SED_I_DOMAIN/$i_domain/g" $nclFileName
-                ncl "$nclFileName"
-                idt plt_Surface3.ncgm # Animate result in a GUI. Assumes NCL_OUTPUT_TYPE="ncgm"
-                convert -delay 100 plt_Surface3.*.png "anim_d${i_domain}.mpeg"
+                ncl 'type="png"' a="addfile(\"./wps_io/geo_em.d${i_domain}.nc\",\"r\")" $wrfStudiesFolder/wrf_Surface3.ncl >> ncl.log
+                #idt plt_Surface3.ncgm # Animate result in a GUI. Assumes NCL_OUTPUT_TYPE="ncgm"
+                #convert -delay 100 plt_Surface3.*.png "anim_d${i_domain}.mpeg"
             fi
 
             ## ... or using Paraview
@@ -241,8 +243,8 @@ do
                 #siso -f vts wrfout_d${i_domain}.nc --last --coords=utm:32u >> siso.log
             fi
         done
-        # Extract 2D data at mast location
-		python3 $HOME/kode/wrfStudies/extractData.py $extractOptions --extract_wrf
+        # Extract data at mast location
+		python3 $HOME/kode/wrfStudies/extractData.py $extractOptions --folder=$pathToResults"/" --extract_wrf
 		popd > /dev/null
 	fi
 	

@@ -18,7 +18,7 @@ begin
   end if
 
 ; We generate plots, but what kind do we prefer?
-  type = "SED_NCL_OUTPUT_TYPE"
+; type = "SED_NCL_OUTPUT_TYPE"
   wks = gsn_open_wks(type,"wps_show_dom")
 
 ; read the following namelist file

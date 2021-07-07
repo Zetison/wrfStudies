@@ -10,10 +10,10 @@ begin
 ;
 ; The WRF ARW input file.  
 ; This needs to have a ".nc" appended, so just do it.
-  a = addfile("./wrfout_dSED_I_DOMAIN.nc","r")
+;  a = addfile("./wrfout_d01.nc","r")
 
 ; We generate plots, but what kind do we prefer?
-  type = "SED_NCL_OUTPUT_TYPE"
+;  type = "png"
   wks = gsn_open_wks(type,"plt_Surface3")
 ;  gsn_define_colormap(wks,"SINTEF1")
   gsn_define_colormap(wks,"NCV_blu_red")

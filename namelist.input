@@ -12,7 +12,7 @@
  end_day                             = SED_D_END_DAY
  end_hour                            = SED_D_END_HOUR
  interval_seconds                    = SED_INTERVAL_SECONDS,
- input_from_file                     = .true.,
+ input_from_file                     = SED_D_INPUT_FROM_FILE
  history_interval_s                  = SED_D_HISTORY_INTERVAL
  frames_per_outfile                  = SED_D_FRAMES_PER_OUTFILE
  restart                             = .false.,
@@ -37,8 +37,8 @@
  p_top_requested                     = 5000,
  num_metgrid_levels                  = SED_NUM_METGRID_LEVELS,
  num_metgrid_soil_levels             = SED_NUM_METGRID_SOIL_LEVELS,
- dx                                  = SED_DX,
- dy                                  = SED_DY,
+ dx                                  = SED_D_DX
+ dy                                  = SED_D_DY
  grid_id                             = SED_D_GRID_ID
  parent_id                           = SED_D_PARENT_ID
  i_parent_start                      = SED_D_I_PARENT_START
@@ -91,7 +91,7 @@
  &dynamics
  hybrid_opt                          = 2, 
  w_damping                           = SED_W_DAMPING,
- diff_opt                            = SED_DIFF_OPT,
+ diff_opt                            = SED_D_DIFF_OPT
  km_opt                              = 4,
  diff_6th_opt                        = SED_DIFF_6TH_OPT,
  diff_6th_factor                     = 0.12,
@@ -102,17 +102,17 @@
  khdif                               = 0,
  kvdif                               = 0,
  non_hydrostatic                     = .true.,
- moist_adv_opt                       = SED_MOIST_ADV_OPT,
- scalar_adv_opt                      = SED_SCALAR_ADV_OPT,
- chem_adv_opt                        = SED_CHEM_ADV_OPT,
- tke_adv_opt                         = SED_TKE_ADV_OPT,
+ moist_adv_opt                       = SED_D_MOIST_ADV_OPT
+ scalar_adv_opt                      = SED_D_SCALAR_ADV_OPT
+ chem_adv_opt                        = SED_D_CHEM_ADV_OPT
+ tke_adv_opt                         = SED_D_TKE_ADV_OPT
  gwd_opt                             = 1,
  fft_filter_lat                      = 45.,
  /
 
  &bdy_control
  spec_bdy_width                      = 5,
- nested                              = .false.,.true.,
+ nested                              = SED_D_NESTED
  specified                           = SED_D_SPECIFIED
  periodic_x                          = SED_D_POLAR
  polar                               = SED_D_POLAR
