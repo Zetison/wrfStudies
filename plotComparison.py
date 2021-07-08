@@ -52,6 +52,8 @@ def main(sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,startda
     try:
         df_wrf = pd.read_csv(folder+'df_wrf_'+sourceid+'.csv')
         df_wrf['time'] = pd.to_datetime(df_wrf['time'])
+        df_wrf2 = pd.read_csv(folder+'df_wrf2_'+sourceid+'.csv')
+        df_wrf2['time'] = pd.to_datetime(df_wrf2['time'])
         wrfDataFound = True
     except:
         wrfDataFound = False
@@ -119,6 +121,8 @@ def main(sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,startda
     if wrfDataFound:
         df_wrf = df_wrf[df_wrf.time >= startdate]
         df_wrf = df_wrf[df_wrf.time <= enddate]
+        df_wrf2 = df_wrf2[df_wrf2.time >= startdate]
+        df_wrf2 = df_wrf2[df_wrf2.time <= enddate]
 
     ########################################################################
     # Plot data
@@ -132,6 +136,8 @@ def main(sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,startda
     df_obs['windDirY'] = np.cos(np.radians(df_obs['wind_from_direction']))
     df_wrf['windDirX'] = np.sin(np.radians(df_wrf['wind_from_direction']))
     df_wrf['windDirY'] = np.cos(np.radians(df_wrf['wind_from_direction']))
+    df_wrf2['windDirX'] = np.sin(np.radians(df_wrf2['wind_from_direction']))
+    df_wrf2['windDirY'] = np.cos(np.radians(df_wrf2['wind_from_direction']))
     df_YR['windDirX'] = np.sin(np.radians(df_YR['wind_from_direction']))
     df_YR['windDirY'] = np.cos(np.radians(df_YR['wind_from_direction']))
     if plotdata:
@@ -147,6 +153,7 @@ def main(sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,startda
         
                 if wrfDataFound:    
                     axs[i,j].plot(df_wrf.time.to_numpy(),df_wrf[fields[i,j]].to_numpy(),'b', label = 'WRF forecast')
+                    axs[i,j].plot(df_wrf2.time.to_numpy(),df_wrf2[fields[i,j]].to_numpy(),'b', label = 'WRF highres forecast')
         
                 axs[i,j].plot(df_obs.time.to_numpy(),df_obs[fields[i,j]].to_numpy(),'r', label = 'Observation data')
     
@@ -168,6 +175,7 @@ def main(sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,startda
         fig.suptitle('Weather forecast comparison between MetCoOp and WRF simulations at '+sourceid)
         df_YR_i = df_obs[fields[0,0]].copy() 
         df_wrf_i = df_obs[fields[0,0]].copy() 
+        df_wrf2_i = df_obs[fields[0,0]].copy() 
         ylabels = np.array([['Relative temperature error [%]', 'Relative wind speed error [%]'],
                                ['Relative longitudinal wind direction error [%]', 'Relative latitudinal wind direction error [%]']])
         
@@ -176,10 +184,12 @@ def main(sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,startda
             for j in range(0,fields.shape[1]):
                 df_YR_i[fields[i,j]] = np.interp(np.array(df_obs.time).astype(float),np.array(df_YR.time).astype(float),df_YR[fields[i,j]])
                 df_wrf_i[fields[i,j]] = np.interp(np.array(df_obs.time).astype(float),np.array(df_wrf.time).astype(float),df_wrf[fields[i,j]])
+                df_wrf2_i[fields[i,j]] = np.interp(np.array(df_obs.time).astype(float),np.array(df_wrf2.time).astype(float),df_wrf2[fields[i,j]])
                 df_obs[fields[i,j]] = np.array(df_obs[fields[i,j]])
 
                 diff_YR = df_YR_i[fields[i,j]]-df_obs[fields[i,j]]
                 diff_wrf_i = df_wrf_i[fields[i,j]]-df_obs[fields[i,j]]
+                diff_wrf2_i = df_wrf2_i[fields[i,j]]-df_obs[fields[i,j]]
                 if fields[i,j] == 'wind_from_direction':
                     phi_YR = np.mod(np.abs(diff_YR),360)
                     phi_wrf = np.mod(np.abs(diff_wrf_i),360)
@@ -187,15 +197,20 @@ def main(sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,startda
                     diff_YR[phi_YR <= 180] = phi_YR
                     diff_wrf_i[phi_wrf > 180] = 360 - phi_wrf
                     diff_wrf_i[phi_wrf <= 180] = phi_wrf
+                    diff_wrf2_i[phi_wrf > 180] = 360 - phi_wrf2
+                    diff_wrf2_i[phi_wrf <= 180] = phi_wrf2
     
                 idx = np.isnan(np.array(df_obs[fields[i,j]]).astype(float)) == False
                 yr_error = 100*np.linalg.norm(diff_YR[idx], ord=order)/np.linalg.norm(df_obs[fields[i,j]][idx], ord=order)
                 wrf_error = 100*np.linalg.norm(diff_wrf_i[idx], ord=order)/np.linalg.norm(df_obs[fields[i,j]][idx], ord=order)
-                axs[i,j].set_title(r'Relative $l_'+str(order)+'$-errors: MetCoOp: '+'{0:.1f}'.format(yr_error)+'%, WRF: '+'{0:.1f}'.format(wrf_error)+'%')
+                wrf2_error = 100*np.linalg.norm(diff_wrf2_i[idx], ord=order)/np.linalg.norm(df_obs[fields[i,j]][idx], ord=order)
+                axs[i,j].set_title(r'Relative $l_'+str(order)+'$-errors: MetCoOp: '+'{0:.1f}'.format(yr_error)+'%, WRF: '+'{0:.1f}'.format(wrf_error)+'%, WRF highres: '+'{0:.1f}'.format(wrf2_error)+'%')
                 yr_errors = 100*np.abs(diff_YR)/max(np.abs(df_obs[fields[i,j]]))
                 wrf_errors = 100*np.abs(diff_wrf_i)/max(np.abs(df_obs[fields[i,j]]))
+                wrf2_errors = 100*np.abs(diff_wrf2_i)/max(np.abs(df_obs[fields[i,j]]))
                 axs[i,j].semilogy(df_obs.time.to_numpy(),yr_errors.to_numpy(),'g', label = 'MetCoOp')
                 axs[i,j].semilogy(df_obs.time.to_numpy(),wrf_errors.to_numpy(),'b', label = 'WRF')
+                axs[i,j].semilogy(df_obs.time.to_numpy(),wrf2_errors.to_numpy(),'b', label = 'WRF highres')
     
                 axs[i,j].legend()
                 axs[i,j].set_xlim(startdate,enddate)
@@ -207,7 +222,3 @@ def main(sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,startda
     
 if __name__ == '__main__':
     main()
-    
-    
-    
-    
