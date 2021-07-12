@@ -20,7 +20,7 @@ source $HOME/kode/bashScripts/sourceWRF
 #pathToWRF="$WRFDIRECTORY/Build_WRF/WRF/run" # Run WRF4.2
 pathToWPS="$WRFDIRECTORY/Build_WRF/WPS3" # Run WPS4.3
 pathToWRF="$WRFDIRECTORY/Build_WRF/WRF3/run" # Run WRF4.3
-loopForecast=false
+loopForecast=true
 clearNCEPdata=false
 delete_wpsOutputFiles=false
 assumeNCEPdataExist=false
