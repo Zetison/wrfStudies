@@ -10,6 +10,7 @@ from os import path
 import click
 from os.path import expanduser
 home = expanduser("~")
+import json
 
 # Insert your own client ID here
 client_id = '24c65298-cf22-4c73-ad01-7c6b2c009626'
@@ -53,16 +54,27 @@ def getYRdata(endpoint, parameters, field):
 @click.option('--extract_wrf/--no-extract_wrf', default=False)
 @click.option('--extract_met/--no-extract_met', default=False)
 def main(folder,append,extract_yr,extract_wrf,extract_met): 
-    sourceIDlist = ["Frankfurt"]
+    #sourceIDlist = ["424242"]
+    sourceIDlist = ['424242', #Frankfurt airport
+                    '2925507', #Fränkisch-Crumbach
+                    '2926120', #Flörsheim
+                    '2925533', #Frankfurt am Main
+                    '2926300', #Fleisbach
+                    '7290400', #Airport Frankfurt Main
+                    '2926419', #Flacht
+                    '2925550', #Frankenthal
+                    '3220966', #Landkreis Darmstadt-Dieburg
+                    '2925665', #Frammersbach
+                    '7290401'] #Niederrad
     #sourceIDlist = ["SN18700", # OSLO - BLINDERN          
     #                "SN6700",  # RV3 Svingen - Elverum
     #                "SN71900", # Bessaker
     #                "SN71990", # Buholmråsa fyr
     #                "SN76914", # ITASMOBAWS1 - Rikshospitalet i Oslo
-    #                "Frankfurt"] # Frankfurt airport
+    #                "424242"] # Frankfurt airport
     for sourceID in sourceIDlist:
         ########################################################################
-        # Get coordinates for observation point (lon,lat,masl)
+        # Get coordinates for observation point (lon,lat)
         if sourceID[0:2] == 'SN': # Assume Norwegian station number format
             endpoint = 'https://frost.met.no/sources/v0.jsonld'
             parameters = {
@@ -73,12 +85,11 @@ def main(folder,append,extract_yr,extract_wrf,extract_met):
             masl = data_source[0]['masl']
             lon = data_source[0]['geometry']['coordinates'][0]
             lat = data_source[0]['geometry']['coordinates'][1]
-        elif sourceID == 'Frankfurt':
-            masl = 98
-            lon = 8.51962
-            lat = 50.02528
         else:
-            print('Error, sourceID = '+sourceID+' not listed')
+            masl = np.NAN
+            df = pd.read_json(home+'/kode/wrfStudies/city.list.json')
+            lon = df[df.id == float(sourceID)].coord.item()['lon']
+            lat = df[df.id == float(sourceID)].coord.item()['lat']
         
         ########################################################################
         # Get data from met file
@@ -142,10 +153,12 @@ def main(folder,append,extract_yr,extract_wrf,extract_met):
             endpoint = 'https://api.met.no/weatherapi/locationforecast/2.0/complete'
             endpoint = 'https://api.met.no/weatherapi/locationforecast/2.0/compact'
             parameters = {
-                'altitude': masl,
                 'lon': str(lon),
                 'lat': str(lat),
             }
+            if not np.isnan(masl):
+                parameters['altitude'] = np.masl
+
             fields = ['time','air_temperature','wind_speed', 'wind_from_direction']
             data_YR = getYRdata(endpoint, parameters, 'properties')
             

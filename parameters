@@ -1,5 +1,6 @@
 #!/bin/bash
 NP=32
+NP=4
 MAX_DOM=1
 #GEOG_DATA_RES="usgs_lakes+default"
 GEOG_DATA_RES="default"
