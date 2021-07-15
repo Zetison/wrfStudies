@@ -46,11 +46,11 @@ def main(sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,startda
     ########################################################################
     # Get YR/OMW/wrf data
     try:
-        df_OWM = pd.read_csv(folder+'df_OWM_'+sourceid+'.csv')
-        df_OWM['time'] = pd.to_datetime(df_OWM['time'])
-        owmDataFound = True
+        df_DWD = pd.read_csv(folder+'df_DWD_'+sourceid+'.csv')
+        df_DWD['time'] = pd.to_datetime(df_DWD['time'])
+        dwdDataFound = True
     except:
-        owmDataFound = False
+        dwdDataFound = False
     
     try:
         df_YR = pd.read_csv(folder+'df_YR_'+sourceid+'.csv')
@@ -62,28 +62,37 @@ def main(sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,startda
     try:
         df_wrf = pd.read_csv(folder+'df_wrf_'+sourceid+'.csv')
         df_wrf['time'] = pd.to_datetime(df_wrf['time'])
-        df_wrf2 = pd.read_csv(folder+'df_wrf2_'+sourceid+'.csv')
-        df_wrf2['time'] = pd.to_datetime(df_wrf2['time'])
         wrfDataFound = True
     except:
         wrfDataFound = False
+    
+    try:
+        df_wrf2 = pd.read_csv(folder+'df_wrf2_'+sourceid+'.csv')
+        df_wrf2['time'] = pd.to_datetime(df_wrf2['time'])
+        wrf2DataFound = True
+    except:
+        wrf2DataFound = False
     
     ########################################################################
     ## Get observation data
     # Define endpoint and parameters
     if not startdate:
-        try:
+        if wrfDataFound:
+            startdate = df_wrf['time'][0]
+        elif wrf2DataFound:
             startdate = df_wrf2['time'][0]
-        except:
+        else:
             startdate = df_YR['time'][0]
     else:
         startdate = pd.to_datetime(startdate)
     
     if not enddate:
-        try:
+        if wrfDataFound:
+            enddate = df_wrf['time'].iloc[-1]
+        elif wrf2DataFound:
             enddate = df_wrf2['time'].iloc[-1]
-        except:
-            enddate = df_YR['time'][0]
+        else:
+            enddate = df_YR['time'].iloc[-1]
     else:
         enddate = pd.to_datetime(enddate)
 
@@ -117,14 +126,14 @@ def main(sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,startda
         # Convert the time value to something Python understands
         df_obs['time'] = pd.to_datetime(df_obs['time'])
     elif sourceid == 'Frankfurt':
-        #df_obs = pd.read_csv(meteobluefile, skiprows=9)
-        #df_obs['time'] = pd.to_datetime(df_obs['timestamp'])
-        #df_obs['air_temperature'] = df_obs['Airport Frankfurt Main Temperature [2 m elevation corrected]']
-        #df_obs['wind_speed'] = df_obs['Airport Frankfurt Main Wind Speed [10 m]']
-        #df_obs['wind_from_direction'] = df_obs['Airport Frankfurt Main Wind Direction [10 m]']
+        df_obs = pd.read_csv(meteobluefile, skiprows=9)
+        df_obs['time'] = pd.to_datetime(df_obs['timestamp'])
+        df_obs['air_temperature'] = df_obs['Airport Frankfurt Main Temperature [2 m elevation corrected]']
+        df_obs['wind_speed'] = df_obs['Airport Frankfurt Main Wind Speed [10 m]']
+        df_obs['wind_from_direction'] = df_obs['Airport Frankfurt Main Wind Direction [10 m]']
     else:
-        df_obs = pd.read_csv(home+'/results/forecastData/df_OWM_'+sourceid+'.csv', skiprows=9)
-        df_obs['time'] = pd.to_datetime(string_to_time(df_obs['time'])) + timedelta(seconds=df_obs['timezone'])
+        df_obs = pd.read_csv(home+'/results/forecastData/df_OWM_'+sourceid+'.csv')
+        df_obs['time'] = pd.to_datetime(df_obs['time']) + timedelta(seconds=df_obs.timezone.to_numpy()[0])
         df_obs['air_temperature'] = df_obs['temp']
         df_obs['wind_speed'] = df_obs['speed']
         df_obs['wind_from_direction'] = df_obs['deg']
@@ -132,11 +141,11 @@ def main(sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,startda
 
     df_obs = df_obs[df_obs.time >= startdate]
     df_obs = df_obs[df_obs.time <= enddate]
-    if owmDataFound:
-        df_OWM = df_OWM[df_OWM.time >= startdate]
-        df_OWM = df_OWM[df_OWM.time <= enddate]
-        if df_OWM.empty:
-            owmDataFound = False
+    if dwdDataFound:
+        df_DWD = df_DWD[df_DWD.time >= startdate]
+        df_DWD = df_DWD[df_DWD.time <= enddate]
+        if df_DWD.empty:
+            dwdDataFound = False
 
     if yrDataFound:
         df_YR = df_YR[df_YR.time >= startdate]
@@ -147,6 +156,8 @@ def main(sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,startda
     if wrfDataFound:
         df_wrf = df_wrf[df_wrf.time >= startdate]
         df_wrf = df_wrf[df_wrf.time <= enddate]
+
+    if wrf2DataFound:
         df_wrf2 = df_wrf2[df_wrf2.time >= startdate]
         df_wrf2 = df_wrf2[df_wrf2.time <= enddate]
 
@@ -160,16 +171,22 @@ def main(sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,startda
                             ['Wind direction - X','Wind direction - Y']])
     df_obs['windDirX'] = np.sin(np.radians(df_obs['wind_from_direction']))
     df_obs['windDirY'] = np.cos(np.radians(df_obs['wind_from_direction']))
-    df_wrf['windDirX'] = np.sin(np.radians(df_wrf['wind_from_direction']))
-    df_wrf['windDirY'] = np.cos(np.radians(df_wrf['wind_from_direction']))
-    df_wrf2['windDirX'] = np.sin(np.radians(df_wrf2['wind_from_direction']))
-    df_wrf2['windDirY'] = np.cos(np.radians(df_wrf2['wind_from_direction']))
-    if owmDataFound:
-        df_OWM['windDirX'] = np.sin(np.radians(df_OWM['wind_from_direction']))
-        df_OWM['windDirY'] = np.cos(np.radians(df_OWM['wind_from_direction']))
+    if wrfDataFound:
+        df_wrf['windDirX'] = np.sin(np.radians(df_wrf['wind_from_direction']))
+        df_wrf['windDirY'] = np.cos(np.radians(df_wrf['wind_from_direction']))
+
+    if wrf2DataFound:
+        df_wrf2['windDirX'] = np.sin(np.radians(df_wrf2['wind_from_direction']))
+        df_wrf2['windDirY'] = np.cos(np.radians(df_wrf2['wind_from_direction']))
+
+    if dwdDataFound:
+        df_DWD['windDirX'] = np.sin(np.radians(df_DWD['wind_from_direction']))
+        df_DWD['windDirY'] = np.cos(np.radians(df_DWD['wind_from_direction']))
+
     if yrDataFound:
         df_YR['windDirX'] = np.sin(np.radians(df_YR['wind_from_direction']))
         df_YR['windDirY'] = np.cos(np.radians(df_YR['wind_from_direction']))
+        
     if plotdata:
         fig, axs = plt.subplots(2,2, sharex=sharex)
         mng = plt.get_current_fig_manager()
@@ -178,13 +195,15 @@ def main(sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,startda
         fig.suptitle('Weather forecast comparison between MetCoOp and WRF simulations at '+sourceid)
         for i in range(0,fields.shape[0]):
             for j in range(0,fields.shape[1]):
-                if owmDataFound:
-                    axs[i,j].plot(df_OWM.time.to_numpy(),df_OWM[fields[i,j]].to_numpy(),'o', label = 'OpenWeather')
+                if dwdDataFound:
+                    axs[i,j].plot(df_DWD.time.to_numpy(),df_DWD[fields[i,j]].to_numpy(),'o', label = 'DWD')
+
                 if yrDataFound:
                     axs[i,j].plot(df_YR.time.to_numpy(),df_YR[fields[i,j]].to_numpy(),'g', label = 'MetCoOp forecast')
         
                 if wrfDataFound:    
                     axs[i,j].plot(df_wrf.time.to_numpy(),df_wrf[fields[i,j]].to_numpy(),'b', label = 'WRF forecast')
+                if wrf2DataFound:    
                     axs[i,j].plot(df_wrf2.time.to_numpy(),df_wrf2[fields[i,j]].to_numpy(),'c', label = 'WRF highres forecast')
         
                 axs[i,j].plot(df_obs.time.to_numpy(),df_obs[fields[i,j]].to_numpy(),'r', label = 'Observation data')
@@ -205,7 +224,7 @@ def main(sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,startda
         mng.resize(*mng.window.maxsize())
         #mng.window.showMaximized()
         fig.suptitle('Weather forecast comparison between MetCoOp and WRF simulations at '+sourceid)
-        df_OWM_i = df_obs[fields[0,0]].copy() 
+        df_DWD_i = df_obs[fields[0,0]].copy() 
         df_YR_i = df_obs[fields[0,0]].copy() 
         df_wrf_i = df_obs[fields[0,0]].copy() 
         df_wrf2_i = df_obs[fields[0,0]].copy() 
@@ -215,45 +234,43 @@ def main(sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,startda
         order = 2 # order of global norm
         for i in range(0,fields.shape[0]):
             for j in range(0,fields.shape[1]):
-                if owmDataFound:
-                    df_OWM_i[fields[i,j]] = np.interp(np.array(df_obs.time).astype(float),np.array(df_OWM.time).astype(float),df_OWM[fields[i,j]])
+                df_obs[fields[i,j]] = np.array(df_obs[fields[i,j]])
+                idx = np.isnan(np.array(df_obs[fields[i,j]]).astype(float)) == False
+                title = 'Relative $l_'+str(order)+'$-errors: '
+                if dwdDataFound:
+                    df_DWD_i[fields[i,j]] = np.interp(np.array(df_obs.time).astype(float),np.array(df_DWD.time).astype(float),df_DWD[fields[i,j]])
+                    diff_DWD = df_DWD_i[fields[i,j]]-df_obs[fields[i,j]]
+                    dwd_error = 100*np.linalg.norm(diff_DWD[idx], ord=order)/np.linalg.norm(df_obs[fields[i,j]][idx], ord=order)
+                    dwd_errors = 100*np.abs(diff_DWD)/max(np.abs(df_obs[fields[i,j]]))
+                    axs[i,j].semilogy(df_obs.time.to_numpy(),dwd_errors.to_numpy(),'o', label = 'DWD')
+                    title += 'DWD: '+'{0:.2f}'.format(dwd_error)+'%, '
+
                 if yrDataFound:
                     df_YR_i[fields[i,j]] = np.interp(np.array(df_obs.time).astype(float),np.array(df_YR.time).astype(float),df_YR[fields[i,j]])
-                df_wrf_i[fields[i,j]] = np.interp(np.array(df_obs.time).astype(float),np.array(df_wrf.time).astype(float),df_wrf[fields[i,j]])
-                df_wrf2_i[fields[i,j]] = np.interp(np.array(df_obs.time).astype(float),np.array(df_wrf2.time).astype(float),df_wrf2[fields[i,j]])
-                df_obs[fields[i,j]] = np.array(df_obs[fields[i,j]])
-
-                if owmDataFound:
-                    diff_OWM = df_OWM_i[fields[i,j]]-df_obs[fields[i,j]]
-                if yrDataFound:
                     diff_YR = df_YR_i[fields[i,j]]-df_obs[fields[i,j]]
-                diff_wrf_i = df_wrf_i[fields[i,j]]-df_obs[fields[i,j]]
-                diff_wrf2_i = df_wrf2_i[fields[i,j]]-df_obs[fields[i,j]]
-    
-                idx = np.isnan(np.array(df_obs[fields[i,j]]).astype(float)) == False
-                if owmDataFound:
-                    owm_error = 100*np.linalg.norm(diff_OWM[idx], ord=order)/np.linalg.norm(df_obs[fields[i,j]][idx], ord=order)
-                if yrDataFound:
                     yr_error = 100*np.linalg.norm(diff_YR[idx], ord=order)/np.linalg.norm(df_obs[fields[i,j]][idx], ord=order)
-                wrf_error = 100*np.linalg.norm(diff_wrf_i[idx], ord=order)/np.linalg.norm(df_obs[fields[i,j]][idx], ord=order)
-                wrf2_error = 100*np.linalg.norm(diff_wrf2_i[idx], ord=order)/np.linalg.norm(df_obs[fields[i,j]][idx], ord=order)
-                title = 'Relative $l_'+str(order)+'$-errors: WRF: '+'{0:.2f}'.format(wrf_error)+'%, WRF highres: '+'{0:.2f}'.format(wrf2_error)+'%'
-
-                if owmDataFound:
-                    owm_errors = 100*np.abs(diff_OWM)/max(np.abs(df_obs[fields[i,j]]))
-                    axs[i,j].semilogy(df_obs.time.to_numpy(),owm_errors.to_numpy(),'o', label = 'OpenWeather')
-                    title += ', OpenWeather: '+'{0:.2f}'.format(owm_error)+'%'
-
-                if yrDataFound:
                     yr_errors = 100*np.abs(diff_YR)/max(np.abs(df_obs[fields[i,j]]))
                     axs[i,j].semilogy(df_obs.time.to_numpy(),yr_errors.to_numpy(),'g', label = 'MetCoOp')
-                    title += ', MetCoOp: '+'{0:.2f}'.format(yr_error)+'%'
+                    title += 'MetCoOp: '+'{0:.2f}'.format(yr_error)+'%, '
+
+                if wrfDataFound:
+                    df_wrf_i[fields[i,j]] = np.interp(np.array(df_obs.time).astype(float),np.array(df_wrf.time).astype(float),df_wrf[fields[i,j]])
+                    diff_wrf_i = df_wrf_i[fields[i,j]]-df_obs[fields[i,j]]
+                    wrf_error = 100*np.linalg.norm(diff_wrf_i[idx], ord=order)/np.linalg.norm(df_obs[fields[i,j]][idx], ord=order)
+                    wrf_errors = 100*np.abs(diff_wrf_i)/max(np.abs(df_obs[fields[i,j]]))
+                    axs[i,j].semilogy(df_obs.time.to_numpy(),wrf_errors.to_numpy(),'b', label = 'WRF')
+                    title += 'WRF: '+'{0:.2f}'.format(wrf_error)+'%, '
+
+                if wrf2DataFound:
+                    df_wrf2_i[fields[i,j]] = np.interp(np.array(df_obs.time).astype(float),np.array(df_wrf2.time).astype(float),df_wrf2[fields[i,j]])
+                    diff_wrf2_i = df_wrf2_i[fields[i,j]]-df_obs[fields[i,j]]
+                    wrf2_error = 100*np.linalg.norm(diff_wrf2_i[idx], ord=order)/np.linalg.norm(df_obs[fields[i,j]][idx], ord=order)
+                    wrf2_errors = 100*np.abs(diff_wrf2_i)/max(np.abs(df_obs[fields[i,j]]))
+                    axs[i,j].semilogy(df_obs.time.to_numpy(),wrf2_errors.to_numpy(),'c', label = 'WRF highres')
+                    title += 'WRF2: '+'{0:.2f}'.format(wrf2_error)+'%, '
+
 
                 axs[i,j].set_title(title)
-                wrf_errors = 100*np.abs(diff_wrf_i)/max(np.abs(df_obs[fields[i,j]]))
-                wrf2_errors = 100*np.abs(diff_wrf2_i)/max(np.abs(df_obs[fields[i,j]]))
-                axs[i,j].semilogy(df_obs.time.to_numpy(),wrf_errors.to_numpy(),'b', label = 'WRF')
-                axs[i,j].semilogy(df_obs.time.to_numpy(),wrf2_errors.to_numpy(),'c', label = 'WRF highres')
     
                 axs[i,j].legend()
                 axs[i,j].set_xlim(startdate,enddate)

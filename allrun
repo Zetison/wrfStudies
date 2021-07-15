@@ -244,7 +244,7 @@ do
             fi
         done
         # Extract data at mast location
-		python3 $HOME/kode/wrfStudies/extractData.py $extractOptions --folder=$pathToResults"/" --extract_wrf
+		python3 $HOME/kode/wrfStudies/extractData.py --folder=$pathToResults"/" --extract_wrf
 		popd > /dev/null
 	fi
 	
