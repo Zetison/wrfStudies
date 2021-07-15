@@ -3,14 +3,14 @@
 #CASE="global"
 #CASE="Bessaker"
 #CASE="SN71990"
-#CASE="Frankfurt"
+CASE="Frankfurt"
 #CASE="SN76914" # Rikshospitalet in Oslo
 #CASE="Elverum" # Sykehuset innlandet Elverum 
 #CASE="SN18700" # OSLO - BLINDERN
 #CASE="ATBcase1" # OSLO - BLINDERN
 #CASE="nested"
 #CASE="YR"
-CASE="debug"
+#CASE="debug"
 if [ -z "$DISPLAY" ]
 then
 	echo "Error: set the DISPLAY variable" #The display variable should be set for post processing purposes in paraview. This issue arises when using screen, and can be resolved by first getting the display variable outside the screen session (echo $DISPLAY) and then inside the screen session setting the variable to this value (i.e. export DISPLAY=localhost:10.0)"
@@ -36,7 +36,7 @@ then
     RUN_HOURS=3
 else
     RUN_DAYS=1
-    RUN_HOURS=0
+    RUN_HOURS=12
 fi
 RUN_MINUTES=0
 RUN_SECONDS=0
@@ -44,29 +44,18 @@ START_HOUR=12
 #START_SIM_DATE="2020-12-05 12:00:00"
 #START_SIM_DATE="2021-03-02 12:00:00"
 START_SIM_DATE="2021-05-23 12:00:00"
+START_SIM_DATE="2021-07-15 12:00:00"
 #START_SIM_DATE="$(date -u +'%Y-%m-%d') $START_HOUR:00:00" # Get date in UTC
 
 while true
 do
+    timer_start=$(date +%s)
     echo "Running WRF program for date "$START_SIM_DATE
 	if [[ "$loopForecast" = true ]]
 	then
 		current_epoch=$(date -u +%s)
 		TODAY="$(date -u +'%Y-%m-%d')" # Get date in UTC
-		target_epoch=$(date -u +'%s' --date="$START_SIM_DATE UTC")
-		sleep_seconds=$(( $target_epoch - $current_epoch ))
-		date1=$((`date -u +%s` + $sleep_seconds))
-		while [ "$date1" -ge `date -u +%s` ]
-		do
-			echo -ne "Time until extraction of MetCoOp data: $(date -u --date @$(($date1 - `date +%s` )) +%H:%M:%S)\r";
-		done
-		mkdir -p $forecastDataFolder
-		#python3 extractData.py $extractOptions --extract_yr
-		python3 extractData.py $extractOptions
-
-		current_epoch=$(date -u +%s)
-		TODAY="$(date -u +'%Y-%m-%d')" # Get date in UTC
-		target_epoch=$(date -u +'%s' --date="$START_SIM_DATE UTC + 6 hour")
+		target_epoch=$(date -u +'%s' --date="$START_SIM_DATE UTC + 7 hour")
 		sleep_seconds=$(( $target_epoch - $current_epoch ))
 		date1=$((`date -u +%s` + $sleep_seconds))
 		while [ "$date1" -ge `date -u +%s` ]
@@ -78,29 +67,10 @@ do
 
     ##############################################################################################
     ## WPS
-    pathToResults="$HOME/results/WRF/$CASE/${COMP_START_DATE}_highres"
-	if [[ "$runPreproc" = true ]]
-    then
-        ##############################################################################################
-        ## Get NCEP data
-        if [[ "$assumeNCEPdataExist" == false ]]
-        then
-            mkdir -p $WRFDIRECTORY/Build_WRF/DATA
-            if [[ "$clearNCEPdata" = true ]]
-            then
-                rm -f $WRFDIRECTORY/Build_WRF/DATA/*
-            fi
-
-            pushd $WRFDIRECTORY/Build_WRF/DATA > /dev/null
-            if [[ $NCEPstorageDate -ge $(date -d ${START_DATE:0:10} +%s) ]]
-            then
-                $HOME/kode/bashScripts/getHistoricNCEPdata $START_DATE $END_DATE $INTERVAL_SECONDS $GFS_RES 
-            else
-                $HOME/kode/bashScripts/getNCEPdata $START_DATE $END_DATE $INTERVAL_SECONDS $GFS_RES 
-            fi
-            popd > /dev/null
-        fi
-        
+    pathToResults="$HOME/results/WRF/$CASE/${COMP_START_DATE}_highRes"
+    pushd $pathToResults > /dev/null
+	if [[ $1 == 1 ]] 
+	then
         mkdir -p $pathToResults $pathToResults/wps_io
         cp -f GEOGRID.TBL METGRID.TBL namelist.wps $pathToResults
 
@@ -119,14 +89,10 @@ do
         DICTS="namelist.wps"
         source $HOME/kode/bashScripts/sedFiles
         popd > /dev/null
-    fi
-    pushd $pathToResults > /dev/null
-	if [[ $1 == 1 ]] 
-	then
         echo "Running geogrid ..."
         ln -sf $pathToWPS/geogrid/src/geogrid.exe geogrid.exe
 		mpirun -np $NP ./geogrid.exe > geogrid.log
-		#./geogrid.exe >> geogrid.log
+		#./geogrid.exe > geogrid.log
         if [[ "$plotNCLresults" = true ]]
         then
             > ncl.log
@@ -146,12 +112,12 @@ do
 		ln -sf $pathToWPS/ungrib/Variable_Tables/Vtable.GFS Vtable
         ln -sf $pathToWPS/ungrib/src/ungrib.exe ungrib.exe
         echo "Running ungrib ..."
-		mpirun -np $NP ./ungrib.exe > ungrib.log
-		#./ungrib.exe | tee ungrib.log
+		#mpirun -np $NP ./ungrib.exe > ungrib.log
+		./ungrib.exe > ungrib.log
         echo "Running metgrid ..."
         ln -sf $pathToWPS/metgrid/src/metgrid.exe metgrid.exe
 		mpirun -np $NP ./metgrid.exe > metgrid.log
-		#./metgrid.exe | tee metgrid.log
+		#./metgrid.exe > metgrid.log
 		# ncview geo_em.d01.nc
         if [ $NP -gt 1 ]
         then
@@ -161,21 +127,6 @@ do
         fi
         rm geogrid.exe ungrib.exe metgrid.exe Vtable GRIBFILE.* FILE*
 	fi
-	
-	if [[ "$MAP_PROJ" == "lat-lon" ]]
-	then
-        DX=""
-        DY=""
-        for i_domain in $(seq -f "%02g" 1 ${MAX_DOM})
-        do
-            temp=$(ncdump -h wps_io/geo_em.d${i_domain}.nc | grep -oP '(?<=:DX = )[+-]?[0-9]+([.][0-9]+)?')
-            DX=$DX$temp", "
-            temp=$(ncdump -h wps_io/geo_em.d${i_domain}.nc | grep -oP '(?<=:DY = )[+-]?[0-9]+([.][0-9]+)?')
-            DY=$DY$temp", "
-        done
-	fi
-	NUM_METGRID_LEVELS=$(ncdump -h "wps_io/met_em.d01.$START_DATE.nc" | grep -oP '(?<=num_metgrid_levels = )[0-9]+;?')
-	NUM_METGRID_SOIL_LEVELS=$(ncdump -h "wps_io/met_em.d01.$START_DATE.nc" | grep -oP '(?<=num_st_layers = )[0-9]+;?')
 	popd > /dev/null
 	##############################################################################################
 	## WRF
@@ -183,6 +134,20 @@ do
 	then
 		cp namelist.input $pathToResults
 		pushd $pathToResults > /dev/null
+        if [[ "$MAP_PROJ" == "lat-lon" ]]
+        then
+            DX=""
+            DY=""
+            for i_domain in $(seq -f "%02g" 1 ${MAX_DOM})
+            do
+                temp=$(ncdump -h wps_io/geo_em.d${i_domain}.nc | grep -oP '(?<=:DX = )[+-]?[0-9]+([.][0-9]+)?')
+                DX=$DX$temp", "
+                temp=$(ncdump -h wps_io/geo_em.d${i_domain}.nc | grep -oP '(?<=:DY = )[+-]?[0-9]+([.][0-9]+)?')
+                DY=$DY$temp", "
+            done
+        fi
+        NUM_METGRID_LEVELS=$(ncdump -h "wps_io/met_em.d01.$START_DATE.nc" | grep -oP '(?<=num_metgrid_levels = )[0-9]+;?')
+        NUM_METGRID_SOIL_LEVELS=$(ncdump -h "wps_io/met_em.d01.$START_DATE.nc" | grep -oP '(?<=num_st_layers = )[0-9]+;?')
 		DICTS="namelist.input" 
 		if [[ "$MAP_PROJ" == "lat-lon" ]]
 		then
@@ -247,6 +212,15 @@ do
 		python3 $HOME/kode/wrfStudies/extractData.py --folder=$pathToResults"/" --extract_wrf
 		popd > /dev/null
 	fi
+
+    pushd $pathToResults > /dev/null
+    timer_end=$(date +%s)
+    echo "Case: "$CASE > wrf.log
+    echo "Total simulation time: "$(date -d@$((timer_end-timer_start)) -u +%H:%M:%S) >> wrf.log
+    echo "Number of processors used: "$N >> wrf.log
+    echo "Path to WPS: "$pathToWPS >> wrf.log
+    echo "Path to WRF: "$pathToWRF >> wrf.log
+    popd > /dev/null
 	
     if [[ "$delete_wpsOutputFiles" = true ]]
     then

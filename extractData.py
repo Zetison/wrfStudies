@@ -65,13 +65,12 @@ def main(folder,append,extract_yr,extract_wrf,extract_met):
                     '2925550', #Frankenthal
                     '3220966', #Landkreis Darmstadt-Dieburg
                     '2925665', #Frammersbach
-                    '7290401'] #Niederrad
-    #sourceIDlist = ["SN18700", # OSLO - BLINDERN          
-    #                "SN6700",  # RV3 Svingen - Elverum
-    #                "SN71900", # Bessaker
-    #                "SN71990", # Buholmråsa fyr
-    #                "SN76914", # ITASMOBAWS1 - Rikshospitalet i Oslo
-    #                "424242"] # Frankfurt airport
+                    '7290401', #Niederrad
+                    'SN18700', # OSLO - BLINDERN          
+                    'SN6700',  # RV3 Svingen - Elverum
+                    'SN71900', # Bessaker
+                    'SN71990', # Buholmråsa fyr
+                    'SN76914'] # ITASMOBAWS1 - Rikshospitalet i Oslo
     for sourceID in sourceIDlist:
         ########################################################################
         # Get coordinates for observation point (lon,lat)
@@ -157,7 +156,7 @@ def main(folder,append,extract_yr,extract_wrf,extract_met):
                 'lat': str(lat),
             }
             if not np.isnan(masl):
-                parameters['altitude'] = np.masl
+                parameters['altitude'] = masl
 
             fields = ['time','air_temperature','wind_speed', 'wind_from_direction']
             data_YR = getYRdata(endpoint, parameters, 'properties')
