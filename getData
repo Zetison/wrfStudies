@@ -102,7 +102,7 @@ do
     fi
 	if [ "$loopForecast" = true ]
 	then
-		START_SIM_DATE=$(date -u +'%Y-%m-%d %H:%M:%S' --date="$START_SIM_DATE UTC + $RUN_DAYS days + $RUN_HOURS hours + $RUN_MINUTES minutes + $RUN_SECONDS seconds")
+		START_SIM_DATE=$(date -u +'%Y-%m-%d %H:%M:%S' --date="$START_SIM_DATE UTC + 24 hours")
 	else
 		exit 1
 	fi
