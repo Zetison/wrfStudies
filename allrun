@@ -3,13 +3,14 @@
 #CASE="global"
 #CASE="Bessaker"
 #CASE="SN71990"
-CASE="Frankfurt"
+#CASE="Frankfurt"
 #CASE="SN76914" # Rikshospitalet in Oslo
 #CASE="Elverum" # Sykehuset innlandet Elverum 
 #CASE="SN18700" # OSLO - BLINDERN
 #CASE="ATBcase1" # OSLO - BLINDERN
 #CASE="nested"
 #CASE="YR"
+CASE="Sula"
 #CASE="debug"
 if [ -z "$DISPLAY" ]
 then
@@ -20,7 +21,7 @@ source $HOME/kode/bashScripts/sourceWRF
 #pathToWRF="$WRFDIRECTORY/Build_WRF/WRF/run" # Run WRF4.2
 pathToWPS="$WRFDIRECTORY/Build_WRF/WPS3" # Run WPS4.3
 pathToWRF="$WRFDIRECTORY/Build_WRF/WRF3/run" # Run WRF4.3
-loopForecast=true
+loopForecast=false
 clearNCEPdata=false
 delete_wpsOutputFiles=false
 assumeNCEPdataExist=false
@@ -28,12 +29,18 @@ runPreproc=true
 forecastDataFolder=$HOME/results/forecastData/
 wrfStudiesFolder=$HOME/kode/wrfStudies/
 plotResultsInParaview=false
-plotNCLresults=false
+plotNCLresults=true
 extractOptions="--folder=$forecastDataFolder"
+CYCLE_INTERVAL=24
 if [[ $CASE == "debug" ]]
 then
     RUN_DAYS=0
     RUN_HOURS=3
+elif [[ $CASE == "Sula" ]]
+then
+    RUN_DAYS=0
+    RUN_HOURS=12
+    CYCLE_INTERVAL=6
 else
     RUN_DAYS=1
     RUN_HOURS=12
@@ -45,8 +52,9 @@ START_HOUR=12
 #START_SIM_DATE="2021-03-02 12:00:00"
 START_SIM_DATE="2021-05-23 12:00:00"
 START_SIM_DATE="2021-07-15 12:00:00"
+START_SIM_DATE="2020-10-31 12:00:00"
 #START_SIM_DATE="$(date -u +'%Y-%m-%d') $START_HOUR:00:00" # Get date in UTC
-
+mkdir -p $HOME/results/WRF/$CASE
 while true
 do
     timer_start=$(date +%s)
@@ -67,7 +75,7 @@ do
 
     ##############################################################################################
     ## WPS
-    pathToResults="$HOME/results/WRF/$CASE/${COMP_START_DATE}_highRes"
+    pathToResults="$HOME/results/WRF/$CASE/${COMP_START_DATE}"
 	if [[ $1 == 1 ]] 
 	then
         cp -f GEOGRID.TBL METGRID.TBL namelist.wps $pathToResults
@@ -90,7 +98,7 @@ do
         echo "Running geogrid ..."
         ln -sf $pathToWPS/geogrid/src/geogrid.exe geogrid.exe
 		mpirun -np $NP ./geogrid.exe > geogrid.log
-		#./geogrid.exe > geogrid.log
+		./geogrid.exe > geogrid.log
         if [[ "$plotNCLresults" = true ]]
         then
             > ncl.log
@@ -226,7 +234,7 @@ do
     fi
 	if [ "$loopForecast" = true ]
 	then
-		START_SIM_DATE=$(date -u +'%Y-%m-%d %H:%M:%S' --date="$START_SIM_DATE UTC + 24 hours")
+		START_SIM_DATE=$(date -u +'%Y-%m-%d %H:%M:%S' --date="$START_SIM_DATE UTC + $CYCLE_INTERVAL hours")
 		for collector in $VARIABLES 
 		do
 			eval "D_${collector}=\"\""
