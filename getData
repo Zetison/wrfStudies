@@ -3,7 +3,8 @@
 #CASE="global"
 #CASE="Bessaker"
 #CASE="SN71990"
-CASE="Frankfurt"
+#CASE="Frankfurt"
+CASE="Sula"
 #CASE="SN76914" # Rikshospitalet in Oslo
 #CASE="Elverum" # Sykehuset innlandet Elverum 
 #CASE="SN18700" # OSLO - BLINDERN
@@ -11,10 +12,6 @@ CASE="Frankfurt"
 #CASE="nested"
 #CASE="YR"
 #CASE="debug"
-if [ -z "$DISPLAY" ]
-then
-	echo "Error: set the DISPLAY variable" #The display variable should be set for post processing purposes in paraview. This issue arises when using screen, and can be resolved by first getting the display variable outside the screen session (echo $DISPLAY) and then inside the screen session setting the variable to this value (i.e. export DISPLAY=localhost:10.0)"
-fi
 source $HOME/kode/bashScripts/sourceWRF
 #pathToWPS="$WRFDIRECTORY/Build_WRF/WPS" # Run WPS4.2
 #pathToWRF="$WRFDIRECTORY/Build_WRF/WRF/run" # Run WRF4.2
@@ -30,10 +27,16 @@ wrfStudiesFolder=$HOME/kode/wrfStudies/
 plotResultsInParaview=false
 plotNCLresults=false
 extractOptions="--folder=$forecastDataFolder"
+CYCLE_INTERVAL=24
 if [[ $CASE == "debug" ]]
 then
     RUN_DAYS=0
     RUN_HOURS=3
+elif [[ $CASE == "Sula" ]]
+then
+    RUN_DAYS=0
+    RUN_HOURS=12
+    CYCLE_INTERVAL=6
 else
     RUN_DAYS=1
     RUN_HOURS=12
@@ -45,6 +48,7 @@ START_HOUR=12
 #START_SIM_DATE="2021-03-02 12:00:00"
 START_SIM_DATE="2021-05-23 12:00:00"
 START_SIM_DATE="2021-07-26 12:00:00"
+START_SIM_DATE="2020-10-31 12:00:00"
 #START_SIM_DATE="$(date -u +'%Y-%m-%d') $START_HOUR:00:00" # Get date in UTC
 
 while true
@@ -102,7 +106,7 @@ do
     fi
 	if [ "$loopForecast" = true ]
 	then
-		START_SIM_DATE=$(date -u +'%Y-%m-%d %H:%M:%S' --date="$START_SIM_DATE UTC + 24 hours")
+		START_SIM_DATE=$(date -u +'%Y-%m-%d %H:%M:%S' --date="$START_SIM_DATE UTC + $CYCLE_INTERVAL hours")
 	else
 		exit 1
 	fi
