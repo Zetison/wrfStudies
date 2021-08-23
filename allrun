@@ -23,7 +23,6 @@ pathToWRF="$WRFDIRECTORY/Build_WRF/WRF3/run" # Run WRF4.3
 loopForecast=true
 clearNCEPdata=false
 delete_wpsOutputFiles=false
-assumeNCEPdataExist=false
 runPreproc=true
 forecastDataFolder=$HOME/results/forecastData/
 wrfStudiesFolder=$HOME/kode/wrfStudies/
@@ -44,7 +43,7 @@ START_HOUR=12
 #START_SIM_DATE="2020-12-05 12:00:00"
 #START_SIM_DATE="2021-03-02 12:00:00"
 START_SIM_DATE="2021-05-23 12:00:00"
-START_SIM_DATE="2021-07-15 12:00:00"
+START_SIM_DATE="2021-08-10 12:00:00"
 #START_SIM_DATE="$(date -u +'%Y-%m-%d') $START_HOUR:00:00" # Get date in UTC
 
 while true
@@ -67,7 +66,7 @@ do
 
     ##############################################################################################
     ## WPS
-    pathToResults="$HOME/results/WRF/$CASE/${COMP_START_DATE}_highRes"
+    pathToResults="$HOME/results/WRF/$CASE/${COMP_START_DATE}"
 	if [[ $1 == 1 ]] 
 	then
         cp -f GEOGRID.TBL METGRID.TBL namelist.wps $pathToResults
