@@ -116,7 +116,7 @@ elif  [[ $CASE == "Sula" ]]
 then
 	NP=1
 	PARM_CONF=0
-	MAX_DOM=6
+	MAX_DOM=4
 	MAP_PROJ="lat-lon" # Accepted projections are 'lambert', 'polar', 'mercator', and 'lat-lon.'
 	#MAP_PROJ="lambert" # Accepted projections are 'lambert', 'polar', 'mercator', and 'lat-lon.'
 	DX=0.25
