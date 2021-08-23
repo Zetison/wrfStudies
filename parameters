@@ -133,7 +133,9 @@ then
 	#E_VERT=33 #  This number must be the same for each domain.
     REF_LAT=62.4234363 # Latitude of a known reference point inside the domain
     REF_LON=6.0321708 # Longitude of the same point as used for REF_LAT
-    GEOG_DATA_RES="sula+default" 
+    REF_LON=6.0321708 # Longitude of the same point as used for REF_LAT
+    #GEOG_DATA_RES="sula+default" 
+    D_GEOG_DATA_RES="'default', 'default', 'default', 'default', 'sula+default', 'sula+default'," 
 elif [[ $CASE == "SN76914" ]] || [[ $CASE == "SN18700" ]] || [[ $CASE == "Elverum" ]] || [[ $CASE == "Bessaker" ]] || [[ $CASE == "SN71990" ]] || [[ $CASE == "Frankfurt" ]]
 then
 	#NP=1
