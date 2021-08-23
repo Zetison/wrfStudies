@@ -40,7 +40,8 @@ def getYRdata(endpoint, parameters, field):
 @click.option('--meteobluefile', default=home+'/results/WRF/Frankfurt/meteoblue/AirportFrankfurtMain.csv')
 @click.option('--startdate', default='') # in the format '2020-09-29 00:00:00'
 @click.option('--enddate', default='')
-def main(sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,startdate,enddate):
+@click.option('--filetype', default='png', help='File type (png,pdf,...) for exporting graphics')
+def main(sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,startdate,enddate,filetype):
     
 
     ########################################################################
@@ -213,7 +214,7 @@ def main(sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,startda
                 axs[i,j].set_xlim(startdate,enddate)
 
         plt.show()
-        fig.savefig(home+'/results/WRF/'+sourceid+'/Comparison.pdf')
+        fig.savefig(home+'/results/WRF/'+sourceid+'/Comparison.'+filetype)
 
 
     ########################################################################
@@ -277,7 +278,7 @@ def main(sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,startda
                 axs[i,j].set(xlabel='Time', ylabel=ylabels[i,j])
 
         plt.show()
-        fig.savefig(home+'/results/WRF/'+sourceid+'/Comparison_error.pdf')
+        fig.savefig(home+'/results/WRF/'+sourceid+'/Comparison_error.'+filetype)
 
     
 if __name__ == '__main__':

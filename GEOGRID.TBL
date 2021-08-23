@@ -13,6 +13,7 @@ name = HGT_M
         interp_option =     gtopo_10m:four_pt
         interp_option =        lowres:average_gcell(4.0)+four_pt
         interp_option =       default:average_gcell(4.0)+four_pt+average_4pt
+        interp_option =          sula:average_gcell(4.0)+four_pt+average_4pt
         rel_path = gmted2010_30s:topo_gmted2010_30s/
         rel_path =     gtopo_30s:topo_30s/
         rel_path =      gtopo_2m:topo_2m/
@@ -20,6 +21,7 @@ name = HGT_M
         rel_path =     gtopo_10m:topo_10m/
         rel_path =        lowres:topo_gmted2010_5m/
         rel_path =       default:topo_gmted2010_30s/
+        rel_path =          sula:topo_Sula_25meter/
 ===============================
 name=LANDUSEF
         priority=1
