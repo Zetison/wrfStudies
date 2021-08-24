@@ -116,7 +116,7 @@ elif  [[ $CASE == "Sula" ]]
 then
 	NP=8
 	PARM_CONF=0
-	MAX_DOM=4
+	MAX_DOM=6
 	MAP_PROJ="lat-lon" # Accepted projections are 'lambert', 'polar', 'mercator', and 'lat-lon.'
 	#MAP_PROJ="lambert" # Accepted projections are 'lambert', 'polar', 'mercator', and 'lat-lon.'
 	DX=0.25
@@ -128,9 +128,9 @@ then
 	E_WE=100 # number of velocity points in east west direction
 	E_SN=100 # number of velocity points in south north direction
 	E_VERT=50 #  This number must be the same for each domain.
-	#E_WE=16 # number of velocity points in east west direction
-	#E_SN=16 # number of velocity points in south north direction
-	#E_VERT=33 #  This number must be the same for each domain.
+	E_WE=16 # number of velocity points in east west direction
+	E_SN=16 # number of velocity points in south north direction
+	E_VERT=33 #  This number must be the same for each domain.
     REF_LAT=62.4234363 # Latitude of a known reference point inside the domain
     REF_LON=6.0321708 # Longitude of the same point as used for REF_LAT
     #GEOG_DATA_RES="sula+default" 
