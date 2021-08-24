@@ -10,8 +10,8 @@
 #CASE="ATBcase1" # OSLO - BLINDERN
 #CASE="nested"
 #CASE="YR"
-CASE="Sula"
-#CASE="debug"
+#CASE="Sula"
+CASE="debug"
 if [ -z "$DISPLAY" ]
 then
 	echo "Error: set the DISPLAY variable" #The display variable should be set for post processing purposes in paraview. This issue arises when using screen, and can be resolved by first getting the display variable outside the screen session (echo $DISPLAY) and then inside the screen session setting the variable to this value (i.e. export DISPLAY=localhost:10.0)"
@@ -47,12 +47,12 @@ fi
 RUN_MINUTES=0
 RUN_SECONDS=0
 START_HOUR=12
-#START_SIM_DATE="2020-12-05 12:00:00"
 #START_SIM_DATE="2021-03-02 12:00:00"
 START_SIM_DATE="2021-05-23 12:00:00"
 START_SIM_DATE="2021-08-10 12:00:00"
 START_SIM_DATE="2021-07-15 12:00:00"
 START_SIM_DATE="2020-10-31 12:00:00"
+START_SIM_DATE="2020-12-05 12:00:00"
 #START_SIM_DATE="$(date -u +'%Y-%m-%d') $START_HOUR:00:00" # Get date in UTC
 mkdir -p $HOME/results/WRF/$CASE
 while true
@@ -159,7 +159,9 @@ do
 		then
 			sed -i "s/SED_D_DX/${DX}/g;s/SED_D_DY/${DY}/g" namelist.input
 		fi
-		sed -i "s/SED_MAX_TIME_STEP/${MAX_TIME_STEP}/g;s/SED_MIN_TIME_STEP/${MIN_TIME_STEP}/g" namelist.input
+        RADT=$(round "$DX/1000")
+        TIME_STEP=$(round "6*$DX/1000")
+        DICTS="namelist.input"
 		source $HOME/kode/bashScripts/sedFiles
 	
 		ln -sf wps_io/met_em* .	
