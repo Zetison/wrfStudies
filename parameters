@@ -1,6 +1,4 @@
 #!/bin/bash
-NP=32
-NP=4
 MAX_DOM=1
 #GEOG_DATA_RES="usgs_lakes+default"
 GEOG_DATA_RES="default"
@@ -21,7 +19,6 @@ REF_LON=10.407602 # Longitude of the same point as used for REF_LAT
 TRUELAT1=75
 TRUELAT2=45
 RUNGLOBAL=false
-NCL_OUTPUT_TYPE="png" # 'x11', 'pdf', 'ps', 'ncgm', 'png'
 # In order for (REF_LAT REF_LON) to be included as a coordinate in centered nested domains one should have E_WE = 3*n+1, E_SN = 3*m+1 for some integer n and m
 
 USE_ADAPTIVE_TIME_STEP=".true."
@@ -187,15 +184,15 @@ then
 	fi
 elif [[ $CASE == "debug" ]]
 then
-    GEOG_DATA_RES="default"
-    #GEOG_DATA_RES="lowres+default" # use lowres data to speed up preprocessing
+    #GEOG_DATA_RES="default"
+    GEOG_DATA_RES="lowres+default" # use lowres data to speed up preprocessing
 	PARM_CONF=0
-	MAX_DOM=4
+	MAX_DOM=1
 	MAP_PROJ="lat-lon" # Accepted projections are 'lambert', 'polar', 'mercator', and 'lat-lon.'
 	DX=0.25
 	DY=0.25
-	GFS_RES="0p25" # resolution (in degrees) in longitude and latitude direction (NOTE: if > 0.25 (0p25) then INTERVAL_SECONDS must be > 10800) First 120 hours available hourly, after that every 3 hours
-	#GFS_RES="1p00" # resolution (in degrees) in longitude and latitude direction (NOTE: if > 0.25 (0p25) then INTERVAL_SECONDS must be > 10800) First 120 hours available hourly, after that every 3 hours
+	#GFS_RES="0p25" # resolution (in degrees) in longitude and latitude direction (NOTE: if > 0.25 (0p25) then INTERVAL_SECONDS must be > 10800) First 120 hours available hourly, after that every 3 hours
+	GFS_RES="1p00" # resolution (in degrees) in longitude and latitude direction (NOTE: if > 0.25 (0p25) then INTERVAL_SECONDS must be > 10800) First 120 hours available hourly, after that every 3 hours
 	NP=1
 	E_WE=16 # number of velocity points in east west direction
 	E_SN=16 # number of velocity points in south north direction

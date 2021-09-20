@@ -4,20 +4,20 @@
 #CASE="Bessaker"
 #CASE="SN71990"
 #CASE="Frankfurt"
-CASE="Sula"
+#CASE="Sula"
 #CASE="SN76914" # Rikshospitalet in Oslo
 #CASE="Elverum" # Sykehuset innlandet Elverum 
 #CASE="SN18700" # OSLO - BLINDERN
 #CASE="ATBcase1" # OSLO - BLINDERN
 #CASE="nested"
 #CASE="YR"
-#CASE="debug"
+CASE="debug"
 source $HOME/kode/bashScripts/sourceWRF
 #pathToWPS="$WRFDIRECTORY/Build_WRF/WPS" # Run WPS4.2
 #pathToWRF="$WRFDIRECTORY/Build_WRF/WRF/run" # Run WRF4.2
 pathToWPS="$WRFDIRECTORY/Build_WRF/WPS3" # Run WPS4.3
 pathToWRF="$WRFDIRECTORY/Build_WRF/WRF3/run" # Run WRF4.3
-loopForecast=true
+loopForecast=false
 clearNCEPdata=false
 delete_wpsOutputFiles=false
 assumeNCEPdataExist=false
@@ -28,10 +28,12 @@ plotResultsInParaview=false
 plotNCLresults=false
 extractOptions="--folder=$forecastDataFolder"
 CYCLE_INTERVAL=24
+GFS_RES="0p25"
 if [[ $CASE == "debug" ]]
 then
     RUN_DAYS=0
     RUN_HOURS=3
+    GFS_RES="1p00"
 elif [[ $CASE == "Sula" ]]
 then
     RUN_DAYS=0
@@ -50,6 +52,8 @@ START_SIM_DATE="2021-05-23 12:00:00"
 START_SIM_DATE="2021-07-26 12:00:00"
 START_SIM_DATE="2020-10-31 12:00:00"
 #START_SIM_DATE="$(date -u +'%Y-%m-%d') $START_HOUR:00:00" # Get date in UTC
+START_SIM_DATE="2020-12-05 12:00:00"
+START_SIM_DATE="2021-09-02 12:00:00"
 
 while true
 do
@@ -79,6 +83,16 @@ do
 		done
 	fi
 	source ./parameters
+    pathToNamelist="$wrfStudiesFolder/studies/$CASE.nml"
+    INTERVAL_SECONDS=$(grep -oP '(?<=interval_seconds       = )[+-]?[0-9]+([.][0-9]+)?' $pathToNamelist )
+    echo "Interval seconds = "$INTERVAL_SECONDS
+    START_DATE="${START_YEAR}-${START_MONTH}-${START_DAY}_${START_HOUR}:${START_MINUTE}:${START_SECOND}"
+    if [[ "$RUNGLOBAL" = true ]]
+    then
+        END_DATE=$START_DATE # only initial conditions are needed for a global run
+    else
+        END_DATE=$(date -u +'%Y-%m-%d_%T' --date="${START_DATE:0:10} ${START_DATE:11} UTC + $RUN_DAYS days + $RUN_HOURS hours + $RUN_MINUTES minutes + $RUN_SECONDS seconds")
+    fi
 
     ##############################################################################################
     ## WPS

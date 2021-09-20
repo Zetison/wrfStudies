@@ -13,29 +13,43 @@ import click
 import copy
 home = expanduser("~")
 @click.command()
+@click.argument('inputnamelist', type=click.File('r'), default=home+'/kode/wrfStudies/studies/debug.nml')
 @click.option('--wps_nml_path', default=home+'/kode/wrfStudies/namelist.wps.all_options')
 @click.option('--wrf_nml_path', default=home+'/kode/wrfStudies/namelist.input.all_options')
 @click.option('--config_nml_path', default=home+'/kode/wrfStudies/configurations/standard.nml')
 @click.option('--pathtoresults', default=home+'/results/WRF')
-@click.option('--pathtoinput', default=home+'/kode/wrfStudies/studies')
 @click.option('--geogdatapath', default=home+'/WPS_DATA/WPS_GEOG')
 @click.option('--wpsdatapath', default=home+'/kode/WRF/Build_WRF/DATA')
 @click.option('--gfsres', default='0p25')
-@click.option('--case', default='debug')
 @click.option('--runglobal/--no-runglobal', default=False)
 @click.option('--output', default='wps')
 @click.option('--start_date', default='2020-12-05 12:00:00')
 @click.option('--ncepuserfilename', default='NCEPuserData.json')
-def main(wps_nml_path,wrf_nml_path,config_nml_path,pathtoresults,pathtoinput,geogdatapath,wpsdatapath,gfsres,case,runglobal,output,start_date,ncepuserfilename):
+def main(inputnamelist,wps_nml_path,wrf_nml_path,config_nml_path,pathtoresults,geogdatapath,wpsdatapath,gfsres,runglobal,output,start_date,ncepuserfilename):
     wrf_nml = f90nml.read(wrf_nml_path)
     wps_nml = f90nml.read(wps_nml_path)
     config_nml = f90nml.read(config_nml_path)
-    input_nml = f90nml.read(pathtoinput+'/'+case+'.nml')
+    input_nml = f90nml.read(inputnamelist)
 
-    days    = input_nml['time_control']['run_days']
-    hours   = input_nml['time_control']['run_hours']
-    minutes = input_nml['time_control']['run_minutes']
-    seconds = input_nml['time_control']['run_seconds']
+    try:
+        days = input_nml['time_control']['run_days']
+    except Exception:
+        days = wrf_nml['time_control']['run_days']
+
+    try:
+        hours = input_nml['time_control']['run_hours']
+    except Exception:
+        hours = wrf_nml['time_control']['run_hours']
+
+    try:
+        minutes = input_nml['time_control']['run_minutes']
+    except Exception:
+        minutes = wrf_nml['time_control']['run_minutes']
+        
+    try:
+        seconds = input_nml['time_control']['run_seconds']
+    except Exception:
+        seconds = wrf_nml['time_control']['run_seconds']
 
     if start_date:
         start_date = pd.to_datetime(start_date)
@@ -48,58 +62,16 @@ def main(wps_nml_path,wrf_nml_path,config_nml_path,pathtoresults,pathtoinput,geo
     end_date = start_date + timedelta(days=days,hours=hours,minutes=minutes,seconds=seconds)
     input_nml['share']['end_date'] = end_date.strftime("%Y-%m-%d_%H:%M:%S")
 
-    pathtoresults += '/'+case+'/'+start_date.strftime("%Y%m%d%H")
+    pathtoresults += '/'+basename(inputnamelist.name).split('.')[0]+'/'+start_date.strftime("%Y%m%d%H")
     Path(pathtoresults).mkdir(parents=True, exist_ok=True)
+    max_dom = input_nml['share']['max_dom']
+    interval_seconds = input_nml['share']['interval_seconds']
+    interval_hours = np.round(interval_seconds/3600).astype(int)
     if output == 'wps':
         output_nml = copy.deepcopy(wps_nml)
         output_path = pathtoresults+'/namelist.wps'
-    elif output == 'wrf':
-        output_nml = copy.deepcopy(wrf_nml)
-        output_path = pathtoresults+'/namelist.input'
 
-    # Update default values with values from the configuration namelist file
-    for namelist in config_nml:
-        for subnamelist in config_nml[namelist]:
-            try:
-                output_nml[namelist][subnamelist] = config_nml[namelist][subnamelist]
-            except Exception:
-                continue
-
-    max_dom = input_nml['share']['max_dom']
-    if output == 'wps':
-        output_nml['geogrid']['geog_data_path'] = geogdatapath
-        output_nml['geogrid']['opt_geogrid_tbl_path'] = pathtoresults
-        output_nml['metgrid']['opt_output_from_metgrid_path'] = pathtoresults+'/wps_io/'
-        output_nml['metgrid']['opt_metgrid_tbl_path'] = pathtoresults
-    elif output == 'wrf':
-        # Transfer identical fields for consistency
-        output_nml['domains']['max_dom'] = max_dom
-        output_nml['domains']['adaptation_domain'] = max_dom
-        for field in ['parent_id','parent_grid_ratio','i_parent_start','j_parent_start','e_we','e_sn']:
-            output_nml['domains'][field] = input_nml['geogrid'][field]
-
-        output_nml['time_control']['start_year']  = start_date_y
-        output_nml['time_control']['start_month'] = start_date.month
-        output_nml['time_control']['start_day']   = start_date.day
-        output_nml['time_control']['start_hour']  = start_date.hour
-        output_nml['time_control']['end_year']    = end_date.year
-        output_nml['time_control']['end_month']   = end_date.month
-        output_nml['time_control']['end_day']     = end_date.day
-        output_nml['time_control']['end_hour']    = end_date.hour
-
-    # Update default values with values from the input namelist file
-    for namelist in input_nml:
-        for subnamelist in input_nml[namelist]:
-            try:
-                output_nml[namelist][subnamelist] = input_nml[namelist][subnamelist]
-            except Exception:
-                continue
-
-    # Check available GFS resolution
-    interval_seconds = input_nml['share']['interval_seconds']
-    interval_hours = np.round(interval_seconds/3600).astype(int)
-
-    if output == 'wps':
+        # Download missing GFS files
         for hour in np.arange(0,np.ceil(days*24+hours+minutes/60+seconds/3600).astype(int)+interval_hours,interval_hours):
             start_date_ymd = start_date.strftime("%Y%m%d")
             start_date_ymdh = start_date.strftime("%Y%m%d%H")
@@ -131,14 +103,81 @@ def main(wps_nml_path,wrf_nml_path,config_nml_path,pathtoresults,pathtoinput,geo
                         cookies = {'enwiki_session': authFileName}
                         responseAuth = requests.post(url, data=data, cookies=cookies)
                         responseAuth.raise_for_status() # ensure we notice bad responses
-                        url = 'https://rda.ucar.edu/data/ds084.1/%s/%s/gfs.%s.%s.f%03d.grib2' % (start_date_y, start_date_ymd, gfsres, start_date_ymd, start_date_h, hour)
+                        url = 'https://rda.ucar.edu/data/ds084.1/%s/%s/gfs.%s.%s.f%03d.grib2' % (start_date_y, start_date_ymd, gfsres, start_date_ymdh, hour)
                         responseGFS = requests.post(url, cookies=responseAuth.cookies)
                         responseGFS.raise_for_status() # ensure we notice bad responses
                         with open(filename, "wb") as f:
                             f.write(responseGFS.content)
             else:
                 print('Found file '+basename(filename))
+    elif output == 'wrf':
+        output_nml = copy.deepcopy(wrf_nml)
+        output_path = pathtoresults+'/namelist.input'
 
+        dx = [''] * max_dom
+        dy = [''] * max_dom
+        for i in range(max_dom):
+            base_url = pathtoresults+'/wps_io/geo_em.d%02d.nc' % (i+1)
+            try:
+                nc_geo = netCDF4.Dataset(base_url)
+            except Exception:
+                print('Could not find the file '+base_url)
+
+            dx[i] = nc_geo.DX
+            dy[i] = nc_geo.DY
+    
+        base_url = pathtoresults+'/wps_io/met_em.d01.%s.nc' % start_date.strftime("%Y-%m-%d_%H:%M:%S")
+        try:
+            nc_met = netCDF4.Dataset(base_url)
+        except Exception:
+            print('Could not find the file '+base_url)
+
+        num_metgrid_levels = nc_met.dimensions['num_metgrid_levels'].size
+        num_st_layers = nc_met.dimensions['num_st_layers'].size
+
+    # Update default values with values from the configuration namelist file
+    for namelist in config_nml:
+        for subnamelist in config_nml[namelist]:
+            try:
+                output_nml[namelist][subnamelist] = config_nml[namelist][subnamelist]
+            except Exception:
+                continue
+
+    if output == 'wps':
+        output_nml['geogrid']['geog_data_path'] = geogdatapath
+        output_nml['geogrid']['opt_geogrid_tbl_path'] = pathtoresults
+        output_nml['metgrid']['opt_output_from_metgrid_path'] = pathtoresults+'/wps_io/'
+        output_nml['metgrid']['opt_metgrid_tbl_path'] = pathtoresults
+    elif output == 'wrf':
+        # Transfer identical fields for consistency
+        output_nml['domains']['max_dom'] = max_dom
+        output_nml['domains']['adaptation_domain'] = max_dom
+        for field in ['parent_id','parent_grid_ratio','i_parent_start','j_parent_start','e_we','e_sn']:
+            output_nml['domains'][field] = input_nml['geogrid'][field]
+
+        output_nml['time_control']['start_year']  = start_date.year
+        output_nml['time_control']['start_month'] = start_date.month
+        output_nml['time_control']['start_day']   = start_date.day
+        output_nml['time_control']['start_hour']  = start_date.hour
+        output_nml['time_control']['end_year']    = end_date.year
+        output_nml['time_control']['end_month']   = end_date.month
+        output_nml['time_control']['end_day']     = end_date.day
+        output_nml['time_control']['end_hour']    = end_date.hour
+
+        output_nml['physics']['radt'] = np.round(np.array(dx)/1000).astype(int).tolist()
+        output_nml['domains']['time_step'] = np.round(np.array(dx[-1])/1000).astype(int).tolist()
+
+
+    # Update default values with values from the input namelist file
+    for namelist in input_nml:
+        for subnamelist in input_nml[namelist]:
+            try:
+                output_nml[namelist][subnamelist] = input_nml[namelist][subnamelist]
+            except Exception:
+                continue
+
+
+    if output == 'wps':
         if not input_nml['geogrid'].get('pole_lat'):
             ref_lat = output_nml['geogrid']['ref_lat']
             ref_lon = output_nml['geogrid']['ref_lon']
@@ -169,32 +208,15 @@ def main(wps_nml_path,wrf_nml_path,config_nml_path,pathtoresults,pathtoinput,geo
         if not input_nml['geogrid'].get('ref_y'):
             del output_nml['geogrid']['ref_y']
     elif output == 'wrf':
-        dx = [''] * max_dom
-        dy = [''] * max_dom
         output_nml['time_control']['interval_seconds'] = interval_seconds
         if not input_nml['time_control'].get('auxinput4_interval'):
             output_nml['time_control']['auxinput4_interval'] = interval_seconds
 
-        for i in range(max_dom):
-            base_url = pathtoresults+'/wps_io/geo_em.d%02d.nc' % (i+1)
-            try:
-                nc_geo = netCDF4.Dataset(base_url)
-            except Exception:
-                print('Could not find the file '+base_url)
-
-            dx[i] = nc_geo.DX
-            dy[i] = nc_geo.DY
-    
         output_nml['domains']['dx'] = dx
         output_nml['domains']['dy'] = dy
-        base_url = pathtoresults+'/wps_io/met_em.d01.%s.nc' % start_date.strftime("%Y-%m-%d_%H:%M:%S")
-        try:
-            nc_met = netCDF4.Dataset(base_url)
-        except Exception:
-            print('Could not find the file '+base_url)
 
-        output_nml['domains']['num_metgrid_levels'] = nc_met.dimensions['num_metgrid_levels'].size
-        output_nml['domains']['num_metgrid_soil_levels'] = nc_met.dimensions['num_st_layers'].size
+        output_nml['domains']['num_metgrid_levels'] = num_metgrid_levels 
+        output_nml['domains']['num_metgrid_soil_levels'] = num_st_layers
 
     # Fix domain dependent fields to have exactly max_dom entries
     for parent_start in [False,True]: # Set i_parent_start and j_parent_start after potentially dependent fields
@@ -233,6 +255,8 @@ def main(wps_nml_path,wrf_nml_path,config_nml_path,pathtoresults,pathtoinput,geo
                         if not parent_start:
                             if subnamelist == 'parent_id':
                                 output_nml[namelist][subnamelist] += list(np.arange(noValues,max_dom))
+                            elif subnamelist == 'grid_id':
+                                output_nml[namelist][subnamelist] += list(np.arange(noValues+1,max_dom+1))
                             else:
                                 output_nml[namelist][subnamelist] += [lastValue] * (max_dom - noValues)
 

@@ -3,7 +3,7 @@
 #CASE="global"
 #CASE="Bessaker"
 #CASE="SN71990"
-#CASE="Frankfurt"
+CASE="Frankfurt"
 #CASE="SN76914" # Rikshospitalet in Oslo
 #CASE="Elverum" # Sykehuset innlandet Elverum 
 #CASE="SN18700" # OSLO - BLINDERN
@@ -25,16 +25,21 @@ loopForecast=false
 clearNCEPdata=false
 delete_wpsOutputFiles=false
 runPreproc=true
-forecastDataFolder=$HOME/results/forecastData/
-wrfStudiesFolder=$HOME/kode/wrfStudies/
+forecastDataFolder=$HOME/results/forecastData
+wrfStudiesFolder=$HOME/kode/wrfStudies
 plotResultsInParaview=false
 plotNCLresults=true
-extractOptions="--folder=$forecastDataFolder"
+NCL_OUTPUT_TYPE="png" # 'x11', 'pdf', 'ps', 'ncgm', 'png'
+extractOptions="--folder=$forecastDataFolder/"
 CYCLE_INTERVAL=24
+NP=8
+GFS_RES="0p25"
 if [[ $CASE == "debug" ]]
 then
     RUN_DAYS=0
     RUN_HOURS=3
+    GFS_RES="1p00"
+    NP=2
 elif [[ $CASE == "Sula" ]]
 then
     RUN_DAYS=0
@@ -43,6 +48,14 @@ then
 else
     RUN_DAYS=1
     RUN_HOURS=12
+fi
+extraNamelistOptions="--gfsres $GFS_RES --ncepuserfilename NCEPuserDataJVV.json"
+if [[ $CASE == "global" ]]
+then
+    extraNamelistOptions="$extraNamelistOptions --runglobal $RUNGLOBAL"
+    RUNGLOBAL=true
+else
+    RUNGLOBAL=false
 fi
 RUN_MINUTES=0
 RUN_SECONDS=0
@@ -53,6 +66,9 @@ START_SIM_DATE="2021-08-10 12:00:00"
 START_SIM_DATE="2021-07-15 12:00:00"
 START_SIM_DATE="2020-10-31 12:00:00"
 START_SIM_DATE="2020-12-05 12:00:00"
+START_SIM_DATE="2021-09-05 00:00:00"
+#START_SIM_DATE="2021-05-01 12:00:00"
+#START_SIM_DATE="2021-09-19 00:00:00"
 #START_SIM_DATE="$(date -u +'%Y-%m-%d') $START_HOUR:00:00" # Get date in UTC
 mkdir -p $HOME/results/WRF/$CASE
 while true
@@ -71,46 +87,41 @@ do
 			echo -ne "Time until start of program: $(date -u --date @$(($date1 - `date +%s` )) +%H:%M:%S)\r";
 		done
 	fi
-	source ./parameters
 
     ##############################################################################################
     ## WPS
+    COMP_START_DATE="${START_SIM_DATE:0:4}${START_SIM_DATE:5:2}${START_SIM_DATE:8:2}${START_SIM_DATE:11:2}"
+    START_DATE=$(echo $START_SIM_DATE | sed 's/ /_/g')
     pathToResults="$HOME/results/WRF/$CASE/${COMP_START_DATE}"
+    pathToNamelist="$wrfStudiesFolder/studies/$CASE.nml"
+    mkdir -p $pathToResults $pathToResults/wps_io
+    python3 $wrfStudiesFolder/createNamelist.py "$wrfStudiesFolder/studies/$CASE.nml" --start_date "$START_SIM_DATE" $extraNamelistOptions
+    MAX_DOM=$(grep -oP '(?<=max_dom                = )[+-]?[0-9]+([.][0-9]+)?' $pathToNamelist )
+    MAP_PROJ=$(grep 'map_proj' $pathToNamelist | awk '{print $3}' | sed 's/,//' | sed "s/'//g")
 	if [[ $1 == 1 ]] 
 	then
-        cp -f GEOGRID.TBL METGRID.TBL namelist.wps $pathToResults
-        mkdir -p $pathToResults $pathToResults/wps_io
+        cp -f GEOGRID.TBL METGRID.TBL $pathToResults
         pushd $pathToResults > /dev/null
-        if [[ "$RUNGLOBAL" = true ]]
-        then
-            sed -i '/SED_DX/d;/SED_DY/d;/SED_REF_LAT/d;/SED_REF_LON/d' namelist.wps
-        fi
-        if [[ "$MAP_PROJ" == "lat-lon" ]]
-        then
-            sed -i '/truelat1/d;/truelat2/d' namelist.wps
-        else
-            sed -i '/SED_POLE_LAT/d;/SED_POLE_LON/d' namelist.wps
-        fi
         
-        DICTS="namelist.wps"
-        source $HOME/kode/bashScripts/sedFiles
-
         echo "Running geogrid ..."
         ln -sf $pathToWPS/geogrid/src/geogrid.exe geogrid.exe
 		mpirun -np $NP ./geogrid.exe > geogrid.log
-		./geogrid.exe > geogrid.log
+		#./geogrid.exe > geogrid.log
         if [[ "$plotNCLresults" = true ]]
         then
+            POLE_LAT=$(grep -oP '(?<=pole_lat = )[+-]?[0-9]+([.][0-9]+)?' namelist.wps )
+            POLE_LON=$(grep -oP '(?<=pole_lon = )[+-]?[0-9]+([.][0-9]+)?' namelist.wps )
+            STAND_LON=$(grep -oP '(?<=stand_lon = )[+-]?[0-9]+([.][0-9]+)?' namelist.wps )
             > ncl.log
             if [[ "$RUNGLOBAL" = true ]]
             then
-                ncl 'type="png"' POLE_LAT=$POLE_LAT STAND_LON=$STAND_LON $wrfStudiesFolder/plotgrids_global.ncl >> ncl.log
+                ncl "type=\"$NCL_OUTPUT_TYPE\"" POLE_LAT=$POLE_LAT STAND_LON=$STAND_LON $wrfStudiesFolder/plotgrids_global.ncl >> ncl.log
             else
-                ncl 'type="png"' POLE_LAT=$POLE_LAT STAND_LON=$STAND_LON $wrfStudiesFolder/plotgrids_new.ncl >> ncl.log
+                ncl "type=\"$NCL_OUTPUT_TYPE\"" POLE_LAT=$POLE_LAT STAND_LON=$STAND_LON $wrfStudiesFolder/plotgrids_new.ncl >> ncl.log
             fi
             for i_domain in $(seq -f "%02g" 1 ${MAX_DOM})
             do
-                ncl 'type="png"' a="addfile(\"./wps_io/geo_em.d${i_domain}.nc\",\"r\")" $wrfStudiesFolder/wrf_wps_ter.ncl >> ncl.log
+                ncl "type=\"$NCL_OUTPUT_TYPE\"" a="addfile(\"./wps_io/geo_em.d${i_domain}.nc\",\"r\")" $wrfStudiesFolder/wrf_wps_ter.ncl >> ncl.log
                 mv plt_geo_6.png "plt_geo_d${i_domain}.png"
             done
         fi
@@ -118,13 +129,12 @@ do
 		ln -sf $pathToWPS/ungrib/Variable_Tables/Vtable.GFS Vtable
         ln -sf $pathToWPS/ungrib/src/ungrib.exe ungrib.exe
         echo "Running ungrib ..."
-		#mpirun -np $NP ./ungrib.exe > ungrib.log
-		./ungrib.exe > ungrib.log
+		mpirun -np $NP ./ungrib.exe > ungrib.log
+		#./ungrib.exe > ungrib.log
         echo "Running metgrid ..."
         ln -sf $pathToWPS/metgrid/src/metgrid.exe metgrid.exe
 		mpirun -np $NP ./metgrid.exe > metgrid.log
 		#./metgrid.exe > metgrid.log
-		# ncview geo_em.d01.nc
         if [ $NP -gt 1 ]
         then
             cat geogrid.log.* >> geogrid.log
@@ -138,42 +148,16 @@ do
 	## WRF
 	if [[ $2 == 1 ]]
 	then
-		cp namelist.input $pathToResults
 		pushd $pathToResults > /dev/null
-        if [[ "$MAP_PROJ" == "lat-lon" ]]
-        then
-            DX=""
-            DY=""
-            for i_domain in $(seq -f "%02g" 1 ${MAX_DOM})
-            do
-                temp=$(ncdump -h wps_io/geo_em.d${i_domain}.nc | grep -oP '(?<=:DX = )[+-]?[0-9]+([.][0-9]+)?')
-                DX=$DX$temp", "
-                temp=$(ncdump -h wps_io/geo_em.d${i_domain}.nc | grep -oP '(?<=:DY = )[+-]?[0-9]+([.][0-9]+)?')
-                DY=$DY$temp", "
-            done
-        fi
-        NUM_METGRID_LEVELS=$(ncdump -h "wps_io/met_em.d01.$START_DATE.nc" | grep -oP '(?<=num_metgrid_levels = )[0-9]+;?')
-        NUM_METGRID_SOIL_LEVELS=$(ncdump -h "wps_io/met_em.d01.$START_DATE.nc" | grep -oP '(?<=num_st_layers = )[0-9]+;?')
-		DICTS="namelist.input" 
-		if [[ "$MAP_PROJ" == "lat-lon" ]]
-		then
-			sed -i "s/SED_D_DX/${DX}/g;s/SED_D_DY/${DY}/g" namelist.input
-		fi
-        RADT=$(round "$DX/1000")
-        TIME_STEP=$(round "6*$DX/1000")
-        DICTS="namelist.input"
-		source $HOME/kode/bashScripts/sedFiles
-	
+        python3 $wrfStudiesFolder/createNamelist.py "$wrfStudiesFolder/studies/$CASE.nml" --output wrf --start_date "$START_SIM_DATE" $extraNamelistOptions
+
 		ln -sf wps_io/met_em* .	
         WRFrunFILES=$(ls -I namelist.input $pathToWRF )
         for FILE in $WRFrunFILES; do 
             ln -sf $pathToWRF/$FILE $FILE 
         done
 		mpirun -np $NP ./real.exe
-		# tail rsl.error.0000
 		mpirun -np $NP ./wrf.exe
-		# tail -F rsl.out.0000
-		# tail rsl.error.0000
 
         rm $WRFrunFILES met_em*
         for i_domain in $(seq -f "%02g" 1 ${MAX_DOM})
@@ -181,8 +165,8 @@ do
             wrfName="wrfout_d"$i_domain
             mv ${wrfName}_${START_DATE} ${wrfName}".nc"
         done
-        cat rsl.error.* >> rsl.error
-        cat rsl.out.* >> rsl.out
+        cat rsl.error.* > rsl.error
+        cat rsl.out.* > rsl.out
         rm rsl.error.* rsl.out.*
         rm namelist.output
 		popd > /dev/null
@@ -198,7 +182,7 @@ do
             ## Plot results using ncl
             if [[ "$plotNCLresults" = true ]]
             then
-                ncl 'type="png"' a="addfile(\"./wps_io/geo_em.d${i_domain}.nc\",\"r\")" $wrfStudiesFolder/wrf_Surface3.ncl >> ncl.log
+                ncl "type=\"$NCL_OUTPUT_TYPE\"" a="addfile(\"./wps_io/geo_em.d${i_domain}.nc\",\"r\")" $wrfStudiesFolder/wrf_Surface3.ncl >> ncl.log
                 #idt plt_Surface3.ncgm # Animate result in a GUI. Assumes NCL_OUTPUT_TYPE="ncgm"
                 #convert -delay 100 plt_Surface3.*.png "anim_d${i_domain}.mpeg"
             fi
@@ -217,7 +201,7 @@ do
             fi
         done
         # Extract data at mast location
-		python3 $HOME/kode/wrfStudies/extractData.py --folder=$pathToResults"/" --extract_wrf
+		python3 $wrfStudiesFolder/extractData.py --folder=$pathToResults"/" --extract_wrf
 		popd > /dev/null
 	fi
 
@@ -237,10 +221,6 @@ do
 	if [ "$loopForecast" = true ]
 	then
 		START_SIM_DATE=$(date -u +'%Y-%m-%d %H:%M:%S' --date="$START_SIM_DATE UTC + $CYCLE_INTERVAL hours")
-		for collector in $VARIABLES 
-		do
-			eval "D_${collector}=\"\""
-		done
 	else
 		exit 1
 	fi
