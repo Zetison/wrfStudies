@@ -1,5 +1,5 @@
 &share
- max_dom                = 4,
+ max_dom                = 6,
  interval_seconds       = 3600,
 /
 
