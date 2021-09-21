@@ -27,7 +27,7 @@ delete_wpsOutputFiles=false
 runPreproc=true
 forecastDataFolder=$HOME/results/forecastData
 wrfStudiesFolder=$HOME/kode/wrfStudies
-plotResultsInParaview=false
+plotResultsInParaview=true
 plotNCLresults=true
 NCL_OUTPUT_TYPE="png" # 'x11', 'pdf', 'ps', 'ncgm', 'png'
 extractOptions="--folder=$forecastDataFolder/"
@@ -94,9 +94,10 @@ do
     pathToResults="$HOME/results/WRF/$CASE/${COMP_START_DATE}"
     pathToNamelist="$wrfStudiesFolder/studies/$CASE.nml"
     mkdir -p $pathToResults $pathToResults/wps_io
-    python3 $wrfStudiesFolder/createNamelist.py "$wrfStudiesFolder/studies/$CASE.nml" --start_date "$START_SIM_DATE" $extraNamelistOptions
-    MAX_DOM=$(grep -oP '(?<=max_dom                = )[+-]?[0-9]+([.][0-9]+)?' $pathToNamelist )
-    MAP_PROJ=$(grep 'map_proj' $pathToNamelist | awk '{print $3}' | sed 's/,//' | sed "s/'//g")
+    nmlInput=$wrfStudiesFolder/studies/$CASE.nml
+    python3 $wrfStudiesFolder/createNamelist.py $nmlInput --start_date "$START_SIM_DATE" $extraNamelistOptions
+    MAX_DOM=$(python getNamelistEntry.py $nmlInput --namelist=share --subnamelist=max_dom)
+    MAP_PROJ=$(python getNamelistEntry.py $nmlInput --namelist=geogrid --subnamelist=map_proj)
 	if [[ $1 == 1 ]] 
 	then
         cp -f GEOGRID.TBL METGRID.TBL $pathToResults
@@ -104,8 +105,8 @@ do
         
         echo "Running geogrid ..."
         ln -sf $pathToWPS/geogrid/src/geogrid.exe geogrid.exe
-		mpirun -np $NP ./geogrid.exe > geogrid.log
-		#./geogrid.exe > geogrid.log
+		#mpirun -np $NP ./geogrid.exe > geogrid.log
+		./geogrid.exe > geogrid.log
         if [[ "$plotNCLresults" = true ]]
         then
             POLE_LAT=$(grep -oP '(?<=pole_lat = )[+-]?[0-9]+([.][0-9]+)?' namelist.wps )
@@ -123,6 +124,15 @@ do
                 ncl "type=\"$NCL_OUTPUT_TYPE\"" a="addfile(\"./wps_io/geo_em.d${i_domain}.nc\",\"r\")" $wrfStudiesFolder/wrf_wps_ter.ncl >> ncl.log
                 mv plt_geo_6.png "plt_geo_d${i_domain}.png"
             done
+        fi
+        if [[ "$plotNCLresults" = true ]]
+        then
+            for i_domain in $(seq -f "%02g" 1 ${MAX_DOM})
+            do
+                coords=$(python $wrfStudiesFolder/getNamelistEntry.py $nmlInput --namelist=misc --subnamelist=coords)
+                siso -f vts --last wps_io/geo_em.d${i_domain}.nc wps_io/geo_om_d${i_domain}.vts --coords=$coords
+            done
+
         fi
 		$pathToWPS/link_grib.csh $WRFDIRECTORY/Build_WRF/DATA/GFS_${GFS_RES}_${COMP_START_DATE}
 		ln -sf $pathToWPS/ungrib/Variable_Tables/Vtable.GFS Vtable

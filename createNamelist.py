@@ -249,7 +249,9 @@ def main(inputnamelist,wps_nml_path,wrf_nml_path,config_nml_path,pathtoresults,g
 
                             for i in range(noValues,max_dom):
                                 parent_grid_ratio = output_nml[namelist]['parent_grid_ratio'][i]
-                                value = (output_nml[namelist][E][i-1] - 1) // parent_grid_ratio + 1 
+                                noNodes_parent = output_nml[namelist][E][i-1] - 1
+                                noNodes = output_nml[namelist][E][i] - 1
+                                value = (parent_grid_ratio*noNodes_parent - noNodes) // (2*parent_grid_ratio) + 1 
                                 output_nml[namelist][subnamelist] += [value]
                     else:
                         if not parent_start:
