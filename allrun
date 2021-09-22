@@ -138,19 +138,19 @@ do
 		ln -sf $pathToWPS/ungrib/Variable_Tables/Vtable.GFS Vtable
         ln -sf $pathToWPS/ungrib/src/ungrib.exe ungrib.exe
         echo "Running ungrib ..."
-		mpirun -np $NP ./ungrib.exe > ungrib.log
-		#./ungrib.exe > ungrib.log
-        echo "Running metgrid ..."
-        ln -sf $pathToWPS/metgrid/src/metgrid.exe metgrid.exe
-		mpirun -np $NP ./metgrid.exe > metgrid.log
-		#./metgrid.exe > metgrid.log
-        if [ $NP -gt 1 ]
-        then
-            cat geogrid.log.* >> geogrid.log
-            cat metgrid.log.* >> metgrid.log
-            rm geogrid.log.* metgrid.log.*
-        fi
-        rm geogrid.exe ungrib.exe metgrid.exe Vtable GRIBFILE.* FILE*
+		#mpirun -np $NP ./ungrib.exe > ungrib.log
+		##./ungrib.exe > ungrib.log
+        #echo "Running metgrid ..."
+        #ln -sf $pathToWPS/metgrid/src/metgrid.exe metgrid.exe
+		#mpirun -np $NP ./metgrid.exe > metgrid.log
+		##./metgrid.exe > metgrid.log
+        #if [ $NP -gt 1 ]
+        #then
+        #    cat geogrid.log.* >> geogrid.log
+        #    cat metgrid.log.* >> metgrid.log
+        #    rm geogrid.log.* metgrid.log.*
+        #fi
+        #rm geogrid.exe ungrib.exe metgrid.exe Vtable GRIBFILE.* FILE*
 	    popd > /dev/null
 	fi
 	##############################################################################################
