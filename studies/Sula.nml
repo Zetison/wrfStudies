@@ -26,7 +26,12 @@
 /
 
 &domains
- time_step              = 90,
+ time_step              = 0,
+ time_step_fract_num    = 9,
+ time_step_fract_den    = 50,
+ min_time_step          = 1,
+ min_time_step_den      = 100,
+ use_adaptive_time_step = .false.,
  e_vert                 = 50,
  parent_time_step_ratio = 1, 3,
 /
