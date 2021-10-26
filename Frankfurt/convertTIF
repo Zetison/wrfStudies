@@ -1,0 +1,14 @@
+#!/bin/bash
+#filename=$1
+#echo "Filename = "$filename
+
+coords="EPSG:3035"
+coords="EPSG:4326"
+
+#gdal_calc.py -A Frankfurt.tif --outfile=temp.tif --calc="A*(A>-10)" --NoDataValue=0 --overwrite
+#gdalwarp temp.tif Frankfurt_USG84.tif -te 7.641981034 49.571206835 9.317161036 50.508394605 -tr 0.000341741 0.000229386 -srcnodata "-3.4028234663852886e+38" -dstnodata 0 -t_srs "EPSG:4326" -overwrite -r bilinear
+##siso -f vts --last --coords=utm:32u Frankfurt_USG84.tif
+
+gdal_calc.py -A Frankfurt100m.tif --outfile=temp.tif --calc="A*(A>-10)" --NoDataValue=0 --overwrite
+gdalwarp temp.tif Frankfurt100m_USG84.tif -te 6.81 48.6 10.3 51.6 -tr 0.0014 0.0014 -srcnodata "-3.4028234663852886e+38" -dstnodata 0 -t_srs "EPSG:4326" -overwrite -r bilinear
+siso -f vts --last --coords=utm:32u Frankfurt100m_USG84.tif

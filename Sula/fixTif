@@ -1,0 +1,8 @@
+#!/bin/bash
+filename=$1
+echo "Filename = "$filename
+na=$(gdalinfo ${filename} | grep NoData | cut -d "=" -f2)
+gdalbuildvrt -srcnodata ${na} -vrtnodata 0 output.vrt ${filename}
+gdal_translate -a_nodata ${na} output.vrt Fix_${filename}
+rm output.vrt
+#siso -f vts Fix_${filename} --last --coords=utm:33u

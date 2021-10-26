@@ -1,0 +1,3 @@
+# Increasing epssm (in &dynamics) may resolve "points exceeded w_flag_cfl in domain d0x" issues
+
+* WRF cannot generally handle slopes > 45 degrees (steep terrain)

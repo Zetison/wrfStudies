@@ -111,7 +111,7 @@ then
 	RUN_HOURS=66
 elif  [[ $CASE == "Sula" ]]
 then
-	NP=8
+	NP=1
 	PARM_CONF=0
 	MAX_DOM=6
 	MAP_PROJ="lat-lon" # Accepted projections are 'lambert', 'polar', 'mercator', and 'lat-lon.'
@@ -372,16 +372,6 @@ do
     D_NESTED=$D_NESTED".true., "
 done
 source ~/kode/bashScripts/round
-if [[ "$MAP_PROJ" = lat-lon ]]
-then
-	RADT=$(round "40075*$DX/360")
-	TIME_STEP=$(round "6*40075*$DX/360")
-	MIN_TIME_STEP=$(round "0.001*40075*$DX/360")
-else
-	RADT=$(round "$DX/1000")
-	TIME_STEP=$(round "6*$DX/1000")
-	MIN_TIME_STEP=$(round "0.001*$DX/1000")
-fi
 START_DATE="${START_YEAR}-${START_MONTH}-${START_DAY}_${START_HOUR}:${START_MINUTE}:${START_SECOND}"
 if [[ "$RUNGLOBAL" = true ]]
 then

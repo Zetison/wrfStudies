@@ -1,0 +1,27 @@
+#!/bin/bash
+#filename=$1
+#echo "Filename = "$filename
+
+coords="EPSG:3035"
+coords="EPSG:4326"
+
+#gdalwarp ~/WPS_DATA/EU_DEM/eu_dem_v11_E40N40.TIF test.tif -te 5.403153641 62.099104746 6.686122391 62.721377390 -tr 0.000485992 0.000224982 -srcnodata "-3.4028234663852886e+38" -dstnodata 0 -t_srs "EPSG:4326" -overwrite -r bilinear
+#gdalwarp ~/WPS_DATA/EU_DEM/eu_dem_v11_E40N40.TIF test.tif -te 4081929.6240 4333214.7399 4153117.1540 4416170.2509 -tr 25 25 -srcnodata "-3.4028234663852886e+38" -dstnodata 0 -t_srs "EPSG:3035" -overwrite -r bilinear
+
+#siso -f vts --last --coords=utm:33u test.tif
+
+
+
+#gdalwarp Aalesund50m.tiff Aalesund50m_USG84.tif -te 5.434297916 62.093368250 7.000200398 62.830192131 -tr 0.000824428 0.000505281 -srcnodata "-3.4028234663852886e+38" -dstnodata 0 -t_srs "EPSG:4326" -overwrite -r bilinear
+#siso -f vts --last --coords=utm:33u Aalesund50m_USG84.tif
+#gdalwarp Sula10m.tiff Sula10m_USG84.tif -te 5.493152331 62.172966500 6.606511153 62.709795328 -tr 0.000824428 0.000505281 -srcnodata "-3.4028234663852886e+38" -dstnodata 0 -t_srs "EPSG:4326" -overwrite -r bilinear
+#siso -f vts --last --coords=utm:33u Sula10m_USG84.tif
+
+
+#gdalwarp Kaarsteinen1m.tiff Kaarsteinen1m_USG84.tif -te 6.112456442 62.399097969 6.124454794 62.404743705 -tr 0.0000164731 0.0000100997 -srcnodata "-3.4028234663852886e+38" -dstnodata 0 -t_srs "EPSG:4326" -overwrite -r bilinear
+#siso -f vts --last --coords=utm:33u Kaarsteinen1m_USG84.tif
+
+gdal_calc.py -A Sunnmore50m.tiff --outfile=temp.tif --calc="A*(A>-10)" --NoDataValue=0 --overwrite
+gdalwarp temp.tif Sunnmore50m_USG84.tif -te 4.944958700 61.927729154 7.396120745 62.894831235 -tr 0.000824723 0.000504634 -srcnodata "-3.4028234663852886e+38" -dstnodata 0 -t_srs "EPSG:4326" -overwrite -r bilinear
+#siso -f vts --last --coords=utm:33u Sunnmore50m_USG84.tif
+

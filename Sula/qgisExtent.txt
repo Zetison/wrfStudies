@@ -1,0 +1,9 @@
+Coordinate system IGNF:WGS84GDD - WGS84 geographiques (dd)
+
+North 62.8
+West 5.5
+South 62
+East 7
+
+Scale: 1:50000
+
