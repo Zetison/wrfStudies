@@ -19,15 +19,15 @@
  dx        = 30000,
  dy        = 30000,
  map_proj  = 'lambert',
+ stand_lon = -98.0,
+ pole_lat  =  39.97472,
+ pole_lon  =  180,
  ref_lat   =  34.83,
  ref_lon   = -81.03,
  ref_x     =  37.0,
  ref_y     =  30.5,
- pole_lat  =  39.97472,
- pole_lon  =  180,
  truelat1  =  30.0,
  truelat2  =  60.0,
- stand_lon = -98.0,
  geog_data_path = '/glade/work/wrfhelp/WPS_GEOG/'
  opt_geogrid_tbl_path = 'geogrid/'
 /
@@ -40,7 +40,7 @@
 &metgrid
  fg_name         = 'FILE'
  io_form_metgrid = 2, 
- opt_output_from_metgrid_path = './',
  opt_metgrid_tbl_path         = 'metgrid/',
+ opt_output_from_metgrid_path = './',
 /
 

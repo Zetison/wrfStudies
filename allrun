@@ -3,14 +3,14 @@
 #CASE="global"
 #CASE="Bessaker"
 #CASE="SN71990"
-#CASE="Frankfurt"
+CASE="Frankfurt"
 #CASE="SN76914" # Rikshospitalet in Oslo
 #CASE="Elverum" # Sykehuset innlandet Elverum 
 #CASE="SN18700" # OSLO - BLINDERN
 #CASE="ATBcase1" # OSLO - BLINDERN
 #CASE="nested"
 #CASE="YR"
-CASE="Sula"
+#CASE="Sula"
 #CASE="debug"
 if [ -z "$DISPLAY" ]
 then
@@ -105,8 +105,8 @@ do
         
         echo "Running geogrid ..."
         ln -sf $pathToWPS/geogrid/src/geogrid.exe geogrid.exe
-		#mpirun -np $NP ./geogrid.exe > geogrid.log
-		./geogrid.exe > geogrid.log
+		mpirun -np $NP ./geogrid.exe > geogrid.log
+		#./geogrid.exe > geogrid.log
         if [[ "$plotNCLresults" = true ]]
         then
             POLE_LAT=$(grep -oP '(?<=pole_lat = )[+-]?[0-9]+([.][0-9]+)?' namelist.wps )
@@ -138,19 +138,19 @@ do
 		ln -sf $pathToWPS/ungrib/Variable_Tables/Vtable.GFS Vtable
         ln -sf $pathToWPS/ungrib/src/ungrib.exe ungrib.exe
         echo "Running ungrib ..."
-		#mpirun -np $NP ./ungrib.exe > ungrib.log
-		##./ungrib.exe > ungrib.log
-        #echo "Running metgrid ..."
-        #ln -sf $pathToWPS/metgrid/src/metgrid.exe metgrid.exe
-		#mpirun -np $NP ./metgrid.exe > metgrid.log
-		##./metgrid.exe > metgrid.log
-        #if [ $NP -gt 1 ]
-        #then
-        #    cat geogrid.log.* >> geogrid.log
-        #    cat metgrid.log.* >> metgrid.log
-        #    rm geogrid.log.* metgrid.log.*
-        #fi
-        #rm geogrid.exe ungrib.exe metgrid.exe Vtable GRIBFILE.* FILE*
+		mpirun -np $NP ./ungrib.exe > ungrib.log
+		#./ungrib.exe > ungrib.log
+        echo "Running metgrid ..."
+        ln -sf $pathToWPS/metgrid/src/metgrid.exe metgrid.exe
+		mpirun -np $NP ./metgrid.exe > metgrid.log
+		#./metgrid.exe > metgrid.log
+        if [ $NP -gt 1 ]
+        then
+            cat geogrid.log.* >> geogrid.log
+            cat metgrid.log.* >> metgrid.log
+            rm geogrid.log.* metgrid.log.*
+        fi
+        rm geogrid.exe ungrib.exe metgrid.exe Vtable GRIBFILE.* FILE*
 	    popd > /dev/null
 	fi
 	##############################################################################################
@@ -202,15 +202,17 @@ do
             then
 				if [[ "$RUNGLOBAL" = true ]]
 				then
-					siso -f pvd $wrfName --coords geocentric -l P,T,U,V,W,T2,U10,V10 --planar --periodic >> siso.log
+					siso -f pvd $wrfName --coords geocentric -l P,T,U,V,W,T2,U10,V10,WIND --planar --periodic >> siso.log
 				else
-					siso -f pvd $wrfName --coords geocentric -l P,T,U,V,W,T2,U10,V10 --planar >> siso.log
+                    coords=$(python $wrfStudiesFolder/getNamelistEntry.py $nmlInput --namelist=misc --subnamelist=coords)
+                    siso -f pvd $wrfName --coords=$coords -l P,T,U,V,W,T2,U10,V10,WIND --planar >> siso.log
+
+                    #siso -f vts wrfout_d${i_domain}.nc --last --coords=$coords >> siso.log
 				fi
-                #siso -f vts wrfout_d${i_domain}.nc --last --coords=utm:32u >> siso.log
             fi
         done
         # Extract data at mast location
-		python3 $wrfStudiesFolder/extractData.py --folder=$pathToResults"/" --extract_wrf
+		#python3 $wrfStudiesFolder/extractData.py --folder=$pathToResults"/" --extract_wrf
 		popd > /dev/null
 	fi
 

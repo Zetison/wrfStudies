@@ -1,9 +1,9 @@
- &physics
+&physics
  physics_suite                       = 'CONUS'
  mp_physics                          = 8,
  cu_physics                          = 1,
- ra_lw_physics                       = 4,
- ra_sw_physics                       = 4,
+ ra_lw_physics                       = 1,
+ ra_sw_physics                       = 1,
  bl_pbl_physics                      = 1,
  sf_sfclay_physics                   = 1,
  sf_surface_physics                  = 2,
@@ -12,12 +12,13 @@
  icloud                              = 1,
  sf_urban_physics                    = 0, 
  fractional_seaice                   = 1,
- /
+! isfflx                              = 1,
+/
 
- &fdda
- /
+&fdda
+/
 
- &dynamics
+&dynamics
  hybrid_opt                          = 2, 
  w_damping                           = 0,
  diff_opt                            = 2,    
@@ -36,16 +37,16 @@
  chem_adv_opt                        = 1,    
  tke_adv_opt                         = 1,    
  gwd_opt                             = 1,    
- /
+/
 
- &bdy_control
+&bdy_control
  spec_bdy_width                      = 5,
- /
+/
 
- &grib2
- /
+&grib2
+/
 
- &namelist_quilt
+&namelist_quilt
  nio_tasks_per_group = 0,
  nio_groups = 1,
- /
+/

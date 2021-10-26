@@ -1,21 +1,31 @@
 &share
- max_dom                = 6,
+ max_dom                = 5,
  interval_seconds       = 10800,
 /
 
 &geogrid
  parent_id              = 1, 1,
  parent_grid_ratio      = 1, 3, 3, 3, 5, 3, 3,
- i_parent_start         = 1,
- j_parent_start         = 1,
- e_we                   = 100, 100, 100, 100, 256, 202, 262,
- e_sn                   = 100, 100, 100, 100, 256, 202, 262,
- geog_data_res          = 'default','default','default','default','sula7p5s+default',
- dx                     = 0.25,
- dy                     = 0.25,
- map_proj               = 'lat-lon',
- ref_lat                = 62.4234363,
- ref_lon                = 6.0321708,
+ geog_data_res          = 'default','default','default','default','sunnmore50meter+default','sunnmore50meter+default','sula10meter+default'
+ i_parent_start         = 1, 26, 35, 35, 35, 61
+ j_parent_start         = 1, 35, 35, 35, 35, 141
+ e_we                   = 96, 109, 115, 127, 271, 151
+ e_sn                   = 111, 109, 112, 130, 291, 151
+! dx                    = 0.25,
+! dy                    = 0.25,
+! map_proj              = 'lat-lon',
+! ref_lat               = 50.02528,
+! ref_lon               = 8.51962,
+ map_proj               = 'lambert'
+! dx                    = 27794.369
+! dy                    = 27794.369
+ dx                     = 20250.0
+ dy                     = 20250.0
+ ref_lon                = 8.259395531703081
+ ref_lat                = 63.014354870112435
+ truelat1               = 64.4
+ truelat2               = 60.4
+ stand_lon              = 6.119395
 /
 
 &time_control
@@ -26,14 +36,38 @@
 /
 
 &domains
- time_step              = 0,
- time_step_fract_num    = 9,
- time_step_fract_den    = 50,
- min_time_step          = 1,
- min_time_step_den      = 100,
- use_adaptive_time_step = .false.,
+ time_step              = 1,
+! time_step_fract_num    = 9,
+! time_step_fract_den    = 10,
+! max_time_step          = 1000,
+! max_time_step_den      = 1,
+! min_time_step          = 4,
+! min_time_step_den      = 10,
+! use_adaptive_time_step = .false.,
+! starting_time_step     = -1, -1, -1, -1, 600,
+! starting_time_step_den = 0, 0, 0, 0, 1000,
  e_vert                 = 50,
  parent_time_step_ratio = 1, 3,
+/
+
+&physics
+ mp_physics             = 8,
+ bl_pbl_physics         = 1,1,1,0,0,0,
+ ra_lw_physics          = 1, 
+ ra_sw_physics          = 1,
+ swint_opt              = 0,
+ sst_update             = 0,
+! radt                   = 27,
+ fractional_seaice      = 0,
+/
+
+&dynamics
+ km_opt                 = 4, 4, 4, 5, 2, 2,
+! km_opt                 = 4, 4, 4, 4, 5, 2, 2,
+ diff_opt               = 2,
+ epssm                  = 0.1, 0.1, 0.1, 10.8, 600.0,
+ w_crit_cfl             = 1.2,
+ w_damping              = 0,
 /
 
 &misc

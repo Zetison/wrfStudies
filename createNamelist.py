@@ -183,10 +183,11 @@ def main(inputnamelist,wps_nml_path,wrf_nml_path,config_nml_path,pathtoresults,g
             ref_lon = output_nml['geogrid']['ref_lon']
             output_nml['geogrid']['pole_lat'] = 90.0 - ref_lat
             output_nml['geogrid']['pole_lon'] = 180.0
-            if runglobal:
-                output_nml['geogrid']['stand_lon'] = -ref_lon
-            else:
-                output_nml['geogrid']['stand_lon'] = ref_lon
+            if output_nml['geogrid']['map_proj'] == 'lat-lon':
+                if runglobal:
+                    output_nml['geogrid']['stand_lon'] = -ref_lon
+                else:
+                    output_nml['geogrid']['stand_lon'] = ref_lon
 
         if output_nml['geogrid']['map_proj'] == 'lat-lon':
             del output_nml['geogrid']['truelat1']
@@ -259,6 +260,8 @@ def main(inputnamelist,wps_nml_path,wrf_nml_path,config_nml_path,pathtoresults,g
                                 output_nml[namelist][subnamelist] += list(np.arange(noValues,max_dom))
                             elif subnamelist == 'grid_id':
                                 output_nml[namelist][subnamelist] += list(np.arange(noValues+1,max_dom+1))
+                            elif subnamelist == 'parent_time_step_ratio':
+                                output_nml[namelist][subnamelist] += output_nml[namelist]['parent_grid_ratio'][noValues:]
                             else:
                                 output_nml[namelist][subnamelist] += [lastValue] * (max_dom - noValues)
 
