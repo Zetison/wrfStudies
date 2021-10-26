@@ -21,18 +21,18 @@ source $HOME/kode/bashScripts/sourceWRF
 #pathToWRF="$WRFDIRECTORY/Build_WRF/WRF/run" # Run WRF4.2
 pathToWPS="$WRFDIRECTORY/Build_WRF/WPS3" # Run WPS4.3
 pathToWRF="$WRFDIRECTORY/Build_WRF/WRF3/run" # Run WRF4.3
-loopForecast=false
+loopForecast=true
 clearNCEPdata=false
 delete_wpsOutputFiles=false
 runPreproc=true
 forecastDataFolder=$HOME/results/forecastData
 wrfStudiesFolder=$HOME/kode/wrfStudies
-plotResultsInParaview=true
+plotResultsInParaview=false
 plotNCLresults=true
 NCL_OUTPUT_TYPE="png" # 'x11', 'pdf', 'ps', 'ncgm', 'png'
 extractOptions="--folder=$forecastDataFolder/"
 CYCLE_INTERVAL=24
-NP=8
+NP=16
 GFS_RES="0p25"
 if [[ $CASE == "debug" ]]
 then
@@ -60,15 +60,16 @@ fi
 RUN_MINUTES=0
 RUN_SECONDS=0
 #START_SIM_DATE="2021-03-02 12:00:00"
-START_SIM_DATE="2021-05-23 12:00:00"
-START_SIM_DATE="2021-08-11 12:00:00"
+#START_SIM_DATE="2021-05-23 12:00:00"
+#START_SIM_DATE="2021-08-11 12:00:00"
 #START_SIM_DATE="2021-07-15 12:00:00"
 #START_SIM_DATE="2020-10-31 12:00:00"
 #START_SIM_DATE="2020-12-05 12:00:00"
 #START_SIM_DATE="2021-09-05 00:00:00"
 #START_SIM_DATE="2021-05-01 12:00:00"
 #START_SIM_DATE="2021-09-19 00:00:00"
-START_SIM_DATE="2020-11-19 00:00:00"
+#START_SIM_DATE="2020-11-19 00:00:00"
+START_SIM_DATE="2021-10-25 12:00:00"
 mkdir -p $HOME/results/WRF/$CASE
 while true
 do
@@ -84,6 +85,18 @@ do
 		while [ "$date1" -ge `date -u +%s` ]
 		do
 			echo -ne "Time until start of program: $(date -u --date @$(($date1 - `date +%s` )) +%H:%M:%S)\r";
+		done
+		mkdir -p $forecastDataFolder
+		#python3 extractData.py $extractOptions --extract_yr
+
+		current_epoch=$(date -u +%s)
+		TODAY="$(date -u +'%Y-%m-%d')" # Get date in UTC
+		target_epoch=$(date -u +'%s' --date="$START_SIM_DATE UTC + 6 hour")
+		sleep_seconds=$(( $target_epoch - $current_epoch ))
+		date1=$((`date -u +%s` + $sleep_seconds))
+		while [ "$date1" -ge `date -u +%s` ]
+		do
+			echo -ne "Time until extraction of data: $(date -u --date @$(($date1 - `date +%s` )) +%H:%M:%S)\r";
 		done
 	fi
 

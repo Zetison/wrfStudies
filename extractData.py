@@ -55,17 +55,17 @@ def getYRdata(endpoint, parameters, field):
 @click.option('--extract_met/--no-extract_met', default=False)
 def main(folder,append,extract_yr,extract_wrf,extract_met): 
     #sourceIDlist = ["424242"]
-    sourceIDlist = ['424242', #Frankfurt airport
-                    '2925507', #Fränkisch-Crumbach
-                    '2926120', #Flörsheim
-                    '2925533', #Frankfurt am Main
-                    '2926300', #Fleisbach
-                    '7290400', #Airport Frankfurt Main
-                    '2926419', #Flacht
-                    '2925550', #Frankenthal
-                    '3220966', #Landkreis Darmstadt-Dieburg
-                    '2925665', #Frammersbach
-                    '7290401', #Niederrad
+    sourceIDlist = ['424242',  # Frankfurt airport
+                    '2925507', # Fränkisch-Crumbach
+                    '2926120', # Flörsheim
+                    '2925533', # Frankfurt am Main
+                    '2926300', # Fleisbach
+                    '7290400', # Airport Frankfurt Main
+                    '2926419', # Flacht
+                    '2925550', # Frankenthal
+                    '3220966', # Landkreis Darmstadt-Dieburg
+                    '2925665', # Frammersbach
+                    '7290401', # Niederrad
                     'SN18700', # OSLO - BLINDERN          
                     'SN6700',  # RV3 Svingen - Elverum
                     'SN71900', # Bessaker
