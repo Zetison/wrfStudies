@@ -20,6 +20,7 @@ name = HGT_M
         interp_option =     sula10meter:average_gcell(4.0)+four_pt+average_4pt
         interp_option = frankfurt25meter:average_gcell(4.0)+four_pt+average_4pt
         interp_option = frankfurt100meter:average_gcell(4.0)+four_pt+average_4pt
+        interp_option = bessaker50meter:average_gcell(4.0)+four_pt+average_4pt
         rel_path =   gmted2010_30s:topo_gmted2010_30s/
         rel_path =       gtopo_30s:topo_30s/
         rel_path =        gtopo_2m:topo_2m/
@@ -34,6 +35,7 @@ name = HGT_M
         rel_path =     sula10meter:topo_Sula_10meter/
         rel_path = frankfurt25meter:topo_Frankfurt_25meter/
         rel_path = frankfurt100meter:topo_Frankfurt_100meter/
+        rel_path = bessaker50meter:topo_Bessaker_50meter/
 ===============================
 name=LANDUSEF
         priority=1
