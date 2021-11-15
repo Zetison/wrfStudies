@@ -17,10 +17,8 @@ then
 	echo "Error: set the DISPLAY variable" #The display variable should be set for post processing purposes in paraview. This issue arises when using screen, and can be resolved by first getting the display variable outside the screen session (echo $DISPLAY) and then inside the screen session setting the variable to this value (i.e. export DISPLAY=localhost:10.0)"
 fi
 source $HOME/kode/bashScripts/sourceWRF
-#pathToWPS="$WRFDIRECTORY/Build_WRF/WPS" # Run WPS4.2
-#pathToWRF="$WRFDIRECTORY/Build_WRF/WRF/run" # Run WRF4.2
-pathToWPS="$WRFDIRECTORY/Build_WRF/WPS3" # Run WPS4.3
-pathToWRF="$WRFDIRECTORY/Build_WRF/WRF3/run" # Run WRF4.3
+pathToWPS="$WRFDIRECTORY/Build_WRF/WPS"
+pathToWRF="$WRFDIRECTORY/Build_WRF/WRF/run"
 loopForecast=true
 clearNCEPdata=false
 delete_wpsOutputFiles=false
@@ -69,7 +67,7 @@ RUN_SECONDS=0
 #START_SIM_DATE="2021-05-01 12:00:00"
 #START_SIM_DATE="2021-09-19 00:00:00"
 #START_SIM_DATE="2020-11-19 00:00:00"
-START_SIM_DATE="2021-10-25 12:00:00"
+START_SIM_DATE="2021-11-02 12:00:00"
 mkdir -p $HOME/results/WRF/$CASE
 while true
 do
