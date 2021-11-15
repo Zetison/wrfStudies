@@ -32,7 +32,8 @@ def getYRdata(endpoint, parameters, field):
 
 
 @click.command()
-@click.option('--sourceid', default='Frankfurt')
+@click.option('--case', default='Frankfurt')
+@click.option('--sourceid', default='424242')
 @click.option('--timeresolution', default='PT1H')
 @click.option('--plotdata/--no-plotdata', default=True)
 @click.option('--ploterror/--no-ploterror', default=True)
@@ -41,7 +42,7 @@ def getYRdata(endpoint, parameters, field):
 @click.option('--startdate', default='') # in the format '2020-09-29 00:00:00'
 @click.option('--enddate', default='')
 @click.option('--filetype', default='png', help='File type (png,pdf,...) for exporting graphics')
-def main(sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,startdate,enddate,filetype):
+def main(case,sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,startdate,enddate,filetype):
     
 
     ########################################################################
@@ -126,7 +127,7 @@ def main(sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,startda
         df_obs = df[fields].copy()
         # Convert the time value to something Python understands
         df_obs['time'] = pd.to_datetime(df_obs['time'])
-    elif sourceid == 'Frankfurt':
+    elif sourceid == '424242':
         df_obs = pd.read_csv(meteobluefile, skiprows=9)
         df_obs['time'] = pd.to_datetime(df_obs['timestamp'])
         df_obs['air_temperature'] = df_obs['Airport Frankfurt Main Temperature [2 m elevation corrected]']
@@ -191,8 +192,8 @@ def main(sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,startda
     if plotdata:
         fig, axs = plt.subplots(2,2, sharex=sharex)
         mng = plt.get_current_fig_manager()
-        mng.resize(*mng.window.maxsize())
-        #mng.window.showMaximized()
+        #mng.resize(*mng.window.maxsize())
+        mng.window.showMaximized()
         fig.suptitle('Weather forecast comparison between MetCoOp and WRF simulations at '+sourceid)
         for i in range(0,fields.shape[0]):
             for j in range(0,fields.shape[1]):
@@ -214,7 +215,7 @@ def main(sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,startda
                 axs[i,j].set_xlim(startdate,enddate)
 
         plt.show()
-        fig.savefig(home+'/results/WRF/'+sourceid+'/Comparison.'+filetype)
+        fig.savefig(home+'/results/WRF/'+case+'/Comparison.'+filetype)
 
 
     ########################################################################
@@ -222,8 +223,8 @@ def main(sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,startda
     if ploterror:
         fig, axs = plt.subplots(2,2, sharex=sharex)
         mng = plt.get_current_fig_manager()
-        mng.resize(*mng.window.maxsize())
-        #mng.window.showMaximized()
+        #mng.resize(*mng.window.maxsize())
+        mng.window.showMaximized()
         fig.suptitle('Weather forecast comparison between MetCoOp and WRF simulations at '+sourceid)
         df_DWD_i = df_obs[fields[0,0]].copy() 
         df_YR_i = df_obs[fields[0,0]].copy() 
@@ -278,7 +279,7 @@ def main(sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,startda
                 axs[i,j].set(xlabel='Time', ylabel=ylabels[i,j])
 
         plt.show()
-        fig.savefig(home+'/results/WRF/'+sourceid+'/Comparison_error.'+filetype)
+        fig.savefig(home+'/results/WRF/'+case+'/Comparison_error.'+filetype)
 
     
 if __name__ == '__main__':

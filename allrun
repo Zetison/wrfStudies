@@ -87,7 +87,7 @@ do
 			echo -ne "Time until start of program: $(date -u --date @$(($date1 - `date +%s` )) +%H:%M:%S)\r";
 		done
 		mkdir -p $forecastDataFolder
-		#python3 extractData.py $extractOptions --extract_yr
+		python3 extractData.py $extractOptions --extract_yr
 
 		current_epoch=$(date -u +%s)
 		TODAY="$(date -u +'%Y-%m-%d')" # Get date in UTC
@@ -225,7 +225,7 @@ do
             fi
         done
         # Extract data at mast location
-		#python3 $wrfStudiesFolder/extractData.py --folder=$pathToResults"/" --extract_wrf
+		python3 $wrfStudiesFolder/extractData.py --folder=$pathToResults"/" --extract_wrf
 		popd > /dev/null
 	fi
 

@@ -31,11 +31,14 @@ def main(folder):
         for f in WRFresultsFiles:
             row = pd.read_csv(f)
             df = df.append(row)
+            rowNan = pd.Series(dtype=object)
+            rowNan[row.columns[1]] = row[row.columns[1]] 
+            df = df.append(rowNan, ignore_index=True)
 
         df['time'] = pd.to_datetime(df['time'])
 
-        df = df.sort_values(by='time')
-        df = df.reset_index()
+        df = df.reset_index(drop=True)
+        df.drop(df.tail(1).index,inplace=True)
         mergedFile = folder+'df_wrf_'+sourceid+'.csv'
         df.to_csv(mergedFile,index=False)
 
