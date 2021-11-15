@@ -191,8 +191,8 @@ def main(sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,startda
     if plotdata:
         fig, axs = plt.subplots(2,2, sharex=sharex)
         mng = plt.get_current_fig_manager()
-        mng.resize(*mng.window.maxsize())
-        #mng.window.showMaximized()
+        #mng.resize(*mng.window.maxsize())
+        mng.window.showMaximized()
         fig.suptitle('Weather forecast comparison between MetCoOp and WRF simulations at '+sourceid)
         for i in range(0,fields.shape[0]):
             for j in range(0,fields.shape[1]):
@@ -222,8 +222,8 @@ def main(sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,startda
     if ploterror:
         fig, axs = plt.subplots(2,2, sharex=sharex)
         mng = plt.get_current_fig_manager()
-        mng.resize(*mng.window.maxsize())
-        #mng.window.showMaximized()
+        #mng.resize(*mng.window.maxsize())
+        mng.window.showMaximized()
         fig.suptitle('Weather forecast comparison between MetCoOp and WRF simulations at '+sourceid)
         df_DWD_i = df_obs[fields[0,0]].copy() 
         df_YR_i = df_obs[fields[0,0]].copy() 

@@ -143,7 +143,7 @@ def main(folder,append,extract_yr,extract_wrf,extract_met):
                 else:
                     df_wrf.to_csv(folder+'df_wrf_'+sourceID+'.csv', index=False)
 
-                print('Sucessfully extracted wrf data')
+                print('Successfully extracted wrf data for ' + sourceID)
 
                         
         ########################################################################
@@ -183,7 +183,7 @@ def main(folder,append,extract_yr,extract_wrf,extract_met):
             else:
                 df_YR.to_csv(folder+'df_YR_'+sourceID+'.csv', index=False)
 
-            print('Sucessfully extracted YR data')
+            print('Successfully extracted YR data for ' + sourceID)
             
 if __name__ == '__main__':
     main()
