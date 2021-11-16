@@ -2,8 +2,10 @@ from glob import glob
 import pandas as pd
 from os.path import expanduser, isfile
 home = expanduser("~")
+import numpy as np
 from datetime import datetime, timedelta
 import click
+import copy
 @click.command()
 @click.option('--folder', default=home+'/results/forecastData/')
 def main(folder):
@@ -31,8 +33,10 @@ def main(folder):
         for f in WRFresultsFiles:
             row = pd.read_csv(f)
             df = df.append(row)
-            rowNan = pd.Series(dtype=object)
-            rowNan[row.columns[1]] = row[row.columns[1]] 
+            rowNan = copy.deepcopy(df.iloc[-1])
+            for col in df.columns:
+                if not col == 'time' and not col == 'index':
+                    rowNan[col] = np.NaN
             df = df.append(rowNan, ignore_index=True)
 
         df['time'] = pd.to_datetime(df['time'])
