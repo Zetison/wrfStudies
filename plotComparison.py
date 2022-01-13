@@ -80,21 +80,21 @@ def main(case,sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,st
     # Define endpoint and parameters
     if not startdate:
         if wrfDataFound:
-            startdate = df_wrf['time'][0]
+            startdate = df_wrf['time'].min()
         elif wrf2DataFound:
-            startdate = df_wrf2['time'][0]
+            startdate = df_wrf2['time'].min()
         else:
-            startdate = df_YR['time'][0]
+            startdate = df_YR['time'].min()
     else:
         startdate = pd.to_datetime(startdate)
     
     if not enddate:
         if wrfDataFound:
-            enddate = df_wrf['time'].iloc[-1]
+            enddate = df_wrf['time'].max()
         elif wrf2DataFound:
-            enddate = df_wrf2['time'].iloc[-1]
+            enddate = df_wrf2['time'].max()
         else:
-            enddate = df_YR['time'].iloc[-1]
+            enddate = df_YR['time'].max()
     else:
         enddate = pd.to_datetime(enddate)
 

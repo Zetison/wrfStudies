@@ -1,0 +1,10 @@
+#!/bin/bash
+#filename=$1
+#echo "Filename = "$filename
+
+coords="EPSG:3035"
+coords="EPSG:4326"
+
+gdal_calc.py -A Bessaker50meter.tiff --outfile=temp.tiff --calc="A*(A>-10)" --NoDataValue=0 --overwrite
+gdalwarp temp.tiff Bessaker50meter_USG84.tiff -te 9.05 63.443208967 11.930729946 64.962685552 -tr 0.000959493 0.000477026 -srcnodata "-3.4028234663852886e+38" -dstnodata 0 -t_srs "EPSG:4326" -overwrite -r bilinear
+siso -f vts --last --coords=utm:33u Bessaker50meter_USG84.tiff
