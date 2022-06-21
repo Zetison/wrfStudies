@@ -1,9 +1,9 @@
 #!/bin/bash
 #CASE="global"
 #CASE="global"
-CASE="Bessaker"
+#CASE="Bessaker"
 #CASE="SN71990"
-#CASE="Frankfurt"
+CASE="Frankfurt"
 #CASE="SN76914" # Rikshospitalet in Oslo
 #CASE="Elverum" # Sykehuset innlandet Elverum 
 #CASE="SN18700" # OSLO - BLINDERN
@@ -19,7 +19,7 @@ fi
 source $HOME/kode/bashScripts/sourceWRF
 pathToWPS="$WRFDIRECTORY/Build_WRF/WPS"
 pathToWRF="$WRFDIRECTORY/Build_WRF/WRF/run"
-loopForecast=false
+loopForecast=true
 clearNCEPdata=false
 delete_wpsOutputFiles=false
 runPreproc=true
@@ -72,7 +72,7 @@ RUN_SECONDS=0
 #START_SIM_DATE="2021-05-01 12:00:00"
 #START_SIM_DATE="2021-09-19 00:00:00"
 #START_SIM_DATE="2020-11-19 00:00:00"
-START_SIM_DATE="2021-12-24 12:00:00"
+START_SIM_DATE="2021-10-25 12:00:00"
 mkdir -p $HOME/results/WRF/$CASE
 while true
 do

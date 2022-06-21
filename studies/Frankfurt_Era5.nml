@@ -36,7 +36,7 @@
 ! use_adaptive_time_step = .false.,
 ! starting_time_step     = -1, -1, -1, -1, 600,
 ! starting_time_step_den = 0, 0, 0, 0, 1000,
- e_vert                 = 50,
+ e_vert                 = 137,
  parent_time_step_ratio = 1, 3,
 /
 
