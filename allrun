@@ -3,7 +3,7 @@
 #CASE="global"
 #CASE="Bessaker"
 #CASE="SN71990"
-CASE="Frankfurt"
+CASE="Frankfurt_Era5"
 #CASE="SN76914" # Rikshospitalet in Oslo
 #CASE="Elverum" # Sykehuset innlandet Elverum 
 #CASE="SN18700" # OSLO - BLINDERN
@@ -19,7 +19,7 @@ fi
 source $HOME/kode/bashScripts/sourceWRF
 pathToWPS="$WRFDIRECTORY/Build_WRF/WPS"
 pathToWRF="$WRFDIRECTORY/Build_WRF/WRF/run"
-loopForecast=true
+loopForecast=false
 clearNCEPdata=false
 delete_wpsOutputFiles=false
 runPreproc=true

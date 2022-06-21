@@ -1,6 +1,6 @@
 &share
  max_dom                = 4,
- interval_seconds       = 3600,
+ interval_seconds       = 10800,
 /
 
 &geogrid
