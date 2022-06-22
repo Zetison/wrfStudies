@@ -1,6 +1,6 @@
 &share
  max_dom                = 4,
- interval_seconds       = 10800,
+ interval_seconds       = 3600,
 /
 
 &geogrid
@@ -9,8 +9,8 @@
  geog_data_res          = 'default','default','default','frankfurt100meter+default','frankfurt25meter+default',
  i_parent_start         = 1,
  j_parent_start         = 1,
- e_we                   = 100, 100, 100, 100, 202, 
- e_sn                   = 100, 100, 100, 100, 202,
+ e_we                   = 202, !100, 100, 100, 100, 202, 
+ e_sn                   = 202, !100, 100, 100, 100, 202,
  dx                     = 0.25,
  dy                     = 0.25,
  map_proj               = 'lat-lon',
@@ -19,8 +19,8 @@
 /
 
 &time_control
- run_days               = 1,
- run_hours              = 12,
+ run_days               = 0,
+ run_hours              = 3,
  history_interval_s     = 600,
  frames_per_outfile     = 1000000, 
 /

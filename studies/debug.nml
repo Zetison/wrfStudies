@@ -30,3 +30,7 @@
  e_vert                 = 50,
  parent_time_step_ratio = 1, 3,
 /
+
+&misc
+ coords                 = 'utm:32u'
+/

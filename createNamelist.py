@@ -265,11 +265,23 @@ def main(inputnamelist,wps_nml_path,wrf_nml_path,config_nml_path,pathtoresults,g
                             else:
                                 output_nml[namelist][subnamelist] += [lastValue] * (max_dom - noValues)
 
+    # Check for errors
+    for i in range(max_dom):
+        if output == 'wps':
+            namelist = 'geogrid'
+        elif output == 'wrf':
+            namelist = 'domains'
+
+        if not (output_nml[namelist]['e_we'][i]-1)%output_nml[namelist]['parent_grid_ratio'][i] == 0:
+            raise Exception('(e_we+1 must be an integer multiple of the parent_grid_ratio')
+    
+    # Write nml file
     output_nml.end_comma = True
     output_nml.column_width = 100
     output_nml.indent = 1 
     output_nml.write(output_path, force=True)
 
+    
 
 if __name__ == '__main__':
     main()
