@@ -51,8 +51,8 @@ then
     RUN_HOURS=12
     CYCLE_INTERVAL=6
 else
-    RUN_DAYS=0
-    RUN_HOURS=3
+    RUN_DAYS=1
+    RUN_HOURS=12
 fi
 extraNamelistOptions="--gfsres $GFS_RES --ncepuserfilename NCEPuserDataJVV.json"
 if [[ $CASE == "global" ]]

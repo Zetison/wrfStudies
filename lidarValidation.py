@@ -5,11 +5,12 @@ from paraview.simple import *
 paraview.simple._DisableFirstRenderCameraReset()
  
 home = expanduser("~")
+home = '/home/jonvegar'
 sys.path.insert(1, home+'/kode/paraUtils')
 from utils import *
 from sources import cone 
 ref = 0
-outputPath = home+'/results/WRF/Frankfurt/lidar/SED_SUBFOLDER'
+outputPath = home+'/results/lidar/Frankfurt/SED_SUBFOLDER'
 ImportPresets(filename=home+'/kode/colormaps/SINTEF1.json')
 saveScreenShots = True
 importData = False
@@ -45,7 +46,7 @@ animationScene1 = GetAnimationScene()
 # get the time-keeper
 timeKeeper1 = GetTimeKeeper()
 fileName = outputPath+'/SED_pvdfilename'
-wrfFileName = home+'/results/WRF/Frankfurt/SED_WRF_FOLDER/wrfout_d04_vol.pvd'
+wrfFileName = home+'/results/WRF/Frankfurt/SED_WRF_FOLDER/wrfout_d04.pvd'
 
 #vtkName = outputPath+'cone'
 #cone(lidarLoc,h_max,phi,n=200,name=vtkName)
@@ -102,7 +103,7 @@ if plotLIC:
     
     resampleWithDataset1 = ResampleWithDataset(SourceDataArrays=calculator1, DestinationMesh=lidar)
     resampleWithDataset1.CellLocator = 'Static Cell Locator'
-    resampleWithDataset1Display = Show(resampleWithDataset1, renderView1, 'StructuredGridRepresentation')
+    resampleWithDataset1Display = Show(resampleWithDataset1, renderView1)
     resampleWithDataset1Display.ColorArrayName = ['POINTS', lidarFieldName]
     resampleWithDataset1Display.Ambient = 1.0
     resampleWithDataset1Display.Diffuse = 0.0
@@ -116,14 +117,14 @@ if plotLIC:
     AssignViewToLayout(view=renderView2, layout=layout1, hint=2)
 
     
-    lidarDisplay = Show(lidar, renderView2, 'StructuredGridRepresentation')
+    lidarDisplay = Show(lidar, renderView2)
     #lidarDisplay.ColorArrayName = ['CELLS', lidarFieldName]
     lidarDisplay.Ambient = 1.0
     lidarDisplay.Diffuse = 0.0
     ColorBy(lidarDisplay, ('CELLS', lidarFieldName))
     #resampleWithDataset = ResampleWithDataset(SourceDataArrays=cellDatatoPointData1, DestinationMesh=cone)
     #resampleWithDataset.CellLocator = 'Static Cell Locator'
-    #lidarDisplay = Show(resampleWithDataset, renderView2, 'StructuredGridRepresentation')
+    #lidarDisplay = Show(resampleWithDataset, renderView2)
     #lidarDisplay.ColorArrayName = ['POINTS', lidarFieldName]
     #lidarDisplay.Ambient = 1.0
     #lidarDisplay.Diffuse = 0.0
@@ -154,7 +155,7 @@ pdo.GetFieldData().AddArray(sexaTime)'
     annotateAttributeData1.Prefix = ''
     
     # show data in view
-    annotateAttributeData1Display = Show(annotateAttributeData1, renderView1, 'TextSourceRepresentation')
+    annotateAttributeData1Display = Show(annotateAttributeData1, renderView1)
     annotateAttributeData1Display.FontSize = 8
     #annotateTimeStep(calculator1,renderView1,'UpperLeftCorner', SAVE_HIST,color=[0.0,0.0,0.0])
 
