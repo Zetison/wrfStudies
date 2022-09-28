@@ -19,8 +19,8 @@
 /
 
 &time_control
- run_days               = 0,
- run_hours              = 3,
+ run_days               = 1,
+ run_hours              = 12,
  history_interval_s     = 600,
  frames_per_outfile     = 1000000, 
 /
