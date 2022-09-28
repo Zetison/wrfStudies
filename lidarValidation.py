@@ -5,7 +5,6 @@ from paraview.simple import *
 paraview.simple._DisableFirstRenderCameraReset()
  
 home = expanduser("~")
-home = '/home/jonvegar'
 sys.path.insert(1, home+'/kode/paraUtils')
 from utils import *
 from sources import cone 
