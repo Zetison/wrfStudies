@@ -102,7 +102,7 @@ if plotLIC:
     
     resampleWithDataset1 = ResampleWithDataset(SourceDataArrays=calculator1, DestinationMesh=lidar)
     resampleWithDataset1.CellLocator = 'Static Cell Locator'
-    resampleWithDataset1Display = Show(resampleWithDataset1, renderView1)
+    resampleWithDataset1Display = Show(resampleWithDataset1, renderView1, 'StructuredGridRepresentation')
     resampleWithDataset1Display.ColorArrayName = ['POINTS', lidarFieldName]
     resampleWithDataset1Display.Ambient = 1.0
     resampleWithDataset1Display.Diffuse = 0.0
@@ -116,14 +116,14 @@ if plotLIC:
     AssignViewToLayout(view=renderView2, layout=layout1, hint=2)
 
     
-    lidarDisplay = Show(lidar, renderView2)
+    lidarDisplay = Show(lidar, renderView2, 'StructuredGridRepresentation')
     #lidarDisplay.ColorArrayName = ['CELLS', lidarFieldName]
     lidarDisplay.Ambient = 1.0
     lidarDisplay.Diffuse = 0.0
     ColorBy(lidarDisplay, ('CELLS', lidarFieldName))
     #resampleWithDataset = ResampleWithDataset(SourceDataArrays=cellDatatoPointData1, DestinationMesh=cone)
     #resampleWithDataset.CellLocator = 'Static Cell Locator'
-    #lidarDisplay = Show(resampleWithDataset, renderView2)
+    #lidarDisplay = Show(resampleWithDataset, renderView2, 'StructuredGridRepresentation')
     #lidarDisplay.ColorArrayName = ['POINTS', lidarFieldName]
     #lidarDisplay.Ambient = 1.0
     #lidarDisplay.Diffuse = 0.0
@@ -154,7 +154,7 @@ pdo.GetFieldData().AddArray(sexaTime)'
     annotateAttributeData1.Prefix = ''
     
     # show data in view
-    annotateAttributeData1Display = Show(annotateAttributeData1, renderView1)
+    annotateAttributeData1Display = Show(annotateAttributeData1, renderView1, 'TextSourceRepresentation')
     annotateAttributeData1Display.FontSize = 8
     #annotateTimeStep(calculator1,renderView1,'UpperLeftCorner', SAVE_HIST,color=[0.0,0.0,0.0])
 
