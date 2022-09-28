@@ -1,5 +1,5 @@
 &share
- max_dom                = 5,
+ max_dom                = 4,
  interval_seconds       = 10800,
 /
 
@@ -9,8 +9,8 @@
  geog_data_res          = 'default','default','default','bessaker50meter+default',
  i_parent_start         = 1,
  j_parent_start         = 1,
- e_we                   = 100, 100, 100, 100, 202, 
- e_sn                   = 100, 100, 100, 100, 202,
+ e_we                   = 202, 
+ e_sn                   = 202,
  dx                     = 0.25,
  dy                     = 0.25,
  map_proj               = 'lat-lon',
