@@ -68,7 +68,7 @@ then
         cp $HOME/kode/wrfStudies/lidarValidation.py .
         source $HOME/kode/bashScripts/sedFiles
         #pushd $HOME/results/WRF/Frankfurt/$WRF_FOLDER > /dev/null
-        #siso -f pvd wrfout_d04.nc wrfout_d04_vol.pvd --coords utm:32u -l P,T,U,V,W
+        siso -f pvd wrfout_d04.nc wrfout_d04_vol.pvd --coords utm:32u -l P,T,U,V,W
         #popd > /dev/null
         #/usr/lib/ParaView-5.8.1-osmesa-MPI-Linux-Python3.7-64bit/bin/pvbatch lidarValidation.py
         #pvbatch lidarValidation.py
