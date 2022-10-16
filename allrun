@@ -3,7 +3,9 @@
 #CASE="global"
 #CASE="Bessaker"
 #CASE="SN71990"
-CASE="Frankfurt_Era5"
+#CASE="Frankfurt_Era5"
+#CASE="Frankfurt_10800"
+CASE="Frankfurt_10800_fine"
 #CASE="SN76914" # Rikshospitalet in Oslo
 #CASE="Elverum" # Sykehuset innlandet Elverum 
 #CASE="SN18700" # OSLO - BLINDERN
@@ -30,28 +32,27 @@ plotNCLresults=true
 NCL_OUTPUT_TYPE="png" # 'x11', 'pdf', 'ps', 'ncgm', 'png'
 extractOptions="--folder=$forecastDataFolder/"
 CYCLE_INTERVAL=24
-NP=16
+NP=32
 GFS_RES="0p25"
 if [[ $CASE == "debug" ]]
 then
-    RUN_DAYS=0
-    RUN_HOURS=3
     GFS_RES="1p00"
     NP=2
     START_SIM_DATE="2021-09-05 00:00:00"
 elif [[ $CASE == "Bessaker" ]]
 then
-    RUN_DAYS=0
-    RUN_HOURS=12
     CYCLE_INTERVAL=6
 elif [[ $CASE == "Sula" ]]
 then
-    RUN_DAYS=0
-    RUN_HOURS=12
     CYCLE_INTERVAL=6
-else
-    RUN_DAYS=1
-    RUN_HOURS=12
+elif [[ $CASE == "Frankfurt_10800" ]]
+then
+    CYCLE_INTERVAL=12
+    loopForecast=false
+elif [[ $CASE == "Frankfurt_10800_fine" ]]
+then
+    CYCLE_INTERVAL=12
+    loopForecast=false
 fi
 extraNamelistOptions="--gfsres $GFS_RES --ncepuserfilename NCEPuserDataJVV.json"
 if [[ $CASE == "global" ]]
@@ -61,8 +62,6 @@ then
 else
     RUNGLOBAL=false
 fi
-RUN_MINUTES=0
-RUN_SECONDS=0
 #START_SIM_DATE="2021-03-02 12:00:00"
 #START_SIM_DATE="2021-05-23 12:00:00"
 #START_SIM_DATE="2021-08-11 12:00:00"
@@ -73,7 +72,8 @@ RUN_SECONDS=0
 #START_SIM_DATE="2021-05-01 12:00:00"
 #START_SIM_DATE="2021-09-19 00:00:00"
 #START_SIM_DATE="2020-11-19 00:00:00"
-START_SIM_DATE="2021-10-25 12:00:00"
+#START_SIM_DATE="2020-11-06 12:00:00"
+START_SIM_DATE="2021-07-10 12:00:00"
 mkdir -p $HOME/results/WRF/$CASE
 while true
 do
