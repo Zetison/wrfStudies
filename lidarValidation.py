@@ -12,11 +12,6 @@ ref = 0
 outputPath = home+'/results/lidar/Frankfurt/SED_SUBFOLDER'
 ImportPresets(filename=home+'/kode/colormaps/SINTEF1.json')
 saveScreenShots = True
-importData = False
-u_inf = 10.0 # is the freestream velocity of the fluid
-p_inf = 101325 # is the static pressure in the freestream (i.e. remote from any disturbance)
-rho_inf = 1.3 # is the freestream fluid density (Air at sea level and 15 °C is 1.225kg/m^3)
-z_lnPltLvl = 0.6 # z coordinate of 1D plots
 VRAD_max = 3.0
 SAVE_HIST = 10
 noSteps=2113
@@ -32,7 +27,7 @@ plotVolumeRendering = 0
 plotyplus           = 0 
 plotOverTime        = 0
 plotMesh            = 0
-makeVideo           = 0 
+makeVideo           = 0
 viewSizeSlice=[1920,520]
 viewSizeSlice2=[2*1920,2*520]
 scalarBarLength = 0.2
@@ -45,7 +40,8 @@ animationScene1 = GetAnimationScene()
 # get the time-keeper
 timeKeeper1 = GetTimeKeeper()
 fileName = outputPath+'/SED_pvdfilename'
-wrfFileName = home+'/results/WRF/Frankfurt/SED_WRF_FOLDER/wrfout_d04.pvd'
+wrfFileName = home+'/results/WRF/Frankfurt_10800/SED_WRF_FOLDER/wrfout_d04_vol.pvd'
+#wrfFileName = home+'/results/WRF/Frankfurt/SED_WRF_FOLDER/wrfout_d04_vol.pvd'
 
 #vtkName = outputPath+'cone'
 #cone(lidarLoc,h_max,phi,n=200,name=vtkName)
@@ -53,7 +49,7 @@ wrfFileName = home+'/results/WRF/Frankfurt/SED_WRF_FOLDER/wrfout_d04.pvd'
 lidar = PVDReader(registrationName='lidar', FileName=fileName)
 wrf = PVDReader(registrationName='wrf', FileName=wrfFileName)
 #lidar = XMLUnstructuredGridReader(registrationName='fileName', FileName=fileNames)
-aziFileType = False
+aziFileType = True
 if aziFileType:
     lidarFieldName='VRADH'
 else:
@@ -134,6 +130,7 @@ if plotLIC:
     programmableFilter1.RequestUpdateExtentScript = ''
     programmableFilter1.PythonPath = ''
     epoch = 1607169600 # obtained by: date -u +'%s' --date="2020-09-27 12:00:00"
+    epoch = 1625918400 # obtained by: date -u +'%s' --date="2021-07-10 12:00:00"
     
     # Properties modified on programmableFilter1
     programmableFilter1.Script = 'pdo =  self.GetOutput()\n\
@@ -164,9 +161,9 @@ pdo.GetFieldData().AddArray(sexaTime)'
     VRADLUTColorBar.WindowLocation = 'UpperRightCorner'
     VRADLUTColorBar.ComponentTitle = ''
     VRADLUTColorBar.ScalarBarLength = 0.3 
-    VRADLUT.RescaleTransferFunction(-10.0, 10.0)
     VRADLUT.ApplyPreset('SINTEF1', True)
     VRADLUT.NanColor = [1.0, 1.0, 1.0]
+    VRADLUT.RescaleTransferFunction(-10.0, 10.0)
     
     VRADLUTColorBar.WindowLocation = 'LowerCenter'
     VRADLUTColorBar.HorizontalTitle = 1
@@ -176,6 +173,10 @@ pdo.GetFieldData().AddArray(sexaTime)'
 
     if printLogo:
         insertSINTEFlogo(renderView2,'blue', position=[0.81,0])
+
+    VRADLUT.ApplyPreset('SINTEF1', True)
+    VRADLUT.NanColor = [1.0, 1.0, 1.0]
+    VRADLUT.RescaleTransferFunction(-10.0, 10.0)
     
     lidarDisplay.SetScalarBarVisibility(renderView2, False)
     renderView1.InteractionMode = '2D'

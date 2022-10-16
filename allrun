@@ -1,7 +1,7 @@
 #!/bin/bash
 #CASE="global"
 #CASE="global"
-CASE="Bessaker"
+#CASE="Bessaker"
 #CASE="SN71990"
 #CASE="Frankfurt_Era5"
 #CASE="SN76914" # Rikshospitalet in Oslo
@@ -11,7 +11,7 @@ CASE="Bessaker"
 #CASE="nested"
 #CASE="YR"
 #CASE="Sula"
-#CASE="debug"
+CASE="debug"
 if [ -z "$DISPLAY" ]
 then
 	echo "Error: set the DISPLAY variable" #The display variable should be set for post processing purposes in paraview. This issue arises when using screen, and can be resolved by first getting the display variable outside the screen session (echo $DISPLAY) and then inside the screen session setting the variable to this value (i.e. export DISPLAY=localhost:10.0)"
@@ -37,7 +37,7 @@ if [[ $CASE == "debug" ]]
 then
     RUN_DAYS=0
     RUN_HOURS=3
-    GFS_RES="1p00"
+    GFS_RES="0p25"
     NP=2
     START_SIM_DATE="2021-09-05 00:00:00"
 elif [[ $CASE == "Bessaker" ]]

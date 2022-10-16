@@ -41,7 +41,7 @@ begin
   mpres@mpPerimLineColor            = "Black"
   mpres@mpOutlineBoundarySets       = "National"
   mpres@mpGridSpacingF              = 10
-  mpres@tiMainString                = "WPS Domain Configuration for ZEB domain"
+  mpres@tiMainString                = "WPS Domain Configuration"
 
   lnres = True 
   lnres@gsLineThicknessF = 2.5
