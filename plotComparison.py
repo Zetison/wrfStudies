@@ -48,8 +48,9 @@ def main(case,sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,st
     ########################################################################
     # Get YR/OMW/wrf data
     try:
-        df_DWD = pd.read_csv(folder+'df_DWD_'+sourceid+'.csv')
+        df_DWD = pd.read_csv(folder+'df_dwd_'+sourceid+'.csv')
         df_DWD['time'] = pd.to_datetime(df_DWD['time'])
+        print('Observation data found')
         dwdDataFound = True
     except:
         dwdDataFound = False
@@ -58,6 +59,7 @@ def main(case,sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,st
         df_YR = pd.read_csv(folder+'df_YR_'+sourceid+'.csv')
         df_YR['time'] = pd.to_datetime(df_YR['time'])
         yrDataFound = True
+        print('YR data found')
     except:
         yrDataFound = False
     
@@ -65,6 +67,7 @@ def main(case,sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,st
         df_wrf = pd.read_csv(folder+'df_wrf_'+sourceid+'.csv')
         df_wrf['time'] = pd.to_datetime(df_wrf['time'])
         wrfDataFound = True
+        print('wrf data found')
     except:
         wrfDataFound = False
     
@@ -72,6 +75,7 @@ def main(case,sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,st
         df_wrf2 = pd.read_csv(folder+'df_wrf2_'+sourceid+'.csv')
         df_wrf2['time'] = pd.to_datetime(df_wrf2['time'])
         wrf2DataFound = True
+        print('wrf2 data found')
     except:
         wrf2DataFound = False
     
@@ -82,6 +86,8 @@ def main(case,sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,st
         if wrfDataFound:
             startdate = df_wrf['time'].min()
         elif wrf2DataFound:
+            startdate = df_wrf2['time'].min()
+        elif obsDataFound:
             startdate = df_wrf2['time'].min()
         else:
             startdate = df_YR['time'].min()
@@ -134,11 +140,15 @@ def main(case,sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,st
         df_obs['wind_speed'] = df_obs['Airport Frankfurt Main Wind Speed [10 m]']
         df_obs['wind_from_direction'] = df_obs['Airport Frankfurt Main Wind Direction [10 m]']
     else:
-        df_obs = pd.read_csv(home+'/results/forecastData/df_OWM_'+sourceid+'.csv')
-        df_obs['time'] = pd.to_datetime(df_obs['time']) + timedelta(seconds=df_obs.timezone.to_numpy()[0])
-        df_obs['air_temperature'] = df_obs['temp']
-        df_obs['wind_speed'] = df_obs['speed']
-        df_obs['wind_from_direction'] = df_obs['deg']
+        try:
+            df_obs = pd.read_csv(home+'/results/forecastData/df_OWM_'+sourceid+'.csv')
+            df_obs['time'] = pd.to_datetime(df_obs['time']) + timedelta(seconds=df_obs.timezone.to_numpy()[0])
+            df_obs['air_temperature'] = df_obs['temp']
+            df_obs['wind_speed'] = df_obs['speed']
+            df_obs['wind_from_direction'] = df_obs['deg']
+        except:
+            df_obs = pd.read_csv(home+'/results/forecastData/df_obs_'+sourceid+'.csv')
+            df_obs['time'] = pd.to_datetime(df_obs['time'])
 
 
     df_obs = df_obs[df_obs.time >= startdate]

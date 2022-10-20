@@ -30,6 +30,7 @@ forecastDataFolder=$HOME/results/forecastData
 wrfStudiesFolder=$HOME/kode/wrfStudies
 plotResultsInParaview=false
 plotNCLresults=true
+onlyStoreMAX_DOM=true
 NCL_OUTPUT_TYPE="png" # 'x11', 'pdf', 'ps', 'ncgm', 'png'
 extractOptions="--folder=$forecastDataFolder/"
 CYCLE_INTERVAL=24
@@ -39,6 +40,7 @@ if [[ $CASE == "debug" ]]
 then
     GFS_RES="0p25"
     NP=2
+    loopForecast=false
     START_SIM_DATE="2021-09-05 00:00:00"
 elif [[ $CASE == "Bessaker" ]]
 then
@@ -194,20 +196,34 @@ do
         do
             wrfName="wrfout_d"$i_domain
             mv ${wrfName}_${START_DATE} ${wrfName}".nc"
+            if [[ "$onlyStoreMAX_DOM" = true ]]
+            then
+                if ! [[ "$i_domain" == "$(printf "%02g" $MAX_DOM)" ]]
+                then
+                    rm $wrfName".nc"
+                fi
+            fi
         done
         cat rsl.error.* > rsl.error
         cat rsl.out.* > rsl.out
         rm rsl.error.* rsl.out.*
-        rm namelist.output
 		popd > /dev/null
 	fi
 	
+
+        
 	##############################################################################################
 	## Post processing
+    if [[ "$onlyStoreMAX_DOM" = true ]]
+    then
+        i_domain_arr=$(printf "%02g" ${MAX_DOM})
+    else
+        i_domain_arr=$(seq -f "%02g" 1 ${MAX_DOM})
+    fi
 	if [[ $3 == 1 ]]
 	then
 		pushd $pathToResults > /dev/null
-        for i_domain in $(seq -f "%02g" 1 ${MAX_DOM})
+        for i_domain in $i_domain_arr
         do
             ## Plot results using ncl
             if [[ "$plotNCLresults" = true ]]
