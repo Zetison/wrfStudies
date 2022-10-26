@@ -5,7 +5,7 @@
 #CASE="SN71990"
 #CASE="Frankfurt_Era5"
 #CASE="Frankfurt_10800"
-CASE="Frankfurt_10800_fine"
+#CASE="Frankfurt_10800_fine"
 #CASE="SN76914" # Rikshospitalet in Oslo
 #CASE="Elverum" # Sykehuset innlandet Elverum 
 #CASE="SN18700" # OSLO - BLINDERN
@@ -13,7 +13,7 @@ CASE="Frankfurt_10800_fine"
 #CASE="nested"
 #CASE="YR"
 #CASE="Sula"
-#CASE="debug"
+CASE="debug"
 if [ -z "$DISPLAY" ]
 then
 	echo "Error: set the DISPLAY variable" #The display variable should be set for post processing purposes in paraview. This issue arises when using screen, and can be resolved by first getting the display variable outside the screen session (echo $DISPLAY) and then inside the screen session setting the variable to this value (i.e. export DISPLAY=localhost:10.0)"
@@ -30,7 +30,6 @@ forecastDataFolder=$HOME/results/forecastData
 wrfStudiesFolder=$HOME/kode/wrfStudies
 plotResultsInParaview=false
 plotNCLresults=true
-onlyStoreMAX_DOM=true
 NCL_OUTPUT_TYPE="png" # 'x11', 'pdf', 'ps', 'ncgm', 'png'
 extractOptions="--folder=$forecastDataFolder/"
 CYCLE_INTERVAL=24
@@ -214,16 +213,10 @@ do
         
 	##############################################################################################
 	## Post processing
-    if [[ "$onlyStoreMAX_DOM" = true ]]
-    then
-        i_domain_arr=$(printf "%02g" ${MAX_DOM})
-    else
-        i_domain_arr=$(seq -f "%02g" 1 ${MAX_DOM})
-    fi
 	if [[ $3 == 1 ]]
 	then
 		pushd $pathToResults > /dev/null
-        for i_domain in $i_domain_arr
+        for i_domain in $(seq -f "%02g" 1 ${MAX_DOM})
         do
             ## Plot results using ncl
             #if [[ "$plotNCLresults" = true ]]
