@@ -5,7 +5,7 @@
 #CASE="SN71990"
 #CASE="Frankfurt_Era5"
 #CASE="Frankfurt_10800"
-#CASE="Frankfurt_10800_fine"
+CASE="Frankfurt_10800_fine"
 #CASE="SN76914" # Rikshospitalet in Oslo
 #CASE="Elverum" # Sykehuset innlandet Elverum 
 #CASE="SN18700" # OSLO - BLINDERN
@@ -13,7 +13,7 @@
 #CASE="nested"
 #CASE="YR"
 #CASE="Sula"
-CASE="debug"
+#CASE="debug"
 if [ -z "$DISPLAY" ]
 then
 	echo "Error: set the DISPLAY variable" #The display variable should be set for post processing purposes in paraview. This issue arises when using screen, and can be resolved by first getting the display variable outside the screen session (echo $DISPLAY) and then inside the screen session setting the variable to this value (i.e. export DISPLAY=localhost:10.0)"
@@ -35,6 +35,7 @@ NCL_OUTPUT_TYPE="png" # 'x11', 'pdf', 'ps', 'ncgm', 'png'
 extractOptions="--folder=$forecastDataFolder/"
 CYCLE_INTERVAL=24
 NP=32
+NP=8
 GFS_RES="0p25"
 if [[ $CASE == "debug" ]]
 then
@@ -128,8 +129,8 @@ do
         
         echo "Running geogrid ..."
         ln -sf $pathToWPS/geogrid/src/geogrid.exe geogrid.exe
-		mpirun -np $NP ./geogrid.exe > geogrid.log
-		#./geogrid.exe > geogrid.log
+		#mpirun -np $NP ./geogrid.exe > geogrid.log
+		./geogrid.exe > geogrid.log
         if [[ "$plotNCLresults" = true ]]
         then
             POLE_LAT=$(grep -oP '(?<=pole_lat = )[+-]?[0-9]+([.][0-9]+)?' namelist.wps )
@@ -161,8 +162,8 @@ do
 		ln -sf $pathToWPS/ungrib/Variable_Tables/Vtable.GFS Vtable
         ln -sf $pathToWPS/ungrib/src/ungrib.exe ungrib.exe
         echo "Running ungrib ..."
-		mpirun -np $NP ./ungrib.exe > ungrib.log
-		#./ungrib.exe > ungrib.log
+		#mpirun -np $NP ./ungrib.exe > ungrib.log
+		./ungrib.exe > ungrib.log
         echo "Running metgrid ..."
         ln -sf $pathToWPS/metgrid/src/metgrid.exe metgrid.exe
 		mpirun -np $NP ./metgrid.exe > metgrid.log
@@ -195,12 +196,11 @@ do
         for i_domain in $(seq -f "%02g" 1 ${MAX_DOM})
         do
             wrfName="wrfout_d"$i_domain
-            mv ${wrfName}_${START_DATE} ${wrfName}".nc"
             if [[ "$onlyStoreMAX_DOM" = true ]]
             then
                 if ! [[ "$i_domain" == "$(printf "%02g" $MAX_DOM)" ]]
                 then
-                    rm $wrfName".nc"
+                    rm $wrfName*
                 fi
             fi
         done
@@ -226,12 +226,12 @@ do
         for i_domain in $i_domain_arr
         do
             ## Plot results using ncl
-            if [[ "$plotNCLresults" = true ]]
-            then
-                ncl "type=\"$NCL_OUTPUT_TYPE\"" a="addfile(\"./wps_io/geo_em.d${i_domain}.nc\",\"r\")" $wrfStudiesFolder/wrf_Surface3.ncl >> ncl.log
+            #if [[ "$plotNCLresults" = true ]]
+            #then
+                #ncl "type=\"$NCL_OUTPUT_TYPE\"" a="addfile(\"./wps_io/geo_em.d${i_domain}.nc\",\"r\")" $wrfStudiesFolder/wrf_Surface3.ncl >> ncl.log
                 #idt plt_Surface3.ncgm # Animate result in a GUI. Assumes NCL_OUTPUT_TYPE="ncgm"
                 #convert -delay 100 plt_Surface3.*.png "anim_d${i_domain}.mpeg"
-            fi
+            #fi
 
             ## ... or using Paraview
             wrfName="wrfout_d"$i_domain".nc"
