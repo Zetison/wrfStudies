@@ -1,0 +1,37 @@
+#!/bin/bash
+START_SIM_DATE="2021-07-10 12:00:00"
+dateStrings=$(date -u +'%Y%m%d%H' --date="$START_SIM_DATE UTC")
+folderName=$HOME/results/WRF/Frankfurt_10800_fine/$dateStrings
+pushd $folderName > /dev/null
+wrfName="wrfout_d05"
+
+fileNames=$(ls ${wrfName}_*)
+for filename in $fileNames
+do
+    siso -f pvd $filename --coords utm:32u -l U,V,W
+done
+
+#START_SIM_DATE="$dateStrings 12:00:00"
+#current_epoch=$(date -u +'%s' --date="$START_SIM_DATE UTC")
+#pvdfilename="${wrfName}_vol.pvd"
+#echo -e "<VTKFile type=\"Collection\">" > $pvdfilename
+#echo -e "\t<Collection>" >> $pvdfilename
+#i=0
+#fileNames=$(ls -v ${wrfName}_*.pvd)
+#for filename in $fileNames
+#do
+#    dateStringStrip=${dateString//-}
+#    temp="${filename##*$dateString}"
+#    temp="${temp##*$dateStringStrip}"
+#    time=$dateStringStrip${temp:0:8}
+#    START_SIM_DATE="${time:0:4}-${time:4:2}-${time:6:2} ${time:8:2}:${time:10:2}:${time:12:2}"
+#    echo $START_SIM_DATE
+#    target_epoch=$(date -u +'%s' --date="$START_SIM_DATE UTC")
+#    t=$(( $target_epoch - $current_epoch ))
+#    vtuFilename=${pvdfilename}-data/data-${i}.vtu
+#    vtuFileName=${pvdfilename}-data/data-${i}-1.vtu
+#    echo -e "\t\t<DataSet timestep=\"$t\" part=\"0\" file=\"${vtuFileName}\" />" >> $pvdfilename
+#    i=$(( i + 1 ))
+#done
+
+popd > /dev/null
