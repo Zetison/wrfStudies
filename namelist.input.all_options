@@ -13,7 +13,7 @@
  end_hour                            = 00,   00,
  interval_seconds                    = 10800
  input_from_file                     = .true.,.true.,
- history_interval_s                  = 600,  600,
+ history_interval                    = 0, 10,
  frames_per_outfile                  = 1, 1,
  restart                             = .false.,
  restart_interval                    = 7200,
@@ -48,7 +48,7 @@
  feedback                            = 1,
  smooth_option                       = 0
  use_adaptive_time_step              = .true., 
- step_to_output_time                 = .true.,
+ step_to_output_time                 = .false.,
  max_step_increase_pct               = 5, 51,
  starting_time_step                  = -1, -1,
  starting_time_step_den              = 0, 0,

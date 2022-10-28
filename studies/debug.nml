@@ -21,8 +21,8 @@
 &time_control
  run_days               = 0,
  run_hours              = 3,
- history_interval_s     = 600,
- frames_per_outfile     = 1000000, 
+ history_interval       = 10,
+ frames_per_outfile     = 10, 
 /
 
 &domains
