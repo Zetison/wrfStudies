@@ -114,7 +114,7 @@ def main(folder,append,extract_yr,extract_wrf,extract_met,sourceidlist):
                     break
 
                 i_domain -= 1
-                for filename in glob.glob('wrfout_d0'+str(i_domain)+'*'):
+                for filename in sorted(glob.glob('wrfout_d0'+str(i_domain)+'*')):
                     try:
                         ncfile = Dataset(filename)
                     except:
@@ -145,12 +145,12 @@ def main(folder,append,extract_yr,extract_wrf,extract_met,sourceidlist):
                         df_wrf_hist = pd.read_csv(folder+'df_wrf_'+sourceID+'.csv')
                         if datetime.strptime(df_wrf_hist['time'].iloc[-1],"%Y-%m-%d %H:%M:%S") < df_wrf['time'].iloc[-1]:
                             df_wrf_hist = df_wrf_hist[df_wrf_hist['time'] <= str(df_wrf['time'][0])]
-                            df_wrf_hist = df_wrf_hist.append(df_wrf)
+                            df_wrf_hist = pd.concat([df_wrf_hist, df_wrf])
                             df_wrf_hist.to_csv(folder+'df_wrf_'+sourceID+'.csv', index=False)
                     else:
                         df_wrf.to_csv(folder+'df_wrf_'+sourceID+'.csv', index=False)
 
-                    print('Successfully extracted wrf data for ' + sourceID)
+                    print('Successfully extracted wrf data for ' + sourceID + ' using file '+filename)
 
                         
         ########################################################################

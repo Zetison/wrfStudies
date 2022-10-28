@@ -3,8 +3,9 @@ import click
 import os
 @click.command()
 @click.option('--filestr', type=str, default='wrfout_d05')
+@click.option('--timeshift', type=int, default=0)
 
-def main(filestr): 
+def main(filestr,timeshift): 
     directory = os.getcwd()
     counter = 1
     for filename in sorted(os.listdir(directory)):
@@ -20,12 +21,12 @@ def main(filestr):
         bs_data = BeautifulSoup(data,'xml')
         if counter == 1:
             for dataSet in bs_data.find_all('Collection')[0].find_all('DataSet'):
-                dataSet['timestep'] = str(round(float(dataSet['timestep'])))
+                dataSet['timestep'] = str(round(float(dataSet['timestep'])+timeshift))
 
             bs_dataMerged = bs_data.__copy__()
         else:
             for dataSet in bs_data.find_all('Collection')[0].find_all('DataSet'):
-                dataSet['timestep'] = str(round(float(dataSet['timestep'])))
+                dataSet['timestep'] = str(round(float(dataSet['timestep'])+timeshift))
                 bs_dataMerged.find_all('Collection')[0].append(dataSet)
 
         counter += 1

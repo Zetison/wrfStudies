@@ -4,7 +4,7 @@
 #CASE="Bessaker"
 #CASE="SN71990"
 #CASE="Frankfurt_Era5"
-#CASE="Frankfurt_10800"
+CASE="Frankfurt_10800"
 #CASE="Frankfurt_10800_fine"
 #CASE="SN76914" # Rikshospitalet in Oslo
 #CASE="Elverum" # Sykehuset innlandet Elverum 
@@ -13,7 +13,7 @@
 #CASE="nested"
 #CASE="YR"
 #CASE="Sula"
-CASE="debug"
+#CASE="debug"
 if [ -z "$DISPLAY" ]
 then
 	echo "Error: set the DISPLAY variable" #The display variable should be set for post processing purposes in paraview. This issue arises when using screen, and can be resolved by first getting the display variable outside the screen session (echo $DISPLAY) and then inside the screen session setting the variable to this value (i.e. export DISPLAY=localhost:10.0)"
@@ -77,6 +77,7 @@ fi
 #START_SIM_DATE="2020-11-19 00:00:00"
 #START_SIM_DATE="2020-11-06 12:00:00"
 START_SIM_DATE="2021-07-10 12:00:00"
+START_SIM_DATE="2021-07-10 18:00:00"
 mkdir -p $HOME/results/WRF/$CASE
 while true
 do
