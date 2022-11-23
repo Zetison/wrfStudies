@@ -21,7 +21,7 @@
 &time_control
  run_days               = 0,
  run_hours              = 3,
- history_interval       = 10,
+ history_interval       = 0,0,0,10,
  frames_per_outfile     = 10, 
 /
 

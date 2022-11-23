@@ -9,11 +9,10 @@ import pandas as pd
 from netCDF4 import Dataset
 import numpy as np
 import wrf
+import glob
 from datetime import date
 from os.path import expanduser
 import click
-import splipy.surface_factory as sfac
-from splipy import SplineObject,BSplineBasis
 from matplotlib.cm import get_cmap
 from matplotlib.colors import ListedColormap
 import matplotlib.pyplot as plt
@@ -112,9 +111,9 @@ def getYRdata(endpoint, parameters, field):
         print('url: %s' % rObj.url)
         
 @click.command()
-@click.option('--folder', default=home+'/results/WRF/Frankfurt/modeS/2020-12-05/')
-@click.option('--wrffolder', default=home+'/results/WRF/Frankfurt/2020120512')
-@click.option('--sourceid', default='3965B2')
+@click.option('--folder', default=home+'/results/WRF/Frankfurt/modeS/2021-07-10/')
+@click.option('--wrffolder', default=home+'/results/WRF/Frankfurt_10800/2021071018')
+@click.option('--sourceid', default='3965B1')
 @click.option('--append/--no-append', default=True)
 @click.option('--plotcurves/--no-plotcurves', default=True)
 @click.option('--plotmap/--no-plotmap', default=True)
@@ -155,7 +154,7 @@ def main(folder,wrffolder,append,sourceid,plotmap,plotcurves,plotcontour,plotcon
 
         i_domain -= 1
         try:
-            ncfile = Dataset(wrffolder+'/wrfout_d0'+str(i_domain)+'.nc')
+            ncfile = Dataset(glob.glob(wrffolder+'/wrfout_d0'+str(i_domain)+'*.nc')[0])
         except:
             continue
 
@@ -167,8 +166,8 @@ def main(folder,wrffolder,append,sourceid,plotmap,plotcurves,plotcontour,plotcon
         dummy = pd.DataFrame({'time': wrf.getvar(ncfile, 'Times', wrf.ALL_TIMES)})
         time = dummy['time'].to_numpy()
         indices = (time[0] <= time_e) & (time_e <= time[-1])
-        if not np.any(indices):
-            raise OutOfRange('The mode-S data is out of range')
+        #if not np.any(indices):
+            #raise OutOfRange('The mode-S data is out of range')
 
         lat_e = lat_e[indices]
         lon_e = lon_e[indices]
@@ -185,7 +184,7 @@ def main(folder,wrffolder,append,sourceid,plotmap,plotcurves,plotcontour,plotcon
         e_we = ncfile.dimensions['west_east'].size
         e_sn = ncfile.dimensions['south_north'].size
         if np.any(xy < 0) or np.any(xy[0] > e_we-1) or np.any(xy[1] > e_sn-1):
-            print('Flight path is outside domain d0'+str(i_domain))
+            print('Part of the flight path is outside domain d0'+str(i_domain))
             continue
         else:
             print('Extracting WRF-data from domain d0'+str(i_domain))

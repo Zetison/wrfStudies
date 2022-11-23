@@ -20,7 +20,7 @@
 
 &time_control
  run_days               = 0,
- run_hours              = 12,
+ run_hours              = 6,
  history_interval_s     = 60,
  frames_per_outfile     = 1000000, 
 /

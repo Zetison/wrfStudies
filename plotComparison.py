@@ -87,8 +87,6 @@ def main(case,sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,st
             startdate = df_wrf['time'].min()
         elif wrf2DataFound:
             startdate = df_wrf2['time'].min()
-        elif obsDataFound:
-            startdate = df_wrf2['time'].min()
         else:
             startdate = df_YR['time'].min()
     else:
