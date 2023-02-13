@@ -55,6 +55,7 @@ def getYRdata(endpoint, parameters, field):
 @click.option('--extract_wrf/--no-extract_wrf', default=False)
 @click.option('--extract_open_meteo/--no-extract_open_meteo', default=False)
 @click.option('--start_date', default="2022-12-11",type=str)
+@click.option('--sourceidlist', type=str)
 def main(folder,append,extract_yr,extract_wrf,extract_met,sourceidlist): 
     if sourceidlist:
         sourceIDlist = sourceidlist.split(' ')
