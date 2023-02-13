@@ -66,6 +66,9 @@ def main(inputnamelist,wps_nml_path,wrf_nml_path,config_nml_path,pathtoresults,g
     Path(pathtoresults).mkdir(parents=True, exist_ok=True)
     max_dom = input_nml['share']['max_dom']
     interval_seconds = input_nml['share']['interval_seconds']
+    if np.mod((end_date-start_date).total_seconds()/interval_seconds,1) != 0:
+        raise Exception('end_date - start_date must be divisible by interval_seconds')
+ 
     interval_hours = np.round(interval_seconds/3600).astype(int)
     if output == 'wps':
         output_nml = copy.deepcopy(wps_nml)

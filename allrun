@@ -4,6 +4,7 @@
 #CASE="Bessaker"
 #CASE="SN71990"
 #CASE="Frankfurt_Era5"
+#CASE="Frankfurt"
 #CASE="Frankfurt_10800"
 #CASE="Frankfurt_10800_fine"
 #CASE="SN76914" # Rikshospitalet in Oslo
@@ -13,7 +14,8 @@
 #CASE="nested"
 #CASE="YR"
 #CASE="Sula"
-CASE="debug"
+CASE="Trondheim"
+#CASE="debug"
 if [ -z "$DISPLAY" ]
 then
 	echo "Error: set the DISPLAY variable" #The display variable should be set for post processing purposes in paraview. This issue arises when using screen, and can be resolved by first getting the display variable outside the screen session (echo $DISPLAY) and then inside the screen session setting the variable to this value (i.e. export DISPLAY=localhost:10.0)"
@@ -21,20 +23,21 @@ fi
 source $HOME/kode/bashScripts/sourceWRF
 pathToWPS="$WRFDIRECTORY/Build_WRF/WPS"
 pathToWRF="$WRFDIRECTORY/Build_WRF/WRF/run"
+forecastDataFolder=$HOME/results/forecastData
+wrfStudiesFolder=$HOME/kode/wrfStudies
 loopForecast=true
 clearNCEPdata=false
 extractYRdata=false
+onlyStoreMAX_DOM=false
 delete_wpsOutputFiles=false
-runPreproc=true
-forecastDataFolder=$HOME/results/forecastData
-wrfStudiesFolder=$HOME/kode/wrfStudies
 plotResultsInParaview=false
 plotNCLresults=true
 NCL_OUTPUT_TYPE="png" # 'x11', 'pdf', 'ps', 'ncgm', 'png'
 extractOptions="--folder=$forecastDataFolder/"
 CYCLE_INTERVAL=24
-NP=32
-NP=8
+#NP=32
+NP=16
+#NP=8
 GFS_RES="0p25"
 if [[ $CASE == "debug" ]]
 then
@@ -76,8 +79,8 @@ fi
 #START_SIM_DATE="2021-09-19 00:00:00"
 #START_SIM_DATE="2020-11-19 00:00:00"
 #START_SIM_DATE="2020-11-06 12:00:00"
-START_SIM_DATE="2021-07-10 12:00:00"
-#START_SIM_DATE="2021-07-10 18:00:00"
+START_SIM_DATE="2022-12-24 12:00:00"
+#START_SIM_DATE="2020-11-01 00:00:00"
 mkdir -p $HOME/results/WRF/$CASE
 while true
 do
@@ -129,8 +132,8 @@ do
         
         echo "Running geogrid ..."
         ln -sf $pathToWPS/geogrid/src/geogrid.exe geogrid.exe
-		#mpirun -np $NP ./geogrid.exe > geogrid.log
-		./geogrid.exe > geogrid.log
+		mpirun -np $NP ./geogrid.exe > geogrid.log
+		#./geogrid.exe > geogrid.log
         if [[ "$plotNCLresults" = true ]]
         then
             POLE_LAT=$(grep -oP '(?<=pole_lat = )[+-]?[0-9]+([.][0-9]+)?' namelist.wps )
@@ -162,8 +165,8 @@ do
 		ln -sf $pathToWPS/ungrib/Variable_Tables/Vtable.GFS Vtable
         ln -sf $pathToWPS/ungrib/src/ungrib.exe ungrib.exe
         echo "Running ungrib ..."
-		#mpirun -np $NP ./ungrib.exe > ungrib.log
-		./ungrib.exe > ungrib.log
+		mpirun -np $NP ./ungrib.exe > ungrib.log
+		#./ungrib.exe > ungrib.log
         echo "Running metgrid ..."
         ln -sf $pathToWPS/metgrid/src/metgrid.exe metgrid.exe
 		mpirun -np $NP ./metgrid.exe > metgrid.log
@@ -207,7 +210,14 @@ do
         cat rsl.error.* > rsl.error
         cat rsl.out.* > rsl.out
         rm rsl.error.* rsl.out.*
-		popd > /dev/null
+
+        timer_end=$(date +%s)
+        echo "Case: "$CASE > wrf.log
+        echo "Total simulation time: "$(date -d@$((timer_end-timer_start)) -u +%H:%M:%S) >> wrf.log
+        echo "Number of processors used: "$NP >> wrf.log
+        echo "Path to WPS: "$pathToWPS >> wrf.log
+        echo "Path to WRF: "$pathToWRF >> wrf.log
+        popd > /dev/null
 	fi
 	
 
@@ -243,18 +253,11 @@ do
             fi
         done
         # Extract data at mast location
-		python3 $wrfStudiesFolder/extractData.py --folder=$pathToResults"/" --extract_wrf
+        sourceid=$(python $wrfStudiesFolder/getNamelistEntry.py $nmlInput --namelist=misc --subnamelist=sourceid)
+		python3 $wrfStudiesFolder/extractData.py --folder=$pathToResults"/" --extract_wrf --sourceidlist=$sourceid --no-append
 		popd > /dev/null
 	fi
 
-    pushd $pathToResults > /dev/null
-    timer_end=$(date +%s)
-    echo "Case: "$CASE > wrf.log
-    echo "Total simulation time: "$(date -d@$((timer_end-timer_start)) -u +%H:%M:%S) >> wrf.log
-    echo "Number of processors used: "$NP >> wrf.log
-    echo "Path to WPS: "$pathToWPS >> wrf.log
-    echo "Path to WRF: "$pathToWRF >> wrf.log
-    popd > /dev/null
 	
     if [[ "$delete_wpsOutputFiles" = true ]]
     then
