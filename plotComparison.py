@@ -32,7 +32,7 @@ def getYRdata(endpoint, parameters, field):
 
 
 @click.command()
-@click.option('--case', default='Frankfurt')
+@click.option('--CASE', 'CASE', default='Frankfurt')
 @click.option('--sourceid', default='424242')
 @click.option('--timeresolution', default='PT1H')
 @click.option('--plotdata/--no-plotdata', default=True)
@@ -42,7 +42,7 @@ def getYRdata(endpoint, parameters, field):
 @click.option('--startdate', default='') # in the format '2020-09-29 00:00:00'
 @click.option('--enddate', default='')
 @click.option('--filetype', default='png', help='File type (png,pdf,...) for exporting graphics')
-def main(case,sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,startdate,enddate,filetype):
+def main(CASE,sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,startdate,enddate,filetype):
     
 
     ########################################################################
@@ -223,7 +223,7 @@ def main(case,sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,st
                 axs[i,j].set_xlim(startdate,enddate)
 
         plt.show()
-        fig.savefig(home+'/results/WRF/'+case+'/Comparison.'+filetype)
+        fig.savefig(home+'/results/WRF/'+CASE+'/Comparison.'+filetype)
 
 
     ########################################################################
@@ -287,7 +287,7 @@ def main(case,sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,st
                 axs[i,j].set(xlabel='Time', ylabel=ylabels[i,j])
 
         plt.show()
-        fig.savefig(home+'/results/WRF/'+case+'/Comparison_error.'+filetype)
+        fig.savefig(home+'/results/WRF/'+CASE+'/Comparison_error.'+filetype)
 
     
 if __name__ == '__main__':
