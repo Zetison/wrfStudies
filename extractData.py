@@ -114,7 +114,7 @@ def main(folder,append,extract_yr,extract_wrf,extract_met,sourceidlist):
                     break
 
                 i_domain -= 1
-                for filename in sorted(glob.glob('wrfout_d0'+str(i_domain)+'*')):
+                for filename in sorted(glob.glob(folder+'wrfout_d0'+str(i_domain)+'*')):
                     try:
                         ncfile = Dataset(filename)
                     except:

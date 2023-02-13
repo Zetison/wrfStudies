@@ -1,37 +1,39 @@
 &share
- max_dom                = 5,
+ max_dom                = 4,
  interval_seconds       = 10800,
 /
 
 &geogrid
  parent_id              = 1, 1,
  parent_grid_ratio      = 1, 3, 3, 3, 5, 3, 3,
- geog_data_res          = 'default','default','default','default','sunnmore50meter+default','sunnmore50meter+default','sula10meter+default'
- i_parent_start         = 1, 26, 35, 35, 35, 61
- j_parent_start         = 1, 35, 35, 35, 35, 141
- e_we                   = 96, 109, 115, 127, 271, 151
- e_sn                   = 111, 109, 112, 130, 291, 151
-! dx                    = 0.25,
-! dy                    = 0.25,
-! map_proj              = 'lat-lon',
-! ref_lat               = 50.02528,
-! ref_lon               = 8.51962,
- map_proj               = 'lambert'
-! dx                    = 27794.369
-! dy                    = 27794.369
- dx                     = 20250.0
- dy                     = 20250.0
- ref_lon                = 8.259395531703081
+ geog_data_res          = 'default','default','default','default','sunnmore50meter+default'
+ i_parent_start         = 1,
+ j_parent_start         = 1,
+ e_we                   = 100, 100, 100, 100, 202, 
+ e_sn                   = 100, 100, 100, 100, 202,
+! i_parent_start         = 1, 26, 35, 35, 35, 61
+! j_parent_start         = 1, 35, 35, 35, 35, 141
+! e_we                   = 96, 109, 115, 127, 271, 151
+! e_sn                   = 111, 109, 112, 130, 291, 151
+ dx                     = 0.25,
+ dy                     = 0.25,
+ map_proj               = 'lat-lon',
  ref_lat                = 63.014354870112435
- truelat1               = 64.4
- truelat2               = 60.4
- stand_lon              = 6.119395
+ ref_lon                = 8.259395531703081
+! map_proj               = 'lambert'
+! dx                     = 20250.0
+! dy                     = 20250.0
+! ref_lon                = 8.259395531703081
+! ref_lat                = 63.014354870112435
+! truelat1               = 64.4
+! truelat2               = 60.4
+! stand_lon              = 6.119395
 /
 
 &time_control
  run_days               = 0,
- run_hours              = 12,
- history_interval_s     = 600,
+ run_hours              = 21,
+ history_interval       = 1000,1000,1000,60,
  frames_per_outfile     = 1000000, 
 /
 
@@ -52,7 +54,7 @@
 
 &physics
  mp_physics             = 8,
- bl_pbl_physics         = 1,1,1,0,0,0,
+ bl_pbl_physics         = 1,1,1,1,0,0,
  ra_lw_physics          = 1, 
  ra_sw_physics          = 1,
  swint_opt              = 0,
@@ -62,7 +64,7 @@
 /
 
 &dynamics
- km_opt                 = 4, 4, 4, 5, 2, 2,
+ km_opt                 = 4, 4, 4, 4, 5, 2, 2,
 ! km_opt                 = 4, 4, 4, 4, 5, 2, 2,
  diff_opt               = 2,
  epssm                  = 0.1, 0.1, 0.1, 10.8, 600.0,
