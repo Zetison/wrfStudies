@@ -53,8 +53,8 @@ def getYRdata(endpoint, parameters, field):
 @click.option('--append/--no-append', default=True)
 @click.option('--extract_yr/--no-extract_yr', default=False)
 @click.option('--extract_wrf/--no-extract_wrf', default=False)
-@click.option('--extract_met/--no-extract_met', default=False)
-@click.option('--sourceidlist', type=str)
+@click.option('--extract_open_meteo/--no-extract_open_meteo', default=False)
+@click.option('--start_date', default="2022-12-11",type=str)
 def main(folder,append,extract_yr,extract_wrf,extract_met,sourceidlist): 
     if sourceidlist:
         sourceIDlist = sourceidlist.split(' ')
@@ -100,7 +100,6 @@ def main(folder,append,extract_yr,extract_wrf,extract_met,sourceidlist):
         if extract_met:
             print('Not implemented')
 
-                        
         ########################################################################
         # Get data from WRF file
         if extract_wrf:
