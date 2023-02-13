@@ -32,8 +32,8 @@ def getYRdata(endpoint, parameters, field):
 
 
 @click.command()
-@click.option('--case', default='Frankfurt')
-@click.option('--sourceid', default='424242')
+@click.option('--case', default='Trondheim')
+@click.option('--sourceid', default='SN68110')
 @click.option('--timeresolution', default='PT1H')
 @click.option('--plotdata/--no-plotdata', default=True)
 @click.option('--ploterror/--no-ploterror', default=True)
@@ -54,6 +54,14 @@ def main(case,sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,st
         dwdDataFound = True
     except:
         dwdDataFound = False
+    
+    try:
+        df_open_meteo = pd.read_csv(folder+'df_open_meteo_'+sourceid+'.csv')
+        df_open_meteo['time'] = pd.to_datetime(df_open_meteo['time'])
+        print('Observation data found')
+        open_meteoDataFound = True
+    except:
+        open_meteoDataFound = False
     
     try:
         df_YR = pd.read_csv(folder+'df_YR_'+sourceid+'.csv')
@@ -87,6 +95,8 @@ def main(case,sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,st
             startdate = df_wrf['time'].min()
         elif wrf2DataFound:
             startdate = df_wrf2['time'].min()
+        elif open_meteoDataFound:
+            startdate = df_open_meteo['time'].min()
         else:
             startdate = df_YR['time'].min()
     else:
@@ -97,6 +107,8 @@ def main(case,sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,st
             enddate = df_wrf['time'].max()
         elif wrf2DataFound:
             enddate = df_wrf2['time'].max()
+        elif open_meteoDataFound:
+            enddate = df_open_meteo['time'].max()
         else:
             enddate = df_YR['time'].max()
     else:
@@ -123,14 +135,14 @@ def main(case,sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,st
             noFields = min(len(fields),len(data[i]['observations'])+1)
             for j in range(1,noFields):
                 row[fields[j]] = data[i]['observations'][j-1]['value']
-            df = df.append(row)
+            df = pd.concat([df,row])
         
         df = df.reset_index()
         
         # These additional columns will be kept
         df_obs = df[fields].copy()
         # Convert the time value to something Python understands
-        df_obs['time'] = pd.to_datetime(df_obs['time'])
+        df_obs['time'] = pd.to_datetime(df_obs['time']).dt.tz_localize(None)
     elif sourceid == '424242':
         df_obs = pd.read_csv(meteobluefile, skiprows=9)
         df_obs['time'] = pd.to_datetime(df_obs['timestamp'])
@@ -156,6 +168,12 @@ def main(case,sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,st
         df_DWD = df_DWD[df_DWD.time <= enddate]
         if df_DWD.empty:
             dwdDataFound = False
+
+    if open_meteoDataFound:
+        df_open_meteo = df_open_meteo[df_open_meteo.time >= startdate]
+        df_open_meteo = df_open_meteo[df_open_meteo.time <= enddate]
+        if df_open_meteo.empty:
+            open_meteoDataFound = False
 
     if yrDataFound:
         df_YR = df_YR[df_YR.time >= startdate]
@@ -193,6 +211,10 @@ def main(case,sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,st
         df_DWD['windDirX'] = np.sin(np.radians(df_DWD['wind_from_direction']))
         df_DWD['windDirY'] = np.cos(np.radians(df_DWD['wind_from_direction']))
 
+    if open_meteoDataFound:
+        df_open_meteo['windDirX'] = np.sin(np.radians(df_open_meteo['wind_from_direction']))
+        df_open_meteo['windDirY'] = np.cos(np.radians(df_open_meteo['wind_from_direction']))
+
     if yrDataFound:
         df_YR['windDirX'] = np.sin(np.radians(df_YR['wind_from_direction']))
         df_YR['windDirY'] = np.cos(np.radians(df_YR['wind_from_direction']))
@@ -207,6 +229,9 @@ def main(case,sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,st
             for j in range(0,fields.shape[1]):
                 if dwdDataFound:
                     axs[i,j].plot(df_DWD.time.to_numpy(),df_DWD[fields[i,j]].to_numpy(),'o', label = 'DWD')
+
+                if open_meteoDataFound:
+                    axs[i,j].plot(df_open_meteo.time.to_numpy(),df_open_meteo[fields[i,j]].to_numpy(),color='m', label = 'Open-Meteo')
 
                 if yrDataFound:
                     axs[i,j].plot(df_YR.time.to_numpy(),df_YR[fields[i,j]].to_numpy(),'g', label = 'MetCoOp forecast')
@@ -235,6 +260,7 @@ def main(case,sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,st
         mng.window.showMaximized()
         fig.suptitle('Weather forecast comparison between MetCoOp and WRF simulations at '+sourceid)
         df_DWD_i = df_obs[fields[0,0]].copy() 
+        df_open_meteo_i = df_obs[fields[0,0]].copy() 
         df_YR_i = df_obs[fields[0,0]].copy() 
         df_wrf_i = df_obs[fields[0,0]].copy() 
         df_wrf2_i = df_obs[fields[0,0]].copy() 
@@ -254,6 +280,14 @@ def main(case,sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,st
                     dwd_errors = 100*np.abs(diff_DWD)/max(np.abs(df_obs[fields[i,j]]))
                     axs[i,j].semilogy(df_obs.time.to_numpy(),dwd_errors.to_numpy(),'o', label = 'DWD')
                     title += 'DWD: '+'{0:.2f}'.format(dwd_error)+'%, '
+
+                if open_meteoDataFound:
+                    df_open_meteo_i[fields[i,j]] = np.interp(np.array(df_obs.time).astype(float),np.array(df_open_meteo.time).astype(float),df_open_meteo[fields[i,j]])
+                    diff_open_meteo = df_open_meteo_i[fields[i,j]]-df_obs[fields[i,j]]
+                    open_meteo_error = 100*np.linalg.norm(diff_open_meteo[idx], ord=order)/np.linalg.norm(df_obs[fields[i,j]][idx], ord=order)
+                    open_meteo_errors = 100*np.abs(diff_open_meteo)/max(np.abs(df_open_meteo[fields[i,j]]))
+                    axs[i,j].semilogy(df_obs.time.to_numpy(),open_meteo_errors.to_numpy(),'o', label = 'Open-Meteo')
+                    title += 'Open-Meteo: '+'{0:.2f}'.format(open_meteo_error)+'%, '
 
                 if yrDataFound:
                     df_YR_i[fields[i,j]] = np.interp(np.array(df_obs.time).astype(float),np.array(df_YR.time).astype(float),df_YR[fields[i,j]])
