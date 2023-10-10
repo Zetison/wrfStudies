@@ -32,8 +32,8 @@ def getYRdata(endpoint, parameters, field):
 
 
 @click.command()
-@click.option('--CASE', 'CASE', default='Frankfurt')
-@click.option('--sourceid', default='424242')
+@click.option('--CASE', 'CASE', default='Trondheim')
+@click.option('--sourceid', default='SN68860')
 @click.option('--timeresolution', default='PT1H')
 @click.option('--plotdata/--no-plotdata', default=True)
 @click.option('--ploterror/--no-ploterror', default=True)
@@ -286,7 +286,7 @@ def main(CASE,sourceid,timeresolution,plotdata,ploterror,folder,meteobluefile,st
                     diff_open_meteo = df_open_meteo_i[fields[i,j]]-df_obs[fields[i,j]]
                     open_meteo_error = 100*np.linalg.norm(diff_open_meteo[idx], ord=order)/np.linalg.norm(df_obs[fields[i,j]][idx], ord=order)
                     open_meteo_errors = 100*np.abs(diff_open_meteo)/max(np.abs(df_open_meteo[fields[i,j]]))
-                    axs[i,j].semilogy(df_obs.time.to_numpy(),open_meteo_errors.to_numpy(),'o', label = 'Open-Meteo')
+                    axs[i,j].semilogy(df_obs.time.to_numpy(),open_meteo_errors.to_numpy(),color='m', label = 'Open-Meteo')
                     title += 'Open-Meteo: '+'{0:.2f}'.format(open_meteo_error)+'%, '
 
                 if yrDataFound:

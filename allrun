@@ -4,7 +4,7 @@
 #CASE="Bessaker"
 #CASE="SN71990"
 #CASE="Frankfurt_Era5"
-#CASE="Frankfurt"
+CASE="Frankfurt"
 #CASE="Frankfurt_10800"
 #CASE="Frankfurt_10800_fine"
 #CASE="SN76914" # Rikshospitalet in Oslo
@@ -14,7 +14,7 @@
 #CASE="nested"
 #CASE="YR"
 #CASE="Sula"
-CASE="Trondheim"
+#CASE="Trondheim"
 #CASE="debug"
 if [ -z "$DISPLAY" ]
 then
@@ -79,7 +79,7 @@ fi
 #START_SIM_DATE="2021-09-19 00:00:00"
 #START_SIM_DATE="2020-11-19 00:00:00"
 #START_SIM_DATE="2020-11-06 12:00:00"
-START_SIM_DATE="2022-12-24 12:00:00"
+START_SIM_DATE="2023-09-06 12:00:00"
 #START_SIM_DATE="2020-11-01 00:00:00"
 mkdir -p $HOME/results/WRF/$CASE
 while true
